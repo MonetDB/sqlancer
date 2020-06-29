@@ -22,7 +22,9 @@ def verify_prefix(prefix, files):
 verify_prefix('CockroachDB', get_java_files("sqlancer/cockroachdb/"))
 verify_prefix('DuckDB', get_java_files("sqlancer/duckdb"))
 verify_prefix('MariaDB', get_java_files("sqlancer/mariadb/"))
+verify_prefix('Monet', get_java_files("sqlancer/monet/"))
 verify_prefix('MySQL', get_java_files("sqlancer/mysql/"))
 verify_prefix('Postgres', get_java_files("sqlancer/postgres/"))
 verify_prefix('SQLite3', get_java_files("sqlancer/sqlite3/"))
 verify_prefix('TiDB', get_java_files("sqlancer/tidb/"))
+

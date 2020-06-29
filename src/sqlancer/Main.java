@@ -31,6 +31,7 @@ import sqlancer.clickhouse.ClickhouseProvider;
 import sqlancer.cockroachdb.CockroachDBProvider;
 import sqlancer.duckdb.DuckDBProvider;
 import sqlancer.mariadb.MariaDBProvider;
+import sqlancer.monet.MonetProvider;
 import sqlancer.mysql.MySQLProvider;
 import sqlancer.postgres.PostgresProvider;
 import sqlancer.sqlite3.SQLite3Provider;
@@ -482,6 +483,7 @@ public final class Main {
         providers.add(new CockroachDBProvider());
         providers.add(new MySQLProvider());
         providers.add(new MariaDBProvider());
+        providers.add(new MonetProvider());
         providers.add(new TiDBProvider());
         providers.add(new PostgresProvider());
         providers.add(new ClickhouseProvider());

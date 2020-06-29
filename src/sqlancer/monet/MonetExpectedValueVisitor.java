@@ -1,0 +1,131 @@
+package sqlancer.monet;
+
+import sqlancer.monet.ast.MonetAggregate;
+import sqlancer.monet.ast.MonetBetweenOperation;
+import sqlancer.monet.ast.MonetCastOperation;
+import sqlancer.monet.ast.MonetColumnValue;
+import sqlancer.monet.ast.MonetConstant;
+import sqlancer.monet.ast.MonetExpression;
+import sqlancer.monet.ast.MonetFunction;
+import sqlancer.monet.ast.MonetInOperation;
+import sqlancer.monet.ast.MonetOrderByTerm;
+import sqlancer.monet.ast.MonetPostfixOperation;
+import sqlancer.monet.ast.MonetPostfixText;
+import sqlancer.monet.ast.MonetPrefixOperation;
+import sqlancer.monet.ast.MonetSelect;
+import sqlancer.monet.ast.MonetSelect.MonetFromTable;
+
+public final class MonetExpectedValueVisitor implements MonetVisitor {
+
+    private final StringBuilder sb = new StringBuilder();
+    private int nrTabs = 0;
+
+    private void print(MonetExpression expr) {
+        MonetToStringVisitor v = new MonetToStringVisitor();
+        v.visit(expr);
+        for (int i = 0; i < nrTabs; i++) {
+            sb.append("\t");
+        }
+        sb.append(v.get());
+        sb.append(" -- " + expr.getExpectedValue());
+        sb.append("\n");
+    }
+
+    // @Override
+    // public void visit(MonetExpression expr) {
+    // nrTabs++;
+    // try {
+    // super.visit(expr);
+    // } catch (IgnoreMeException e) {
+    //
+    // }
+    // nrTabs--;
+    // }
+
+    @Override
+    public void visit(MonetConstant constant) {
+        print(constant);
+    }
+
+    @Override
+    public void visit(MonetPostfixOperation op) {
+        print(op);
+        visit(op.getExpression());
+    }
+
+    public String get() {
+        return sb.toString();
+    }
+
+    @Override
+    public void visit(MonetColumnValue c) {
+        print(c);
+    }
+
+    @Override
+    public void visit(MonetPrefixOperation op) {
+        print(op);
+        visit(op.getExpression());
+    }
+
+    @Override
+    public void visit(MonetSelect op) {
+        visit(op.getWhereClause());
+    }
+
+    @Override
+    public void visit(MonetOrderByTerm op) {
+
+    }
+
+    @Override
+    public void visit(MonetFunction f) {
+        print(f);
+        for (int i = 0; i < f.getArguments().length; i++) {
+            visit(f.getArguments()[i]);
+        }
+    }
+
+    @Override
+    public void visit(MonetCastOperation cast) {
+        print(cast);
+        visit(cast.getExpression());
+    }
+
+    @Override
+    public void visit(MonetBetweenOperation op) {
+        print(op);
+        visit(op.getExpr());
+        visit(op.getLeft());
+        visit(op.getRight());
+    }
+
+    @Override
+    public void visit(MonetInOperation op) {
+        print(op);
+        visit(op.getExpr());
+        for (MonetExpression right : op.getListElements()) {
+            visit(right);
+        }
+    }
+
+    @Override
+    public void visit(MonetPostfixText op) {
+        print(op);
+        visit(op.getExpr());
+    }
+
+    @Override
+    public void visit(MonetAggregate op) {
+        print(op);
+        for (MonetExpression expr : op.getArgs()) {
+            visit(expr);
+        }
+    }
+
+    @Override
+    public void visit(MonetFromTable from) {
+        print(from);
+    }
+
+}

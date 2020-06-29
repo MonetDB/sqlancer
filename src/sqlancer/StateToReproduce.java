@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import sqlancer.monet.MonetSchema.MonetColumn;
+import sqlancer.monet.ast.MonetConstant;
+import sqlancer.monet.ast.MonetExpression;
 import sqlancer.mysql.MySQLSchema.MySQLColumn;
 import sqlancer.mysql.ast.MySQLConstant;
 import sqlancer.mysql.ast.MySQLExpression;
@@ -120,6 +123,28 @@ public class StateToReproduce {
         }
 
         public PostgresExpression getWhereClause() {
+            return whereClause;
+        }
+
+    }
+
+    public static class MonetStateToReproduce extends StateToReproduce {
+
+        public Map<MonetColumn, MonetConstant> randomRowValues;
+
+        public MonetExpression whereClause;
+
+        public String queryThatSelectsRow;
+
+        public MonetStateToReproduce(String databaseName) {
+            super(databaseName);
+        }
+
+        public Map<MonetColumn, MonetConstant> getRandomRowValues() {
+            return randomRowValues;
+        }
+
+        public MonetExpression getWhereClause() {
             return whereClause;
         }
 
