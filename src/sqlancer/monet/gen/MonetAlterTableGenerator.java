@@ -137,6 +137,7 @@ public class MonetAlterTableGenerator {
                 errors.add("value too long for type (var)char");
                 errors.add("NOT NULL constraint violated for column");
                 errors.add("a table can have only one PRIMARY KEY");
+                errors.add("already exists");
                 break;
             default:
                 throw new AssertionError(a);

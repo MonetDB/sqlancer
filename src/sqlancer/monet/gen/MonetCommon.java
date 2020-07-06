@@ -51,6 +51,8 @@ public final class MonetCommon {
         errors.add("value exceeds limits of type int");
         errors.add("overflow in calculation");
         errors.add("are not equal");
+        errors.add("Numerical result out of range");
+        errors.add("Argument 2 to round function must be positive");
         addToCharFunctionErrors(errors);
         addBitStringOperationErrors(errors);
         addFunctionErrors(errors);
