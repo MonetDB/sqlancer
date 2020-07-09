@@ -200,6 +200,22 @@ public final class Randomly {
         }
     }
 
+    public long getIntegerBounded(int max) {
+        if (smallBiasProbability()) {
+            return Randomly.fromOptions(-1L, (long)max, 0L, 1L, 0L);
+        } else {
+            if (cacheProbability()) {
+                Long l = getFromLongCache();
+                if (l != null) {
+                    return l;
+                }
+            }
+            long nextLong = (long) getThreadRandom().get().nextInt(max);
+            addToCache(nextLong);
+            return nextLong;
+        }
+    }
+
     public String getString() {
         if (smallBiasProbability()) {
             return Randomly.fromOptions("TRUE", "FALSE", "0.0", "-0.0", "1e500", "-1e500");

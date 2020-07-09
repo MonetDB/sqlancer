@@ -30,7 +30,7 @@ public class MonetSchema {
     private String databaseName;
 
     public enum MonetDataType {
-        INT, BOOLEAN, STRING, DECIMAL, REAL, DOUBLE;
+        INT, BOOLEAN, STRING, DECIMAL, REAL, DOUBLE, TIME, TIMESTAMP, DATE, MONTH_INTERVAL, SECOND_INTERVAL;
 
         public static MonetDataType getRandomType() {
             List<MonetDataType> dataTypes = Arrays.asList(values());
@@ -130,12 +130,18 @@ public class MonetSchema {
             return MonetDataType.DOUBLE;
         case "decimal":
             return MonetDataType.DECIMAL;
-        /*case "date":
+        case "date":
             return MonetDataType.DATE;
         case "time":
+        case "timetz":
             return MonetDataType.TIME;
         case "timestamp":
-            return MonetDataType.TIMESTAMP;*/
+        case "timestamptz":
+            return MonetDataType.TIMESTAMP;
+        case "month_interval":
+            return MonetDataType.MONTH_INTERVAL;
+        case "sec_interval":
+            return MonetDataType.SECOND_INTERVAL;
         default:
             throw new AssertionError(typeString);
         }

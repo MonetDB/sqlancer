@@ -1,5 +1,6 @@
 package sqlancer.monet;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import sqlancer.Randomly;
@@ -206,11 +207,27 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
         case DOUBLE:
             sb.append("DOUBLE");
             break;
+        case TIME:
+            sb.append("TIME");
+            break;
+        case TIMESTAMP:
+            sb.append("TIMESTAMP");
+            break;
+        case DATE:
+            sb.append("DATE");
+            break;
+        case MONTH_INTERVAL:
+            sb.append("INTERVAL MONTH");
+            break;
+        case SECOND_INTERVAL:
+            sb.append("INTERVAL SECOND");
+            break;
         default:
             throw new AssertionError(cast.getType());
         }
         Optional<Integer> size = compoundType.getSize();
-        if (size.isPresent() && compoundType.getDataType() != MonetDataType.INT) {
+        MonetDataType[] exclude = new MonetDataType[]{MonetDataType.INT,MonetDataType.TIME,MonetDataType.TIMESTAMP,MonetDataType.DATE,MonetDataType.MONTH_INTERVAL,MonetDataType.SECOND_INTERVAL};
+        if (size.isPresent() && !Arrays.stream(exclude).allMatch(t -> t.equals(compoundType.getDataType()))) {
             sb.append("(");
             sb.append(size.get());
             sb.append(")");

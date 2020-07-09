@@ -268,6 +268,11 @@ public class MonetExpressionGenerator {
             case DECIMAL:
             case REAL:
             case DOUBLE:
+            case TIME:
+            case TIMESTAMP:
+            case DATE:
+            case MONTH_INTERVAL:
+            case SECOND_INTERVAL:
                 return generateConstant(r, dataType);
             default:
                 throw new AssertionError(dataType);
@@ -282,6 +287,11 @@ public class MonetExpressionGenerator {
         case DOUBLE:
         case INT:
         case REAL:
+        case TIME:
+        case TIMESTAMP:
+        case DATE:
+        case MONTH_INTERVAL:
+        case SECOND_INTERVAL:
             return MonetCompoundDataType.create(type);
         case STRING: // TODO
             if (Randomly.getBoolean()) {
@@ -422,6 +432,16 @@ public class MonetExpressionGenerator {
             return MonetConstant.createFloatConstant((float) r.getDouble());
         case DOUBLE:
             return MonetConstant.createDoubleConstant(r.getDouble());
+        case TIME:
+            return MonetConstant.createTimeConstant(r.getIntegerBounded(100000));
+        case TIMESTAMP:
+            return MonetConstant.createTimestampConstant(r.getIntegerBounded(1000000)); /* TODO find the max possible value */
+        case DATE:
+            return MonetConstant.createDateConstant(r.getIntegerBounded(100000));
+        case MONTH_INTERVAL:
+            return MonetConstant.createMonthIntervalConstant(r.getInteger());
+        case SECOND_INTERVAL:
+            return MonetConstant.createSecondIntervalConstant(r.getInteger());
         default:
             throw new AssertionError(type);
         }

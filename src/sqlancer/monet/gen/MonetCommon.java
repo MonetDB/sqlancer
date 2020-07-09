@@ -118,6 +118,21 @@ public final class MonetCommon {
         case REAL:
             sb.append("FLOAT");
             break;
+        case TIME:
+            sb.append("TIME");
+            break;
+        case TIMESTAMP:
+            sb.append("TIMESTAMP");
+            break;
+        case DATE:
+            sb.append("DATE");
+            break;
+        case MONTH_INTERVAL:
+            sb.append("INTERVAL MONTH");
+            break;
+        case SECOND_INTERVAL:
+            sb.append("INTERVAL SECOND");
+            break;
         default:
             throw new AssertionError(type);
         }

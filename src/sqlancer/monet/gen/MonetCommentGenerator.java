@@ -57,7 +57,7 @@ public final class MonetCommentGenerator {
             sb.append(globalState.getRandomly().getString().replace("'", "''"));
             sb.append("'");
         }
-        return new QueryAdapter(sb.toString(), Arrays.asList("no such table", "no such column", "no such index"));
+        return new QueryAdapter(sb.toString(), Arrays.asList("no such table", "no such column", "no such index", "COMMENT ON tmp object not allowed"));
     }
 
 }

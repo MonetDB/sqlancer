@@ -10,7 +10,7 @@ import sqlancer.Query;
 import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
 import sqlancer.monet.MonetGlobalState;
-import sqlancer.monet.MonetSchema.MonetColumn;  
+import sqlancer.monet.MonetSchema.MonetColumn;
 import sqlancer.monet.MonetSchema.MonetTable;
 import sqlancer.monet.MonetVisitor;
 
@@ -59,6 +59,7 @@ public class MonetAlterTableGenerator {
 
         errors.add("conversion of");
         errors.add("not supported on TEMPORARY table");
+        errors.add("ALTER TABLE: can't alter temporary table");
         StringBuilder sb = new StringBuilder();
         sb.append("ALTER TABLE ");
         sb.append(" ");

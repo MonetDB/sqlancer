@@ -1,7 +1,7 @@
 package sqlancer.monet.ast;
 
-//import java.sql.Timestamp;
-//import java.text.SimpleDateFormat;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.math.BigDecimal;
 
 import sqlancer.IgnoreMeException;
@@ -481,79 +481,130 @@ public abstract class MonetConstant implements MonetExpression {
         return new DoubleConstant(val);
     }
 
-    /*public static class MonetTimeConstant extends MonetConstantBase {
+    public static class TimeConstant extends MonetConstantBase {
 
-        public String textRepr;
+        private final String textRepr;
 
-        public MonetTimeConstant(long val) {
+        public TimeConstant(long val) {
             Timestamp timestamp = new Timestamp(val);
             SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-            textRepr = dateFormat.format(timestamp);
-        }
-
-        public String getValue() {
-            return textRepr;
+            this.textRepr = dateFormat.format(timestamp);
         }
 
         @Override
-        public String toString() {
+        public String getTextRepresentation() {
             return String.format("TIME '%s'", textRepr);
         }
 
-    }
-
-    public static class MonetDateConstant extends MonetConstantBase {
-
-        public String textRepr;
-
-        public MonetDateConstant(long val) {
-            Timestamp timestamp = new Timestamp(val);
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            textRepr = dateFormat.format(timestamp);
+        @Override
+        public MonetDataType getExpressionType() {
+            return MonetDataType.TIME;
         }
 
-        public String getValue() {
-            return textRepr;
+    }
+
+    public static class DateConstant extends MonetConstantBase {
+
+        private final String textRepr;
+
+        public DateConstant(long val) {
+            Timestamp timestamp = new Timestamp(val);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            this.textRepr = dateFormat.format(timestamp);
         }
 
         @Override
-        public String toString() {
+        public String getTextRepresentation() {
             return String.format("DATE '%s'", textRepr);
         }
 
-    }
-
-    public static class MonetTimestampConstant extends MonetConstantBase {
-
-        public String textRepr;
-
-        public MonetTimestampConstant(long val) {
-            Timestamp timestamp = new Timestamp(val);
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            textRepr = dateFormat.format(timestamp);
+        @Override
+        public MonetDataType getExpressionType() {
+            return MonetDataType.DATE;
         }
 
-        public String getValue() {
-            return textRepr;
+    }
+
+    public static class TimestampConstant extends MonetConstantBase {
+
+        private final String textRepr;
+
+        public TimestampConstant(long val) {
+            Timestamp timestamp = new Timestamp(val);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            this.textRepr = dateFormat.format(timestamp);
         }
 
         @Override
-        public String toString() {
+        public String getTextRepresentation() {
             return String.format("TIMESTAMP '%s'", textRepr);
+        }
+
+        @Override
+        public MonetDataType getExpressionType() {
+            return MonetDataType.TIMESTAMP;
         }
 
     }
 
     public static MonetConstant createTimeConstant(long val) {
-        return new MonetTimeConstant(val);
+        return new TimeConstant(val);
     }
 
     public static MonetConstant createDateConstant(long val) {
-        return new MonetDateConstant(val);
+        return new DateConstant(val);
     }
 
     public static MonetConstant createTimestampConstant(long val) {
-        return new MonetTimestampConstant(val);
-    }*/
+        return new TimestampConstant(val);
+    }
+
+    public static class MonthIntervalConstant extends MonetConstantBase {
+
+        private final String textRepr;
+
+        public MonthIntervalConstant(long val) {
+            this.textRepr = "INTERVAL '" + val + "' MONTH";
+        }
+
+        @Override
+        public String getTextRepresentation() {
+            return this.textRepr;
+        }
+
+        @Override
+        public MonetDataType getExpressionType() {
+            return MonetDataType.MONTH_INTERVAL;
+        }
+
+    }
+
+    public static class SecondIntervalConstant extends MonetConstantBase {
+
+        private final String textRepr;
+
+        public SecondIntervalConstant(long val) {
+            this.textRepr = "INTERVAL '" + val + "' SECOND";
+        }
+
+        @Override
+        public String getTextRepresentation() {
+            return this.textRepr;
+        }
+
+        @Override
+        public MonetDataType getExpressionType() {
+            return MonetDataType.SECOND_INTERVAL;
+        }
+
+    }
+
+    public static MonetConstant createMonthIntervalConstant(long val) {
+        return new MonthIntervalConstant(val);
+    }
+
+    public static MonetConstant createSecondIntervalConstant(long val) {
+        return new SecondIntervalConstant(val);
+    }
 
 }
