@@ -8,8 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-//import org.monetql.util.PSQLException;
-
 import sqlancer.Main.StateLogger;
 import sqlancer.MainOptions;
 import sqlancer.Randomly;
@@ -32,12 +30,12 @@ public class MonetPivotedQuerySynthesisOracle implements TestOracle {
 
     private MonetStateToReproduce state;
     private MonetRowValue rw;
-    private Connection database;
+    private final Connection database;
     private List<MonetColumn> fetchColumns;
-    private MonetSchema s;
-    private MainOptions options;
-    private StateLogger logger;
-    private MonetGlobalState globalState;
+    private final MonetSchema s;
+    private final MainOptions options;
+    private final StateLogger logger;
+    private final MonetGlobalState globalState;
 
     public MonetPivotedQuerySynthesisOracle(MonetGlobalState globalState) throws SQLException {
         this.globalState = globalState;
@@ -181,7 +179,7 @@ public class MonetPivotedQuerySynthesisOracle implements TestOracle {
             boolean isContainedIn = result.next();
             createStatement.close();
             return isContainedIn;
-        } catch (Exception e) {
+        } catch (SQLException e) {
             if (e.getMessage().contains("out of range") || e.getMessage().contains("cannot cast")
                     || e.getMessage().contains("invalid input syntax for ") || e.getMessage().contains("conversion of ") || e.getMessage().contains("must be type")
                     || e.getMessage().contains("operator does not exist")

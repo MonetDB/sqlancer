@@ -27,7 +27,7 @@ import sqlancer.schema.TableIndex;
 public class MonetSchema {
 
     private final List<MonetTable> databaseTables;
-    private String databaseName;
+    private final String databaseName;
 
     public enum MonetDataType {
         INT, BOOLEAN, STRING, DECIMAL, REAL, DOUBLE, TIME, TIMESTAMP, DATE, MONTH_INTERVAL, SECOND_INTERVAL;
@@ -207,8 +207,8 @@ public class MonetSchema {
         }
 
         private final TableType tableType;
-        private List<MonetStatisticsObject> statistics;
-        private boolean isInsertable;
+        private final List<MonetStatisticsObject> statistics;
+        private final boolean isInsertable;
 
         public MonetTable(String tableName, List<MonetColumn> columns, List<MonetIndex> indexes,
                 TableType tableType, List<MonetStatisticsObject> statistics, boolean isView, boolean isInsertable) {

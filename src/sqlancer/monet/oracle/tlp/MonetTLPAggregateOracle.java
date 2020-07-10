@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-//import org.monetql.util.PSQLException;
-
 import sqlancer.Main.StateLogger;
 import sqlancer.MainOptions;
 import sqlancer.ComparatorHelper;
@@ -100,9 +98,7 @@ public class MonetTLPAggregateOracle extends MonetTLPBase {
     private String getAggregateResult(String queryString) throws SQLException {
         String resultString;
         QueryAdapter q = new QueryAdapter(queryString, errors);
-        //try (
-            ResultSet result = q.executeAndGet(state.getConnection());
-            //) {
+        try (ResultSet result = q.executeAndGet(state)) {
             if (result == null) {
                 throw new IgnoreMeException();
             }
@@ -111,9 +107,9 @@ public class MonetTLPAggregateOracle extends MonetTLPBase {
             } else {
                 resultString = result.getString(1);
             }
-        /*} catch (PSQLException e) {
+        } catch (SQLException e) {
             throw new AssertionError(queryString, e);
-        }*/
+        }
         return resultString;
     }
 

@@ -22,6 +22,7 @@ import sqlancer.schema.AbstractTable;
 import sqlancer.schema.AbstractTableColumn;
 import sqlancer.schema.TableIndex;
 import sqlancer.sqlite3.SQLite3Errors;
+import sqlancer.sqlite3.SQLite3Provider.SQLite3GlobalState;
 import sqlancer.sqlite3.SQLite3ToStringVisitor;
 import sqlancer.sqlite3.ast.SQLite3Constant;
 import sqlancer.sqlite3.schema.SQLite3Schema.SQLite3Column.SQLite3CollateSequence;
@@ -56,8 +57,8 @@ public class SQLite3Schema {
 
         private final boolean isInteger; // "INTEGER" type, not "INT"
         private final SQLite3CollateSequence collate;
-        private boolean generated;
-        private boolean isPrimaryKey;
+        boolean generated;
+        private final boolean isPrimaryKey;
 
         public enum SQLite3CollateSequence {
             NOCASE, RTRIM, BINARY;
@@ -77,9 +78,9 @@ public class SQLite3Schema {
             assert !isInteger || columnType == SQLite3DataType.INT;
         }
 
-        public SQLite3Column(String rowId, SQLite3DataType columnType2, boolean b, SQLite3CollateSequence collate,
-                boolean generated) {
-            this(rowId, columnType2, b, generated, collate);
+        public SQLite3Column(String rowId, SQLite3DataType columnType, boolean isInteger,
+                SQLite3CollateSequence collate, boolean generated) {
+            this(rowId, columnType, isInteger, generated, collate);
             this.generated = generated;
         }
 
@@ -223,10 +224,10 @@ public class SQLite3Schema {
 
         private final TableKind tableType;
         private SQLite3Column rowid;
-        private boolean withoutRowid;
-        private int nrRows;
-        private boolean isVirtual;
-        private boolean isReadOnly;
+        private final boolean withoutRowid;
+        private final int nrRows;
+        private final boolean isVirtual;
+        private final boolean isReadOnly;
 
         public SQLite3Table(String tableName, List<SQLite3Column> columns, TableKind tableType, boolean withoutRowid,
                 int nrRows, boolean isView, boolean isVirtual, boolean isReadOnly) {
@@ -342,7 +343,7 @@ public class SQLite3Schema {
         return sb.toString();
     }
 
-    public static int getNrRows(Connection con, String table) throws SQLException {
+    public static int getNrRows(SQLite3GlobalState globalState, String table) throws SQLException {
         String string = "SELECT COUNT(*) FROM " + table;
         List<String> errors = new ArrayList<>();
         errors.add("ORDER BY term out of range");
@@ -352,7 +353,7 @@ public class SQLite3Schema {
                 "misuse of window function"));
         SQLite3Errors.addExpectedExpressionErrors(errors);
         QueryAdapter q = new QueryAdapter(string, errors);
-        try (ResultSet query = q.executeAndGet(con)) {
+        try (ResultSet query = q.executeAndGet(globalState)) {
             if (query == null) {
                 throw new IgnoreMeException();
             }
@@ -363,9 +364,10 @@ public class SQLite3Schema {
         }
     }
 
-    public static SQLite3Schema fromConnection(Connection con) throws SQLException {
+    public static SQLite3Schema fromConnection(SQLite3GlobalState globalState) throws SQLException {
         List<SQLite3Table> databaseTables = new ArrayList<>();
         List<String> indexNames = new ArrayList<>();
+        Connection con = globalState.getConnection();
 
         try (Statement s = con.createStatement()) {
             try (ResultSet rs = s.executeQuery("SELECT name, type as category, sql FROM sqlite_master UNION "
@@ -402,7 +404,7 @@ public class SQLite3Schema {
                     int nrRows;
                     try {
                         // FIXME
-                        nrRows = getNrRows(con, tableName);
+                        nrRows = getNrRows(globalState, tableName);
                     } catch (IgnoreMeException e) {
                         nrRows = 0;
                     }

@@ -21,7 +21,7 @@ import sqlancer.monet.oracle.tlp.MonetTLPWhereOracle;
 public class MonetOptions {
 
     @Parameter(names = "--bulk-insert")
-    public boolean allowBulkInsert = false;
+    public boolean allowBulkInsert;
 
     @Parameter(names = "--oracle", converter = DBMSConverter.class)
     public List<MonetOracle> oracle = Arrays.asList(MonetOracle.QUERY_PARTITIONING);

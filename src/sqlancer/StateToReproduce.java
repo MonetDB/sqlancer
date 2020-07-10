@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import sqlancer.clickhouse.ClickHouseSchema;
+import sqlancer.clickhouse.ast.ClickHouseConstant;
+import sqlancer.clickhouse.ast.ClickHouseExpression;
 import sqlancer.monet.MonetSchema.MonetColumn;
 import sqlancer.monet.ast.MonetConstant;
 import sqlancer.monet.ast.MonetExpression;
@@ -22,7 +25,7 @@ public class StateToReproduce {
     public final List<Query> statements = new ArrayList<>();
     public String queryString;
 
-    private String databaseName;
+    private final String databaseName;
 
     public String databaseVersion;
 
@@ -38,7 +41,6 @@ public class StateToReproduce {
 
     public StateToReproduce(String databaseName) {
         this.databaseName = databaseName;
-
     }
 
     public String getException() {
@@ -128,6 +130,28 @@ public class StateToReproduce {
 
     }
 
+    public static class ClickHouseStateToReproduce extends StateToReproduce {
+
+        public Map<ClickHouseSchema.ClickHouseColumn, ClickHouseConstant> randomRowValues;
+
+        public ClickHouseExpression whereClause;
+
+        public String queryThatSelectsRow;
+
+        public ClickHouseStateToReproduce(String databaseName) {
+            super(databaseName);
+        }
+
+        public Map<ClickHouseSchema.ClickHouseColumn, ClickHouseConstant> getRandomRowValues() {
+            return randomRowValues;
+        }
+
+        public ClickHouseExpression getWhereClause() {
+            return whereClause;
+        }
+
+    }
+
     public static class MonetStateToReproduce extends StateToReproduce {
 
         public Map<MonetColumn, MonetConstant> randomRowValues;
@@ -149,5 +173,4 @@ public class StateToReproduce {
         }
 
     }
-
 }

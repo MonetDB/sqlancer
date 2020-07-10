@@ -1,7 +1,6 @@
 package sqlancer;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -33,7 +32,7 @@ public final class ComparatorHelper {
         return Math.abs(a - b) < 0.0001 * Math.max(Math.abs(a), Math.abs(b));
     }
 
-    public static List<String> getResultSetFirstColumnAsString(String queryString, Set<String> errors, Connection con,
+    public static List<String> getResultSetFirstColumnAsString(String queryString, Set<String> errors,
             GlobalState<?> state) throws SQLException {
         if (state.getOptions().logEachSelect()) {
             // TODO: refactor me
@@ -49,7 +48,7 @@ public final class ComparatorHelper {
         List<String> resultSet = new ArrayList<>();
         ResultSet result = null;
         try {
-            result = q.executeAndGet(con);
+            result = q.executeAndGet(state);
             if (result == null) {
                 throw new IgnoreMeException();
             }
@@ -125,15 +124,12 @@ public final class ComparatorHelper {
             String unionString = firstQueryString + " UNION ALL " + secondQueryString + " UNION ALL "
                     + thirdQueryString;
             combinedString.add(unionString);
-            secondResultSet = getResultSetFirstColumnAsString(unionString, errors, state.getConnection(), state);
+            secondResultSet = getResultSetFirstColumnAsString(unionString, errors, state);
         } else {
             secondResultSet = new ArrayList<>();
-            secondResultSet
-                    .addAll(getResultSetFirstColumnAsString(firstQueryString, errors, state.getConnection(), state));
-            secondResultSet
-                    .addAll(getResultSetFirstColumnAsString(secondQueryString, errors, state.getConnection(), state));
-            secondResultSet
-                    .addAll(getResultSetFirstColumnAsString(thirdQueryString, errors, state.getConnection(), state));
+            secondResultSet.addAll(getResultSetFirstColumnAsString(firstQueryString, errors, state));
+            secondResultSet.addAll(getResultSetFirstColumnAsString(secondQueryString, errors, state));
+            secondResultSet.addAll(getResultSetFirstColumnAsString(thirdQueryString, errors, state));
             combinedString.add(firstQueryString);
             combinedString.add(secondQueryString);
             combinedString.add(thirdQueryString);
@@ -144,13 +140,16 @@ public final class ComparatorHelper {
     public static List<String> getCombinedResultSetNoDuplicates(String firstQueryString, String secondQueryString,
             String thirdQueryString, List<String> combinedString, boolean asUnion, GlobalState<?> state,
             Set<String> errors) throws SQLException {
-        if (!asUnion) {
-            throw new AssertionError();
+        String unionString;
+        if (asUnion) {
+            unionString = firstQueryString + " UNION " + secondQueryString + " UNION " + thirdQueryString;
+        } else {
+            unionString = "SELECT DISTINCT * FROM (" + firstQueryString + " UNION ALL " + secondQueryString
+                    + " UNION ALL " + thirdQueryString + ")";
         }
         List<String> secondResultSet;
-        String unionString = firstQueryString + " UNION " + secondQueryString + " UNION " + thirdQueryString;
         combinedString.add(unionString);
-        secondResultSet = getResultSetFirstColumnAsString(unionString, errors, state.getConnection(), state);
+        secondResultSet = getResultSetFirstColumnAsString(unionString, errors, state);
         return secondResultSet;
     }
 

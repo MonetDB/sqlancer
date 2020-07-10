@@ -15,8 +15,8 @@ public class MonetSelect extends SelectBase<MonetExpression> implements MonetExp
     private MonetExpression distinctOnClause;
 
     public static class MonetFromTable implements MonetExpression {
-        private MonetTable t;
-        private boolean only;
+        private final MonetTable t;
+        private final boolean only;
 
         public MonetFromTable(MonetTable t, boolean only) {
             this.t = t;

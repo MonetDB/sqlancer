@@ -23,8 +23,7 @@ public class MonetTLPWhereOracle extends MonetTLPBase {
             select.setOrderByExpressions(gen.generateOrderBy());
         }
         String originalQueryString = MonetVisitor.asString(select);
-        List<String> resultSet = ComparatorHelper.getResultSetFirstColumnAsString(originalQueryString, errors,
-                state.getConnection(), state);
+        List<String> resultSet = ComparatorHelper.getResultSetFirstColumnAsString(originalQueryString, errors, state);
 
         select.setOrderByExpressions(Collections.emptyList());
         select.setWhereClause(predicate);

@@ -240,7 +240,7 @@ public abstract class PostgresConstant implements PostgresExpression {
 
     public static class IntConstant extends PostgresConstant {
 
-        private long val;
+        private final long val;
 
         public IntConstant(long val) {
             this.val = val;
@@ -464,7 +464,7 @@ public abstract class PostgresConstant implements PostgresExpression {
             if (Double.isFinite(val)) {
                 return String.valueOf(val);
             } else {
-                return "'" + String.valueOf(val) + "'";
+                return "'" + val + "'";
             }
         }
 
@@ -488,7 +488,7 @@ public abstract class PostgresConstant implements PostgresExpression {
             if (Double.isFinite(val)) {
                 return String.valueOf(val);
             } else {
-                return "'" + String.valueOf(val) + "'";
+                return "'" + val + "'";
             }
         }
 
@@ -521,10 +521,10 @@ public abstract class PostgresConstant implements PostgresExpression {
 
     public static class RangeConstant extends PostgresConstantBase {
 
-        private long left;
-        private boolean leftIsInclusive;
-        private long right;
-        private boolean rightIsInclusive;
+        private final long left;
+        private final boolean leftIsInclusive;
+        private final long right;
+        private final boolean rightIsInclusive;
 
         public RangeConstant(long left, boolean leftIsInclusive, long right, boolean rightIsInclusive) {
             this.left = left;
@@ -576,12 +576,16 @@ public abstract class PostgresConstant implements PostgresExpression {
 
     public static PostgresConstant createRange(long left, boolean leftIsInclusive, long right,
             boolean rightIsInclusive) {
+        long realLeft;
+        long realRight;
         if (left > right) {
-            long temp = right;
-            right = left;
-            left = temp;
+            realRight = left;
+            realLeft = right;
+        } else {
+            realLeft = left;
+            realRight = right;
         }
-        return new RangeConstant(left, leftIsInclusive, right, rightIsInclusive);
+        return new RangeConstant(realLeft, leftIsInclusive, realRight, rightIsInclusive);
     }
 
     public static PostgresExpression createBitConstant(long integer) {

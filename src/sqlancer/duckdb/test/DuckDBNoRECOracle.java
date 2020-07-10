@@ -38,14 +38,14 @@ import sqlancer.duckdb.gen.DuckDBExpressionGenerator.DuckDBCastOperation;
 
 public class DuckDBNoRECOracle implements TestOracle {
 
-    private DuckDBSchema s;
-    private Connection con;
+    private final DuckDBSchema s;
+    private final Connection con;
     private String firstQueryString;
     private String secondQueryString;
-    private StateLogger logger;
-    private MainOptions options;
+    private final StateLogger logger;
+    private final MainOptions options;
     private final Set<String> errors = new HashSet<>();
-    private DuckDBGlobalState globalState;
+    private final DuckDBGlobalState globalState;
 
     public DuckDBNoRECOracle(DuckDBGlobalState globalState) {
         this.s = globalState.getSchema();
@@ -88,7 +88,7 @@ public class DuckDBNoRECOracle implements TestOracle {
         // PostfixOperator.IS_TRUE);
         Node<DuckDBExpression> asText = new NewPostfixTextNode<>(new DuckDBCastOperation(
                 new NewPostfixTextNode<DuckDBExpression>(randomWhereCondition,
-                        " IS NOT NULL AND " + DuckDBToStringVisitor.asString(randomWhereCondition) + ""),
+                        " IS NOT NULL AND " + DuckDBToStringVisitor.asString(randomWhereCondition)),
                 new DuckDBCompositeDataType(DuckDBDataType.INT, 8)), "as count");
         select.setFetchColumns(Arrays.asList(asText));
         select.setFromList(tableList);
@@ -96,14 +96,11 @@ public class DuckDBNoRECOracle implements TestOracle {
         select.setJoinList(joins);
         int secondCount = 0;
         secondQueryString = "SELECT SUM(count) FROM (" + DuckDBToStringVisitor.asString(select) + ") as res";
-        if (options.logEachSelect()) {
-            logger.writeCurrent(secondQueryString);
-        }
         errors.add("canceling statement due to statement timeout");
         Query q = new QueryAdapter(secondQueryString, errors);
         ResultSet rs;
         try {
-            rs = q.executeAndGet(con);
+            rs = q.executeAndGetLogged(globalState);
         } catch (Exception e) {
             throw new AssertionError(secondQueryString, e);
         }

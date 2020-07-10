@@ -47,7 +47,7 @@ public class MonetExpressionGenerator {
 
     private final int maxDepth;
 
-    private Randomly r;
+    private final Randomly r;
 
     private List<MonetColumn> columns;
 
@@ -220,7 +220,8 @@ public class MonetExpressionGenerator {
         return new MonetExpressionGenerator(globalState).generateExpression(0, type);
     }
 
-    public MonetExpression generateExpression(int depth, MonetDataType dataType) {
+    public MonetExpression generateExpression(int depth, MonetDataType originalType) {
+        MonetDataType dataType = originalType;
         if (dataType == MonetDataType.DOUBLE && Randomly.getBoolean()) {
             dataType = Randomly.fromOptions(MonetDataType.INT, MonetDataType.DOUBLE);
         }

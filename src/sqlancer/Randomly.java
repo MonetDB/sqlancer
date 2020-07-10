@@ -16,8 +16,7 @@ public final class Randomly {
     private final List<String> cachedStrings = new ArrayList<>();
     private final List<Double> cachedDoubles = new ArrayList<>();
     private final List<byte[]> cachedBytes = new ArrayList<>();
-    private static final String ALPHABET = new String(
-            "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzöß!#<>/.,~-+'*()[]{} ^*?%_\t\n\r|&\\");
+    private static final String ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzöß!#<>/.,~-+'*()[]{} ^*?%_\t\n\r|&\\";
     private Supplier<String> provider;
 
     private static final ThreadLocal<Random> THREAD_RANDOM = new ThreadLocal<>();
@@ -427,7 +426,10 @@ public final class Randomly {
         if (lower > upper) {
             throw new IllegalArgumentException(lower + " " + upper);
         }
-        return lower + ((long) (getThreadRandom().get().nextDouble() * (upper - lower)));
+        if (lower == upper) {
+            return lower;
+        }
+        return (long) (getThreadRandom().get().longs(lower, upper).findFirst().getAsLong());
     }
 
     private static int getNextInt(int lower, int upper) {

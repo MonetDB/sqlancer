@@ -5,8 +5,8 @@ import sqlancer.monet.MonetSchema.MonetDataType;
 
 public class MonetCastOperation implements MonetExpression {
 
-    private MonetExpression expression;
-    private MonetCompoundDataType type;
+    private final MonetExpression expression;
+    private final MonetCompoundDataType type;
 
     public MonetCastOperation(MonetExpression expression, MonetCompoundDataType type) {
         if (expression == null) {

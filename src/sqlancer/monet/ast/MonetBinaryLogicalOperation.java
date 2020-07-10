@@ -13,41 +13,41 @@ public class MonetBinaryLogicalOperation extends BinaryOperatorNode<MonetExpress
         AND {
             @Override
             public MonetConstant apply(MonetConstant left, MonetConstant right) {
-                left = left.cast(MonetDataType.BOOLEAN);
-                right = right.cast(MonetDataType.BOOLEAN);
-                if (left.isNull()) {
-                    if (right.isNull()) {
+                MonetConstant leftBool = left.cast(MonetDataType.BOOLEAN);
+                MonetConstant rightBool = right.cast(MonetDataType.BOOLEAN);
+                if (leftBool.isNull()) {
+                    if (rightBool.isNull()) {
                         return MonetConstant.createNullConstant();
                     } else {
-                        if (right.asBoolean()) {
+                        if (rightBool.asBoolean()) {
                             return MonetConstant.createNullConstant();
                         } else {
                             return MonetConstant.createFalse();
                         }
                     }
-                } else if (!left.asBoolean()) {
+                } else if (!leftBool.asBoolean()) {
                     return MonetConstant.createFalse();
                 }
-                assert left.asBoolean();
-                if (right.isNull()) {
+                assert leftBool.asBoolean();
+                if (rightBool.isNull()) {
                     return MonetConstant.createNullConstant();
                 } else {
-                    return MonetConstant.createBooleanConstant(right.isBoolean() && right.asBoolean());
+                    return MonetConstant.createBooleanConstant(rightBool.isBoolean() && rightBool.asBoolean());
                 }
             }
         },
         OR {
             @Override
             public MonetConstant apply(MonetConstant left, MonetConstant right) {
-                left = left.cast(MonetDataType.BOOLEAN);
-                right = right.cast(MonetDataType.BOOLEAN);
-                if (left.isBoolean() && left.asBoolean()) {
+                MonetConstant leftBool = left.cast(MonetDataType.BOOLEAN);
+                MonetConstant rightBool = right.cast(MonetDataType.BOOLEAN);
+                if (leftBool.isBoolean() && leftBool.asBoolean()) {
                     return MonetConstant.createTrue();
                 }
-                if (right.isBoolean() && right.asBoolean()) {
+                if (rightBool.isBoolean() && rightBool.asBoolean()) {
                     return MonetConstant.createTrue();
                 }
-                if (left.isNull() || right.isNull()) {
+                if (leftBool.isNull() || rightBool.isNull()) {
                     return MonetConstant.createNullConstant();
                 }
                 return MonetConstant.createFalse();

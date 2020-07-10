@@ -45,7 +45,7 @@ import sqlancer.sqlite3.gen.SQLite3Common;
 
 public final class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOptions> {
 
-    public static boolean generateOnlyKnown = false;
+    public static boolean generateOnlyKnown;
 
     //private MonetGlobalState globalState;
 

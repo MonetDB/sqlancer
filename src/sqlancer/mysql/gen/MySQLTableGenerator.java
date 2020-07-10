@@ -19,7 +19,7 @@ import sqlancer.sqlite3.gen.SQLite3Common;
 public class MySQLTableGenerator {
 
     private final StringBuilder sb = new StringBuilder();
-    private boolean allowPrimaryKey;
+    private final boolean allowPrimaryKey;
     private boolean setPrimaryKey;
     private final String tableName;
     private final Randomly r;
@@ -27,8 +27,8 @@ public class MySQLTableGenerator {
     private boolean tableHasNullableColumn;
     private MySQLEngine engine;
     private int keysSpecified;
-    private List<String> columns = new ArrayList<>();
-    private MySQLSchema schema;
+    private final List<String> columns = new ArrayList<>();
+    private final MySQLSchema schema;
 
     public MySQLTableGenerator(String tableName, Randomly r, MySQLSchema schema) {
         this.tableName = tableName;
@@ -139,7 +139,8 @@ public class MySQLTableGenerator {
     }
 
     private enum TableOptions {
-        AUTO_INCREMENT, AVG_ROW_LENGTH, CHECKSUM, COMPRESSION, DELAY_KEY_WRITE, /* ENCRYPTION, */ ENGINE, INSERT_METHOD, KEY_BLOCK_SIZE, MAX_ROWS, MIN_ROWS, PACK_KEYS, STATS_AUTO_RECALC, STATS_PERSISTENT, STATS_SAMPLE_PAGES;
+        AUTO_INCREMENT, AVG_ROW_LENGTH, CHECKSUM, COMPRESSION, DELAY_KEY_WRITE, /* ENCRYPTION, */ ENGINE, INSERT_METHOD,
+        KEY_BLOCK_SIZE, MAX_ROWS, MIN_ROWS, PACK_KEYS, STATS_AUTO_RECALC, STATS_PERSISTENT, STATS_SAMPLE_PAGES;
 
         public static List<TableOptions> getRandomTableOptions() {
             List<TableOptions> options;
@@ -344,10 +345,8 @@ public class MySQLTableGenerator {
             throw new AssertionError();
         }
         if (randomType.isNumeric()) {
-            if (Randomly.getBoolean()) {
-                if (randomType != MySQLDataType.INT && !MySQLBugs.bug99127) {
-                    sb.append(" UNSIGNED");
-                }
+            if (Randomly.getBoolean() && randomType != MySQLDataType.INT && !MySQLBugs.bug99127) {
+                sb.append(" UNSIGNED");
             }
             if (Randomly.getBoolean()) {
                 sb.append(" ZEROFILL");

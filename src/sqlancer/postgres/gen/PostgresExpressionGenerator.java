@@ -53,7 +53,7 @@ public class PostgresExpressionGenerator {
 
     private final int maxDepth;
 
-    private Randomly r;
+    private final Randomly r;
 
     private List<PostgresColumn> columns;
 
@@ -104,7 +104,8 @@ public class PostgresExpressionGenerator {
     }
 
     private enum BooleanExpression {
-        POSTFIX_OPERATOR, NOT, BINARY_LOGICAL_OPERATOR, BINARY_COMPARISON, FUNCTION, CAST, LIKE, BETWEEN, IN_OPERATION, SIMILAR_TO, POSIX_REGEX, BINARY_RANGE_COMPARISON;
+        POSTFIX_OPERATOR, NOT, BINARY_LOGICAL_OPERATOR, BINARY_COMPARISON, FUNCTION, CAST, LIKE, BETWEEN, IN_OPERATION,
+        SIMILAR_TO, POSIX_REGEX, BINARY_RANGE_COMPARISON;
     }
 
     private PostgresExpression generateFunctionWithUnknownResult(int depth, PostgresDataType type) {
@@ -246,7 +247,8 @@ public class PostgresExpressionGenerator {
         return new PostgresExpressionGenerator(globalState).generateExpression(0, type);
     }
 
-    public PostgresExpression generateExpression(int depth, PostgresDataType dataType) {
+    public PostgresExpression generateExpression(int depth, PostgresDataType originalType) {
+        PostgresDataType dataType = originalType;
         if (dataType == PostgresDataType.REAL && Randomly.getBoolean()) {
             dataType = Randomly.fromOptions(PostgresDataType.INT, PostgresDataType.FLOAT);
         }

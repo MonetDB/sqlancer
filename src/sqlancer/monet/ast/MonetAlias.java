@@ -4,8 +4,8 @@ import sqlancer.visitor.UnaryOperation;
 
 public class MonetAlias implements UnaryOperation<MonetExpression>, MonetExpression {
 
-    private MonetExpression expr;
-    private String alias;
+    private final MonetExpression expr;
+    private final String alias;
 
     public MonetAlias(MonetExpression expr, String alias) {
         this.expr = expr;

@@ -230,7 +230,7 @@ public abstract class MonetConstant implements MonetExpression {
 
     public static class IntConstant extends MonetConstant {
 
-        private long val;
+        private final long val;
 
         public IntConstant(long val) {
             this.val = val;
@@ -434,7 +434,7 @@ public abstract class MonetConstant implements MonetExpression {
             if (Double.isFinite(val)) {
                 return String.valueOf(val);
             } else {
-                return "'" + String.valueOf(val) + "'";
+                return "'" + val + "'";
             }
         }
 
@@ -458,7 +458,7 @@ public abstract class MonetConstant implements MonetExpression {
             if (Double.isFinite(val)) {
                 return String.valueOf(val);
             } else {
-                return "'" + String.valueOf(val) + "'";
+                return "'" + val + "'";
             }
         }
 
@@ -608,3 +608,4 @@ public abstract class MonetConstant implements MonetExpression {
     }
 
 }
+    

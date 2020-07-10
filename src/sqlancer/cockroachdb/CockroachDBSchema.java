@@ -19,7 +19,8 @@ public class CockroachDBSchema extends AbstractSchema<CockroachDBTable> {
 
     public enum CockroachDBDataType {
 
-        INT, BOOL, STRING, FLOAT, BYTES, BIT, VARBIT, SERIAL, INTERVAL, TIMESTAMP, TIMESTAMPTZ, DECIMAL, JSONB, TIME, TIMETZ, ARRAY;
+        INT, BOOL, STRING, FLOAT, BYTES, BIT, VARBIT, SERIAL, INTERVAL, TIMESTAMP, TIMESTAMPTZ, DECIMAL, JSONB, TIME,
+        TIMETZ, ARRAY;
 
         public static CockroachDBDataType getRandom() {
             return Randomly.fromOptions(values());
@@ -171,7 +172,7 @@ public class CockroachDBSchema extends AbstractSchema<CockroachDBTable> {
     public static class CockroachDBColumn extends AbstractTableColumn<CockroachDBTable, CockroachDBCompositeDataType> {
 
         private final boolean isPrimaryKey;
-        private boolean isNullable;
+        private final boolean isNullable;
 
         public CockroachDBColumn(String name, CockroachDBCompositeDataType columnType, boolean isPrimaryKey,
                 boolean isNullable) {

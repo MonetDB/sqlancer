@@ -41,15 +41,15 @@ import sqlancer.monet.gen.MonetExpressionGenerator;
 
 public class MonetNoRECOracle implements TestOracle {
 
-    private MonetSchema s;
-    private Connection con;
-    private MonetStateToReproduce state;
+    private final MonetSchema s;
+    private final Connection con;
+    private final MonetStateToReproduce state;
     private String firstQueryString;
     private String secondQueryString;
-    private StateLogger logger;
-    private MainOptions options;
+    private final StateLogger logger;
+    private final MainOptions options;
     private final Set<String> errors = new HashSet<>();
-    private MonetGlobalState globalState;
+    private final MonetGlobalState globalState;
 
     public MonetNoRECOracle(MonetGlobalState globalState) {
         this.s = globalState.getSchema();
@@ -123,7 +123,7 @@ public class MonetNoRECOracle implements TestOracle {
         Query q = new QueryAdapter(secondQueryString, errors);
         ResultSet rs;
         try {
-            rs = q.executeAndGet(con);
+            rs = q.executeAndGet(globalState);
         } catch (Exception e) {
             throw new AssertionError(secondQueryString, e);
         }

@@ -52,7 +52,7 @@ public class MySQLSchema extends AbstractSchema<MySQLTable> {
     public static class MySQLColumn extends AbstractTableColumn<MySQLTable, MySQLDataType> {
 
         private final boolean isPrimaryKey;
-        private int precision;
+        private final int precision;
 
         public enum CollateSequence {
             NOCASE, RTRIM, BINARY;
@@ -223,8 +223,8 @@ public class MySQLSchema extends AbstractSchema<MySQLTable> {
     public static class MySQLTable extends AbstractTable<MySQLColumn, MySQLIndex> {
 
         public enum MySQLEngine {
-            INNO_DB("InnoDB"), MY_ISAM("MyISAM"), MEMORY("MEMORY"), HEAP("HEAP"), CSV("CSV"), MERGE("MERGE"), ARCHIVE(
-                    "ARCHIVE"), FEDERATED("FEDERATED");
+            INNO_DB("InnoDB"), MY_ISAM("MyISAM"), MEMORY("MEMORY"), HEAP("HEAP"), CSV("CSV"), MERGE("MERGE"),
+            ARCHIVE("ARCHIVE"), FEDERATED("FEDERATED");
 
             private String s;
 

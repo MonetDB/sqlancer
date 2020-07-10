@@ -18,17 +18,17 @@ import sqlancer.sqlite3.gen.SQLite3Common;
 
 public class MonetTableGenerator {
 
-    private String tableName;
+    private final String tableName;
     private boolean columnCanHavePrimaryKey;
     private boolean columnHasPrimaryKey;
     private final StringBuilder sb = new StringBuilder();
     private boolean isTemporaryTable;
-    private MonetSchema newSchema;
+    private final MonetSchema newSchema;
     private final List<MonetColumn> columnsToBeAdded = new ArrayList<>();
     private final Set<String> errors = new HashSet<>();
     private final MonetTable table;
-    private boolean generateOnlyKnown;
-    private MonetGlobalState globalState;
+    private final boolean generateOnlyKnown;
+    private final MonetGlobalState globalState;
 
     public MonetTableGenerator(String tableName, MonetSchema newSchema, boolean generateOnlyKnown,
             MonetGlobalState globalState) {

@@ -1,10 +1,10 @@
 package sqlancer.monet.gen;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import sqlancer.GlobalState;
 import sqlancer.Query;
 import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
@@ -113,8 +113,8 @@ public final class MonetQueryCatalogGenerator {
                 "systemfunctions"));
         return new QueryAdapter(sb.toString()) {
             @Override
-            public boolean execute(Connection con) throws SQLException {
-                try (Statement s = con.createStatement()) {
+            public boolean execute(GlobalState<?> globalState) throws SQLException {
+                try (Statement s = globalState.getConnection().createStatement()) {
                     try (ResultSet rs = s.executeQuery(getQueryString())) {
                         // CHECKSTYLE:OFF
                         while (rs.next()) {

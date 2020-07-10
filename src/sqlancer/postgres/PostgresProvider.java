@@ -56,7 +56,7 @@ import sqlancer.sqlite3.gen.SQLite3Common;
 // IN
 public final class PostgresProvider extends ProviderAdapter<PostgresGlobalState, PostgresOptions> {
 
-    public static boolean generateOnlyKnown = false;
+    public static boolean generateOnlyKnown;
 
     private PostgresGlobalState globalState;
 
@@ -110,10 +110,10 @@ public final class PostgresProvider extends ProviderAdapter<PostgresGlobalState,
         }), //
         RESET_ROLE((g) -> new QueryAdapter("RESET ROLE")), //
         COMMENT_ON(PostgresCommentGenerator::generate), //
-        RESET((g) -> new QueryAdapter(
-                "RESET ALL") /*
-                              * https://www.postgresql.org/docs/devel/sql-reset.html TODO: also configuration parameter
-                              */), //
+        RESET((g) -> new QueryAdapter("RESET ALL") /*
+                                                    * https://www.postgresql.org/docs/devel/sql-reset.html TODO: also
+                                                    * configuration parameter
+                                                    */), //
         NOTIFY(PostgresNotifyGenerator::createNotify), //
         LISTEN((g) -> PostgresNotifyGenerator.createListen()), //
         UNLISTEN((g) -> PostgresNotifyGenerator.createUnlisten()), //
@@ -287,17 +287,6 @@ public final class PostgresProvider extends ProviderAdapter<PostgresGlobalState,
         con.close();
         con = DriverManager.getConnection("jdbc:postgresql://localhost:5432/" + databaseName,
                 globalState.getOptions().getUserName(), globalState.getOptions().getPassword());
-        List<String> statements = Arrays.asList(
-                // "CREATE EXTENSION IF NOT EXISTS btree_gin;",
-                // "CREATE EXTENSION IF NOT EXISTS btree_gist;", // TODO: undefined symbol: elog_start
-                "CREATE EXTENSION IF NOT EXISTS pg_prewarm;", "SET max_parallel_workers_per_gather=16");
-        for (String s : statements) {
-            QueryAdapter query = new QueryAdapter(s);
-            globalState.getState().statements.add(query);
-            query.execute(con);
-        }
-        // new QueryAdapter("set jit_above_cost = 0; set jit_inline_above_cost = 0; set jit_optimize_above_cost =
-        // 0;").execute(con);
         return con;
     }
 

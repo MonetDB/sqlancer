@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -27,7 +26,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.JCommander.Builder;
 
-import sqlancer.clickhouse.ClickhouseProvider;
+import sqlancer.clickhouse.ClickHouseProvider;
 import sqlancer.cockroachdb.CockroachDBProvider;
 import sqlancer.duckdb.DuckDBProvider;
 import sqlancer.mariadb.MariaDBProvider;
@@ -47,6 +46,7 @@ public final class Main {
     static int threadsShutdown;
 
     static {
+        System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "ERROR");
         if (!LOG_DIRECTORY.exists()) {
             LOG_DIRECTORY.mkdir();
         }
@@ -62,8 +62,8 @@ public final class Main {
         private FileWriter logFileWriter;
         public FileWriter currentFileWriter;
         private static final List<String> INITIALIZED_PROVIDER_NAMES = new ArrayList<>();
-        private boolean logEachSelect = true;
-        private DatabaseProvider<?, ?> provider;
+        private final boolean logEachSelect;
+        private final DatabaseProvider<?, ?> provider;
 
         private static final class AlsoWriteToConsoleFileWriter extends FileWriter {
 
@@ -235,21 +235,15 @@ public final class Main {
 
     public static class QueryManager {
 
-        private final Connection con;
-        private final StateToReproduce stateToRepro;
+        private final GlobalState<?> globalState;
 
-        QueryManager(Connection con, StateToReproduce state) {
-            if (con == null || state == null) {
-                throw new IllegalArgumentException();
-            }
-            this.con = con;
-            this.stateToRepro = state;
-
+        QueryManager(GlobalState<?> globalState) {
+            this.globalState = globalState;
         }
 
         public boolean execute(Query q) throws SQLException {
-            stateToRepro.statements.add(q);
-            boolean success = q.execute(con);
+            globalState.getState().statements.add(q);
+            boolean success = q.execute(globalState);
             Main.nrSuccessfulActions.addAndGet(1);
             return success;
         }
@@ -276,11 +270,11 @@ public final class Main {
 
     public static class DBMSExecutor<G extends GlobalState<O>, O> {
 
-        private DatabaseProvider<G, O> provider;
-        private MainOptions options;
-        private O command;
-        private String databaseName;
-        private long seed;
+        private final DatabaseProvider<G, O> provider;
+        private final MainOptions options;
+        private final O command;
+        private final String databaseName;
+        private final long seed;
         private StateLogger logger;
         private StateToReproduce stateToRepro;
 
@@ -305,7 +299,7 @@ public final class Main {
             return command;
         }
 
-        public void run() throws Exception {
+        public void run() throws SQLException {
             G state = createGlobalState();
             stateToRepro = provider.getStateToReproduce(databaseName);
             stateToRepro.seedValue = seed;
@@ -317,7 +311,7 @@ public final class Main {
             state.setMainOptions(options);
             state.setDmbsSpecificOptions(command);
             try (Connection con = provider.createDatabase(state)) {
-                QueryManager manager = new QueryManager(con, stateToRepro);
+                QueryManager manager = new QueryManager(state);
                 try {
                     java.sql.DatabaseMetaData meta = con.getMetaData();
                     stateToRepro.databaseVersion = meta.getDatabaseProductVersion();
@@ -342,9 +336,9 @@ public final class Main {
 
     public static class DBMSExecutorFactory<G extends GlobalState<O>, O> {
 
-        private DatabaseProvider<G, O> provider;
-        private MainOptions options;
-        private O command;
+        private final DatabaseProvider<G, O> provider;
+        private final MainOptions options;
+        private final O command;
 
         public DBMSExecutorFactory(DatabaseProvider<G, O> provider, MainOptions options) {
             this.provider = provider;
@@ -428,17 +422,6 @@ public final class Main {
                             executor.run();
                         } catch (IgnoreMeException e) {
                             continue;
-                        } catch (InvocationTargetException e) {
-                            if (e.getCause() instanceof IgnoreMeException) {
-                                continue;
-                            } else {
-                                e.getCause().printStackTrace();
-                                executor.getStateToReproduce().exception = e.getCause().getMessage();
-                                executor.getLogger().logFileWriter = null;
-                                executor.getLogger().logException(e.getCause(), executor.getStateToReproduce());
-                                threadsShutdown++;
-                                break;
-                            }
                         } catch (Throwable reduce) {
                             reduce.printStackTrace();
                             executor.getStateToReproduce().exception = reduce.getMessage();
@@ -486,7 +469,7 @@ public final class Main {
         providers.add(new MonetProvider());
         providers.add(new TiDBProvider());
         providers.add(new PostgresProvider());
-        providers.add(new ClickhouseProvider());
+        providers.add(new ClickHouseProvider());
         providers.add(new DuckDBProvider());
         return providers;
     }
@@ -496,7 +479,7 @@ public final class Main {
         scheduler.scheduleAtFixedRate(new Runnable() {
 
             private long timeMillis = System.currentTimeMillis();
-            private long lastNrQueries = 0;
+            private long lastNrQueries;
             private long lastNrDbs;
 
             {
