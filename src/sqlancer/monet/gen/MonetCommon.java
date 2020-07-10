@@ -26,8 +26,7 @@ public final class MonetCommon {
 
     public static void addCommonExpressionErrors(Set<String> errors) {
         errors.add("LIKE pattern must not end with escape character");
-        errors.add("division by zero");
-        //errors.add("types ");
+        errors.add("by zero"); /* Divisions by zero */
         errors.add("shift operand too large in ");
         errors.add("has no valid default value");
         errors.add("Wrong format (");
@@ -53,23 +52,9 @@ public final class MonetCommon {
         errors.add("are not equal");
         errors.add("Numerical result out of range");
         errors.add("Argument 2 to round function must be positive");
-        addToCharFunctionErrors(errors);
-        addBitStringOperationErrors(errors);
-        addFunctionErrors(errors);
-        addCommonRegexExpressionErrors(errors);
-    }
-
-    private static void addToCharFunctionErrors(Set<String> errors) {
+        errors.add("Overflow");
+        errors.add("Invalid result");
         errors.add("is not a number");
-    }
-
-    private static void addBitStringOperationErrors(Set<String> errors) {
-    }
-
-    private static void addFunctionErrors(Set<String> errors) {
-    }
-
-    private static void addCommonRegexExpressionErrors(Set<String> errors) {
     }
 
     public static void addCommonInsertUpdateErrors(Set<String> errors) {

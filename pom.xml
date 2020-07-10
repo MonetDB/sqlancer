@@ -229,11 +229,11 @@
       <artifactId>clickhouse-jdbc</artifactId>
       <version>0.2.4</version>
     </dependency>
-		<dependency>
-			<groupId>monetdb</groupId>
-			<artifactId>monetdb-jdbc</artifactId>
-			<version>2.29</version>
-		</dependency>
+    <dependency>
+      <groupId>monetdb</groupId>
+      <artifactId>monetdb-jdbc</artifactId>
+      <version>2.29</version>
+    </dependency>
   </dependencies>
   <reporting>
     <plugins>
@@ -246,9 +246,9 @@
   </reporting>
 
   <repositories>
-		<repository>
-			<id>clojars.org</id>
-			<url>https://repo.clojars.org</url>
-		</repository>
-	 </repositories>
+    <repository>
+      <id>clojars.org</id>
+      <url>https://repo.clojars.org</url>
+    </repository>
+  </repositories>
 </project>

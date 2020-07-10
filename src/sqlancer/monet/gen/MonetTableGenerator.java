@@ -128,7 +128,7 @@ public class MonetTableGenerator {
             // make checks constraints less likely
             constraintSubset.remove(ColumnConstraint.CHECK);
         }*/
-        if (!columnCanHavePrimaryKey || columnHasPrimaryKey) {
+        if (!columnCanHavePrimaryKey || columnHasPrimaryKey || serial) {
             constraintSubset.remove(ColumnConstraint.PRIMARY_KEY);
         }
         if (constraintSubset.contains(ColumnConstraint.GENERATED)
@@ -144,7 +144,6 @@ public class MonetTableGenerator {
             constraintSubset.remove(ColumnConstraint.GENERATED);
             constraintSubset.remove(ColumnConstraint.DEFAULT);
             constraintSubset.remove(ColumnConstraint.NULL_OR_NOT_NULL);
-
         }
         for (ColumnConstraint c : constraintSubset) {
             sb.append(" ");
