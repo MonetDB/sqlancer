@@ -116,11 +116,50 @@ public enum MonetFunctionWithUnknownResult {
 
     GREATEST1("greatest", MonetDataType.INT, MonetDataType.INT, MonetDataType.INT),
     GREATEST2("greatest", MonetDataType.REAL, MonetDataType.REAL, MonetDataType.REAL),
-    GREATEST3("greatest", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.STRING);/*,
+    GREATEST3("greatest", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.STRING),
 
-    IFTHENELSE1("ifthenelse", MonetDataType.INT, MonetDataType.BOOLEAN, MonetDataType.INT, MonetDataType.INT),
+    /*IFTHENELSE1("ifthenelse", MonetDataType.INT, MonetDataType.BOOLEAN, MonetDataType.INT, MonetDataType.INT),
     IFTHENELSE2("ifthenelse", MonetDataType.REAL, MonetDataType.BOOLEAN, MonetDataType.REAL, MonetDataType.REAL),
-    IFTHENELSE3("ifthenelse", MonetDataType.STRING, MonetDataType.BOOLEAN, MonetDataType.STRING, MonetDataType.STRING);*/
+    IFTHENELSE3("ifthenelse", MonetDataType.STRING, MonetDataType.BOOLEAN, MonetDataType.STRING, MonetDataType.STRING),*/
+
+    LOCAL_TIMEZONE("local_timezone", MonetDataType.SECOND_INTERVAL),
+
+    DATE_CENTURY("century", MonetDataType.INT, MonetDataType.DATE),
+    DATE_DECADE("decade", MonetDataType.INT, MonetDataType.DATE),
+    DATE_YEAR("year", MonetDataType.INT, MonetDataType.DATE),
+    DATE_QUARTER("quarter", MonetDataType.INT, MonetDataType.DATE),
+    DATE_MONTH("month", MonetDataType.INT, MonetDataType.DATE),
+    DATE_DAY("day", MonetDataType.INT, MonetDataType.DATE),
+    DATE_DAYOFYEAR("dayofyear", MonetDataType.INT, MonetDataType.DATE),
+    DATE_WEEKOFYEAR("weekofyear", MonetDataType.INT, MonetDataType.DATE),
+    DATE_DAYOFWEEK("dayofweek", MonetDataType.INT, MonetDataType.DATE),
+    DATE_DAYOFMONTH("dayofmonth", MonetDataType.INT, MonetDataType.DATE),
+    DATE_WEEK("week", MonetDataType.INT, MonetDataType.DATE),
+    TIME_HOUR("hour", MonetDataType.INT, MonetDataType.TIME),
+    TIME_MINUTE("minute", MonetDataType.INT, MonetDataType.TIME),
+    TIME_SECOND("second", MonetDataType.DECIMAL, MonetDataType.TIME),
+
+    TIMESTAMP_CENTURY("century", MonetDataType.INT, MonetDataType.TIMESTAMP),
+    TIMESTAMP_DECADE("decade", MonetDataType.INT, MonetDataType.TIMESTAMP),
+    TIMESTAMP_YEAR("year", MonetDataType.INT, MonetDataType.TIMESTAMP),
+    TIMESTAMP_QUARTER("quarter", MonetDataType.INT, MonetDataType.TIMESTAMP),
+    TIMESTAMP_MONTH("month", MonetDataType.INT, MonetDataType.TIMESTAMP),
+    TIMESTAMP_DAY("day", MonetDataType.INT, MonetDataType.TIMESTAMP),
+    TIMESTAMP_DAYOFYEAR("dayofyear", MonetDataType.INT, MonetDataType.TIMESTAMP),
+    TIMESTAMP_WEEKOFYEAR("weekofyear", MonetDataType.INT, MonetDataType.TIMESTAMP),
+    TIMESTAMP_DAYOFWEEK("dayofweek", MonetDataType.INT, MonetDataType.TIMESTAMP),
+    TIMESTAMP_DAYOFMONTH("dayofmonth", MonetDataType.INT, MonetDataType.TIMESTAMP),
+    TIMESTAMP_WEEK("week", MonetDataType.INT, MonetDataType.TIMESTAMP),
+    TIMESTAMP_HOUR("hour", MonetDataType.INT, MonetDataType.TIMESTAMP),
+    TIMESTAMP_MINUTE("minute", MonetDataType.INT, MonetDataType.TIMESTAMP),
+    TIMESTAMP_SECOND("second", MonetDataType.DECIMAL, MonetDataType.TIMESTAMP),
+
+    MONINT_YEAR("year", MonetDataType.INT, MonetDataType.MONTH_INTERVAL),
+    MONINT_MONTH("month", MonetDataType.INT, MonetDataType.MONTH_INTERVAL),
+    SECINT_DAY("day", MonetDataType.INT, MonetDataType.SECOND_INTERVAL),
+    SECINT_HOUR("hour", MonetDataType.INT, MonetDataType.SECOND_INTERVAL),
+    SECINT_MINUTE("minute", MonetDataType.INT, MonetDataType.SECOND_INTERVAL),
+    SECINT_SECOND("second", MonetDataType.INT, MonetDataType.SECOND_INTERVAL);
 
     private String functionName;
     private MonetDataType returnType;

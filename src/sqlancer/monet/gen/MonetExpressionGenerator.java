@@ -434,11 +434,11 @@ public class MonetExpressionGenerator {
         case DOUBLE:
             return MonetConstant.createDoubleConstant(r.getDouble());
         case TIME:
-            return MonetConstant.createTimeConstant(r.getIntegerBounded(100000));
+            return MonetConstant.createTimeConstant(r.getIntegerBounded(86400000));
         case TIMESTAMP:
-            return MonetConstant.createTimestampConstant(r.getIntegerBounded(1000000)); /* TODO find the max possible value */
+            return MonetConstant.createTimestampConstant(r.getIntegerBounded(2147483647)); /* TODO Java doesn't have Random.nextLong(long max) why?? */
         case DATE:
-            return MonetConstant.createDateConstant(r.getIntegerBounded(100000));
+            return MonetConstant.createDateConstant(r.getIntegerBounded(2147483647));
         case MONTH_INTERVAL:
             return MonetConstant.createMonthIntervalConstant(r.getInteger());
         case SECOND_INTERVAL:

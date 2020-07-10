@@ -47,7 +47,8 @@ public class MonetFunction implements MonetExpression {
 
             @Override
             public boolean supportsReturnType(MonetDataType type) {
-                return type == MonetDataType.INT || type == MonetDataType.REAL || type == MonetDataType.DOUBLE || type == MonetDataType.DECIMAL;
+                return type == MonetDataType.INT || type == MonetDataType.REAL || type == MonetDataType.DOUBLE || 
+                type == MonetDataType.DECIMAL || type == MonetDataType.MONTH_INTERVAL || type == MonetDataType.SECOND_INTERVAL;
             }
 
             @Override

@@ -18,11 +18,11 @@ public class MonetAggregate extends FunctionNode<MonetAggregateFunction, MonetEx
     private final boolean isDistinct;
 
     public enum MonetAggregateFunction {
-        AVG(MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL), 
+        AVG(MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL), 
         COUNT, MAX, MIN,
         LISTAGG(MonetDataType.STRING),
         GROUP_CONCAT(MonetDataType.STRING),
-        SUM(MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL),
+        SUM(MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL),
         PROD(MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL),
         STDDEV_SAMP(MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL),
         STDDEV_POP(MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL), 
