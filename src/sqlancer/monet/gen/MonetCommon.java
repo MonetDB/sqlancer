@@ -39,8 +39,7 @@ public final class MonetCommon {
         errors.add("doesn't have format (");
         errors.add("to type int failed");
         errors.add(" no columns of tables ");
-        errors.add("overflow in conversion of ");
-        errors.add("overflow in calculation ");
+        errors.add("overflow in ");
         errors.add("number of characters for insert function must be non negative");
         errors.add("Too many digits");
         errors.add("conversion of");
@@ -48,7 +47,6 @@ public final class MonetCommon {
         errors.add("Numerical argument out of domain");
         errors.add("value too large or not a number in:");
         errors.add("value exceeds limits of type int");
-        errors.add("overflow in calculation");
         errors.add("are not equal");
         errors.add("Numerical result out of range");
         errors.add("Argument 2 to round function must be positive");
