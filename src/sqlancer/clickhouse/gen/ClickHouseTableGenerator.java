@@ -11,12 +11,18 @@ import sqlancer.clickhouse.ClickHouseSchema.ClickHouseLancerDataType;
 
 public class ClickHouseTableGenerator {
 
+    StringBuilder sb = new StringBuilder("CREATE TABLE ");
+    Set<String> errors = new HashSet<>();
+
+    public ClickHouseTableGenerator() {
+        errors.add("Memory limit");
+        errors.add("Directory for table data");
+        errors.add("Directory not empty");
+    }
+
     private enum ClickHouseEngine {
         TinyLog, StripeLog, Log, Memory, MergeTree
     }
-
-    StringBuilder sb = new StringBuilder("CREATE TABLE ");
-    Set<String> errors = new HashSet<>();
 
     public Query getQuery(ClickHouseGlobalState globalState) {
         ClickHouseEngine engine = Randomly.fromOptions(ClickHouseEngine.values());
@@ -46,7 +52,7 @@ public class ClickHouseTableGenerator {
             sb.append(" ORDER BY tuple()");
         }
         sb.append(";");
-        return new QueryAdapter(sb.toString(), errors);
+        return new QueryAdapter(sb.toString(), errors, true);
     }
 
     private void potentiallyAppendCodec() {

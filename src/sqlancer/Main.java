@@ -158,16 +158,29 @@ public final class Main {
         }
 
         public void writeCurrent(String queryString) {
+            write(queryString, "\n");
+        }
+
+        private void write(String queryString, String suffix) {
             if (!logEachSelect) {
                 throw new UnsupportedOperationException();
             }
             try {
-                getCurrentFileWriter().write(queryString + ";\n");
+                getCurrentFileWriter().write(queryString);
+                if (!queryString.endsWith(";")) {
+                    getCurrentFileWriter().write(';');
+                }
+                if (suffix != null && suffix.length() != 0) {
+                    getCurrentFileWriter().write(suffix);
+                }
                 currentFileWriter.flush();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw new AssertionError();
             }
+        }
+
+        public void writeCurrentNoLineBreak(String queryString) {
+            write(queryString, "");
         }
 
         public void logRowNotFound(StateToReproduce state) {
@@ -235,9 +248,9 @@ public final class Main {
 
     public static class QueryManager {
 
-        private final GlobalState<?> globalState;
+        private final GlobalState<?, ?> globalState;
 
-        QueryManager(GlobalState<?> globalState) {
+        QueryManager(GlobalState<?, ?> globalState) {
             this.globalState = globalState;
         }
 
@@ -268,7 +281,7 @@ public final class Main {
         System.exit(executeMain(args));
     }
 
-    public static class DBMSExecutor<G extends GlobalState<O>, O> {
+    public static class DBMSExecutor<G extends GlobalState<O, ?>, O> {
 
         private final DatabaseProvider<G, O> provider;
         private final MainOptions options;
@@ -321,7 +334,16 @@ public final class Main {
                 state.setConnection(con);
                 state.setStateLogger(logger);
                 state.setManager(manager);
+                if (options.logEachSelect()) {
+                    logger.writeCurrent(state.getState());
+                }
                 provider.generateAndTestDatabase(state);
+                try {
+                    logger.getCurrentFileWriter().close();
+                    logger.currentFileWriter = null;
+                } catch (IOException e) {
+                    throw new AssertionError(e);
+                }
             }
         }
 
@@ -334,7 +356,7 @@ public final class Main {
         }
     }
 
-    public static class DBMSExecutorFactory<G extends GlobalState<O>, O> {
+    public static class DBMSExecutorFactory<G extends GlobalState<O, ?>, O> {
 
         private final DatabaseProvider<G, O> provider;
         private final MainOptions options;
@@ -394,6 +416,30 @@ public final class Main {
 
         if (options.printProgressInformation()) {
             startProgressMonitor();
+            if (options.printProgressSummary()) {
+                Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        System.out.println("Overall execution statistics");
+                        System.out.println("============================");
+                        System.out.println(formatInteger(nrQueries.get()) + " queries");
+                        System.out.println(formatInteger(nrDatabases.get()) + " databases");
+                        System.out.println(
+                                formatInteger(nrSuccessfulActions.get()) + " successfully-executed statements");
+                        System.out.println(
+                                formatInteger(nrUnsuccessfulActions.get()) + " unsuccessfuly-executed statements");
+                    }
+
+                    private String formatInteger(long intValue) {
+                        if (intValue > 1000) {
+                            return String.format("%,9dk", intValue / 1000);
+                        } else {
+                            return String.format("%,10d", intValue);
+                        }
+                    }
+                }));
+            }
         }
 
         ExecutorService execService = Executors.newFixedThreadPool(options.getNumberConcurrentThreads());
@@ -416,33 +462,54 @@ public final class Main {
                 }
 
                 private void runThread(final String databaseName) {
-                    while (true) {
-                        DBMSExecutor<?, ?> executor = executorFactory.getDBMSExecutor(databaseName, seed);
-                        try {
-                            executor.run();
-                        } catch (IgnoreMeException e) {
-                            continue;
-                        } catch (Throwable reduce) {
-                            reduce.printStackTrace();
-                            executor.getStateToReproduce().exception = reduce.getMessage();
-                            executor.getLogger().logFileWriter = null;
-                            executor.getLogger().logException(reduce, executor.getStateToReproduce());
-                            threadsShutdown++;
-                            break;
-                        } finally {
-                            try {
-                                if (options.logEachSelect()) {
-                                    if (executor.getLogger().currentFileWriter != null) {
-                                        executor.getLogger().currentFileWriter.close();
-                                    }
-                                    executor.getLogger().currentFileWriter = null;
+                    try {
+                        if (options.getMaxGeneratedDatabases() == -1) {
+                            // run without a limit
+                            boolean continueRunning = true;
+                            while (continueRunning) {
+                                continueRunning = run(options, execService, executorFactory, seed, databaseName);
+                            }
+                        } else {
+                            for (int i = 0; i < options.getMaxGeneratedDatabases(); i++) {
+                                boolean continueRunning = run(options, execService, executorFactory, seed,
+                                        databaseName);
+                                if (!continueRunning) {
+                                    break;
                                 }
-                            } catch (IOException e) {
-                                e.printStackTrace();
                             }
-                            if (threadsShutdown == options.getTotalNumberTries()) {
-                                execService.shutdown();
+                        }
+                    } finally {
+                        threadsShutdown++;
+                        if (threadsShutdown == options.getTotalNumberTries()) {
+                            execService.shutdown();
+                        }
+                    }
+                }
+
+                private boolean run(MainOptions options, ExecutorService execService,
+                        DBMSExecutorFactory<?, ?> executorFactory, final long seed, final String databaseName) {
+                    DBMSExecutor<?, ?> executor = executorFactory.getDBMSExecutor(databaseName, seed);
+                    try {
+                        executor.run();
+                        return true;
+                    } catch (IgnoreMeException e) {
+                        return true;
+                    } catch (Throwable reduce) {
+                        reduce.printStackTrace();
+                        executor.getStateToReproduce().exception = reduce.getMessage();
+                        executor.getLogger().logFileWriter = null;
+                        executor.getLogger().logException(reduce, executor.getStateToReproduce());
+                        return false;
+                    } finally {
+                        try {
+                            if (options.logEachSelect()) {
+                                if (executor.getLogger().currentFileWriter != null) {
+                                    executor.getLogger().currentFileWriter.close();
+                                }
+                                executor.getLogger().currentFileWriter = null;
                             }
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
                     }
                 }
@@ -457,6 +524,7 @@ public final class Main {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
         return threadsShutdown == 0 ? 0 : options.getErrorExitCode();
     }
 

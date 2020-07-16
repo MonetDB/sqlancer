@@ -21,15 +21,34 @@ public class QueryAdapter extends Query {
     }
 
     public QueryAdapter(String query, Collection<String> expectedErrors) {
-        this.query = query;
+        this.query = canonicalizeString(query);
         this.expectedErrors = expectedErrors;
         this.couldAffectSchema = false;
+        checkQueryString();
     }
 
     public QueryAdapter(String query, Collection<String> expectedErrors, boolean couldAffectSchema) {
-        this.query = query;
+        this.query = canonicalizeString(query);
         this.expectedErrors = expectedErrors;
         this.couldAffectSchema = couldAffectSchema;
+        checkQueryString();
+    }
+
+    private String canonicalizeString(String s) {
+        if (s.endsWith(";")) {
+            return s;
+        } else if (!s.contains("--")) {
+            return s + ";";
+        } else {
+            // query contains a comment
+            return s;
+        }
+    }
+
+    private void checkQueryString() {
+        if (query.contains("CREATE TABLE") && !couldAffectSchema) {
+            throw new AssertionError("CREATE TABLE statements should set couldAffectSchema to true");
+        }
     }
 
     @Override
@@ -38,7 +57,7 @@ public class QueryAdapter extends Query {
     }
 
     @Override
-    public boolean execute(GlobalState<?> globalState) throws SQLException {
+    public boolean execute(GlobalState<?, ?> globalState) throws SQLException {
         try (Statement s = globalState.getConnection().createStatement()) {
             s.execute(query);
             Main.nrSuccessfulActions.addAndGet(1);
@@ -64,7 +83,7 @@ public class QueryAdapter extends Query {
     }
 
     @Override
-    public ResultSet executeAndGet(GlobalState<?> globalState) throws SQLException {
+    public ResultSet executeAndGet(GlobalState<?, ?> globalState) throws SQLException {
         Statement s = globalState.getConnection().createStatement();
         ResultSet result = null;
         try {

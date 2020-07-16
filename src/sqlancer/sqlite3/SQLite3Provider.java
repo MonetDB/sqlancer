@@ -2,7 +2,6 @@ package sqlancer.sqlite3;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -12,11 +11,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import sqlancer.AbstractAction;
 import sqlancer.GlobalState;
 import sqlancer.IgnoreMeException;
-import sqlancer.Main.QueryManager;
-import sqlancer.Main.StateLogger;
-import sqlancer.MainOptions;
 import sqlancer.ProviderAdapter;
 import sqlancer.Query;
 import sqlancer.QueryAdapter;
@@ -24,6 +21,7 @@ import sqlancer.QueryProvider;
 import sqlancer.Randomly;
 import sqlancer.StateToReproduce;
 import sqlancer.StateToReproduce.SQLite3StateToReproduce;
+import sqlancer.StatementExecutor;
 import sqlancer.TestOracle;
 import sqlancer.sqlite3.SQLite3Provider.SQLite3GlobalState;
 import sqlancer.sqlite3.gen.SQLite3AnalyzeGenerator;
@@ -56,11 +54,6 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
     public static boolean allowFloatingPointFp = true;
     public static boolean mustKnowResult;
 
-    private SQLite3StateToReproduce state;
-    private String databaseName;
-
-    private SQLite3GlobalState globalState;
-
     // PRAGMAS to achieve good performance
     private static final List<String> DEFAULT_PRAGMAS = Arrays.asList("PRAGMA cache_size = 50000;",
             "PRAGMA temp_store=MEMORY;", "PRAGMA synchronous=off;");
@@ -69,7 +62,7 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
         super(SQLite3GlobalState.class, SQLite3Options.class);
     }
 
-    public enum Action {
+    public enum Action implements AbstractAction<SQLite3GlobalState> {
         PRAGMA(SQLite3PragmaGenerator::insertPragma), //
         INDEX(SQLite3IndexGenerator::insertIndex), //
         INSERT(SQLite3InsertGenerator::insertRow), //
@@ -77,12 +70,28 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
         REINDEX(SQLite3ReindexGenerator::executeReindex), //
         ANALYZE(SQLite3AnalyzeGenerator::generateAnalyze), //
         DELETE(SQLite3DeleteGenerator::deleteContent), //
-        TRANSACTION_START(SQLite3TransactionGenerator::generateBeginTransaction), //
+        TRANSACTION_START(SQLite3TransactionGenerator::generateBeginTransaction) {
+            @Override
+            public boolean canBeRetried() {
+                return false;
+            }
+
+        }, //
         ALTER(SQLite3AlterTable::alterTable), //
         DROP_INDEX(SQLite3DropIndexGenerator::dropIndex), //
         UPDATE(SQLite3UpdateGenerator::updateRow), //
-        ROLLBACK_TRANSACTION(SQLite3TransactionGenerator::generateRollbackTransaction), //
-        COMMIT(SQLite3TransactionGenerator::generateCommit), //
+        ROLLBACK_TRANSACTION(SQLite3TransactionGenerator::generateRollbackTransaction) {
+            @Override
+            public boolean canBeRetried() {
+                return false;
+            }
+        }, //
+        COMMIT(SQLite3TransactionGenerator::generateCommit) {
+            @Override
+            public boolean canBeRetried() {
+                return false;
+            }
+        }, //
         DROP_TABLE(SQLite3DropTableGenerator::dropTable), //
         DROP_VIEW(SQLite3ViewGenerator::dropView), //
         EXPLAIN(SQLite3ExplainGenerator::explain), //
@@ -155,30 +164,17 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
             this.queryProvider = queryProvider;
         }
 
+        @Override
         public Query getQuery(SQLite3GlobalState state) throws SQLException {
             return queryProvider.getQuery(state);
         }
     }
 
-    public static class SQLite3GlobalState extends GlobalState<SQLite3Options> {
+    public static class SQLite3GlobalState extends GlobalState<SQLite3Options, SQLite3Schema> {
 
-        private SQLite3Schema schema;
-        private SQLite3Options sqliteOptions;
-
-        public SQLite3Schema getSchema() {
-            return schema;
-        }
-
-        public void setSchema(SQLite3Schema schema) {
-            this.schema = schema;
-        }
-
-        public void setSqliteOptions(SQLite3Options sqliteOptions) {
-            this.sqliteOptions = sqliteOptions;
-        }
-
-        public SQLite3Options getSqliteOptions() {
-            return sqliteOptions;
+        @Override
+        protected void updateSchema() throws SQLException {
+            setSchema(SQLite3Schema.fromConnection(this));
         }
 
     }
@@ -187,19 +183,62 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
         NORMAL, FTS, RTREE
     }
 
+    private static int mapActions(SQLite3GlobalState globalState, Action a) {
+        int nrPerformed = 0;
+        Randomly r = globalState.getRandomly();
+        switch (a) {
+        case CREATE_VIEW:
+            nrPerformed = r.getInteger(0, 2);
+            break;
+        case DELETE:
+        case DROP_VIEW:
+        case DROP_INDEX:
+            nrPerformed = r.getInteger(0, 0);
+            break;
+        case ALTER:
+            nrPerformed = r.getInteger(0, 0);
+            break;
+        case EXPLAIN:
+        case CREATE_TRIGGER:
+        case DROP_TABLE:
+            nrPerformed = r.getInteger(0, 0);
+            break;
+        case VACUUM:
+        case CHECK_RTREE_TABLE:
+            nrPerformed = r.getInteger(0, 3);
+            break;
+        case INSERT:
+            nrPerformed = r.getInteger(0, globalState.getOptions().getMaxNumberInserts());
+            break;
+        case MANIPULATE_STAT_TABLE:
+            nrPerformed = r.getInteger(0, 5);
+            break;
+        case INDEX:
+            nrPerformed = r.getInteger(0, 5);
+            break;
+        case VIRTUAL_TABLE_ACTION:
+        case UPDATE:
+            nrPerformed = r.getInteger(0, 30);
+            break;
+        case PRAGMA:
+            nrPerformed = r.getInteger(0, 20);
+            break;
+        case TRANSACTION_START:
+        case REINDEX:
+        case ANALYZE:
+        case ROLLBACK_TRANSACTION:
+        case COMMIT:
+        default:
+            nrPerformed = r.getInteger(1, 10);
+            break;
+        }
+        return nrPerformed;
+    }
+
     @Override
-    public void generateAndTestDatabase(SQLite3GlobalState globalState) throws SQLException {
-        this.globalState = globalState;
-        SQLite3Options sqliteOptions = globalState.getDmbsSpecificOptions();
-        QueryManager manager = globalState.getManager();
-        MainOptions options = globalState.getOptions();
-        this.databaseName = globalState.getDatabaseName();
+    public void generateDatabase(SQLite3GlobalState globalState) throws SQLException {
         Randomly r = new Randomly(SQLite3SpecialStringGenerator::generate);
-        globalState.setSqliteOptions(sqliteOptions);
         globalState.setRandomly(r);
-        StateLogger logger = globalState.getLogger();
-        this.state = (SQLite3StateToReproduce) globalState.getState();
-        globalState.setState(state);
         if (globalState.getDmbsSpecificOptions().generateDatabase) {
 
             addSensiblePragmaDefaults(globalState);
@@ -212,128 +251,37 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
             }
             int i = 0;
 
-            globalState.setSchema(SQLite3Schema.fromConnection(globalState));
             do {
-                Query tableQuery = getTableQuery(r, i++);
-                executeStatement(globalState, manager, tableQuery);
-                globalState.setSchema(SQLite3Schema.fromConnection(globalState));
-            } while (globalState.getSchema().getDatabaseTables().size() != nrTablesToCreate);
+                Query tableQuery = getTableQuery(globalState, i++);
+                globalState.executeStatement(tableQuery);
+            } while (globalState.getSchema().getDatabaseTables().size() < nrTablesToCreate);
             assert globalState.getSchema().getTables().getTables().size() == nrTablesToCreate;
             checkTablesForGeneratedColumnLoops(globalState);
             if (globalState.getDmbsSpecificOptions().testDBStats && Randomly.getBooleanWithSmallProbability()) {
                 QueryAdapter tableQuery = new QueryAdapter(
                         "CREATE VIRTUAL TABLE IF NOT EXISTS stat USING dbstat(main)");
-                executeStatement(globalState, manager, tableQuery);
-                globalState.setSchema(SQLite3Schema.fromConnection(globalState));
+                globalState.executeStatement(tableQuery);
             }
-            int[] nrRemaining = new int[Action.values().length];
-            List<Action> actions = new ArrayList<>();
-            int total = 0;
-            for (i = 0; i < Action.values().length; i++) {
-                Action action = Action.values()[i];
-                int nrPerformed = 0;
-                switch (action) {
-                case CREATE_VIEW:
-                    nrPerformed = r.getInteger(0, 2);
-                    break;
-                case DELETE:
-                case DROP_VIEW:
-                case DROP_INDEX:
-                    nrPerformed = r.getInteger(0, 0);
-                    break;
-                case ALTER:
-                    nrPerformed = r.getInteger(0, 0);
-                    break;
-                case EXPLAIN:
-                case CREATE_TRIGGER:
-                case DROP_TABLE:
-                    nrPerformed = r.getInteger(0, 0);
-                    break;
-                case VACUUM:
-                case CHECK_RTREE_TABLE:
-                    nrPerformed = r.getInteger(0, 3);
-                    break;
-                case INSERT:
-                    nrPerformed = r.getInteger(0, options.getMaxNumberInserts());
-                    break;
-                case MANIPULATE_STAT_TABLE:
-                    nrPerformed = r.getInteger(0, 5);
-                    break;
-                case INDEX:
-                    nrPerformed = r.getInteger(0, 5);
-                    break;
-                case VIRTUAL_TABLE_ACTION:
-                case UPDATE:
-                    nrPerformed = r.getInteger(0, 30);
-                    break;
-                case PRAGMA:
-                    nrPerformed = r.getInteger(0, 20);
-                    break;
-                case TRANSACTION_START:
-                case REINDEX:
-                case ANALYZE:
-                case ROLLBACK_TRANSACTION:
-                case COMMIT:
-                default:
-                    nrPerformed = r.getInteger(1, 10);
-                    break;
-                }
-                if (nrPerformed != 0) {
-                    actions.add(action);
-                }
-                nrRemaining[action.ordinal()] = nrPerformed;
-                total += nrPerformed;
-            }
+            StatementExecutor<SQLite3GlobalState, Action> se = new StatementExecutor<>(globalState, Action.values(),
+                    SQLite3Provider::mapActions, (q) -> {
+                        if (q.couldAffectSchema() && globalState.getSchema().getDatabaseTables().isEmpty()) {
+                            throw new IgnoreMeException();
+                        }
+                    });
+            se.executeStatements();
 
-            if (options.logEachSelect()) {
-                logger.writeCurrent(state);
-            }
-
-            while (total != 0) {
-                Action nextAction = null;
-                int selection = r.getInteger(0, total);
-                int previousRange = 0;
-                for (i = 0; i < nrRemaining.length; i++) {
-                    if (previousRange <= selection && selection < previousRange + nrRemaining[i]) {
-                        nextAction = Action.values()[i];
-                        break;
-                    } else {
-                        previousRange += nrRemaining[i];
-                    }
-                }
-                assert nextAction != null;
-                assert nrRemaining[nextAction.ordinal()] > 0;
-                nrRemaining[nextAction.ordinal()]--;
-                Query query = null;
-                try {
-                    query = nextAction.getQuery(globalState);
-                    if (options.logEachSelect()) {
-                        logger.writeCurrent(query.getQueryString());
-                    }
-                    executeStatement(globalState, manager, query);
-                } catch (IgnoreMeException e) {
-
-                }
-                if (query != null && query.couldAffectSchema()) {
-                    globalState.setSchema(SQLite3Schema.fromConnection(globalState));
-                    if (globalState.getSchema().getDatabaseTables().isEmpty()) {
-                        throw new IgnoreMeException();
-                    }
-                }
-                total--;
-            }
             Query query = SQLite3TransactionGenerator.generateCommit(globalState);
-            executeStatement(globalState, manager, query);
+            globalState.executeStatement(query);
 
             // also do an abort for DEFERRABLE INITIALLY DEFERRED
             query = SQLite3TransactionGenerator.generateRollbackTransaction(globalState);
-            executeStatement(globalState, manager, query);
-            globalState.setSchema(SQLite3Schema.fromConnection(globalState));
-            manager.incrementCreateDatabase();
-        } else {
-            globalState.setSchema(SQLite3Schema.fromConnection(globalState));
+            globalState.executeStatement(query);
         }
-        TestOracle oracle = globalState.getSqliteOptions().oracle.create(globalState);
+    }
+
+    @Override
+    protected TestOracle getTestOracle(SQLite3GlobalState globalState) throws SQLException {
+        TestOracle oracle = globalState.getDmbsSpecificOptions().oracle.create(globalState);
         if (oracle.onlyWorksForNonEmptyTables()) {
             for (SQLite3Table table : globalState.getSchema().getDatabaseTables()) {
                 int nrRows = SQLite3Schema.getNrRows(globalState, table.getName());
@@ -342,38 +290,7 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
                 }
             }
         }
-        for (int i = 0; i < options.getNrQueries(); i++) {
-            try {
-                oracle.check();
-                manager.incrementSelectQueryCount();
-            } catch (IgnoreMeException e) {
-
-            }
-        }
-        try {
-            if (options.logEachSelect()) {
-                logger.getCurrentFileWriter().close();
-                logger.currentFileWriter = null;
-            }
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        if (globalState.getDmbsSpecificOptions().exitAfterFirstDatabase) {
-            System.exit(0);
-        }
-    }
-
-    private void executeStatement(SQLite3GlobalState globalState, QueryManager manager, Query tableQuery)
-            throws SQLException {
-        manager.execute(tableQuery);
-        if (globalState.getDmbsSpecificOptions().printStatements) {
-            String s = tableQuery.getQueryString();
-            if (!s.endsWith(";")) {
-                s = s + ";";
-            }
-            System.out.println(s);
-        }
+        return oracle;
     }
 
     private void checkTablesForGeneratedColumnLoops(SQLite3GlobalState globalState) throws SQLException {
@@ -388,13 +305,13 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
         }
     }
 
-    private Query getTableQuery(Randomly r, int i) throws AssertionError {
+    private Query getTableQuery(SQLite3GlobalState globalState, int i) throws AssertionError {
         Query tableQuery;
         List<TableType> options = new ArrayList<>(Arrays.asList(TableType.values()));
-        if (!globalState.getSqliteOptions().testFts) {
+        if (!globalState.getDmbsSpecificOptions().testFts) {
             options.remove(TableType.FTS);
         }
-        if (!globalState.getSqliteOptions().testRtree) {
+        if (!globalState.getDmbsSpecificOptions().testRtree) {
             options.remove(TableType.RTREE);
         }
         switch (Randomly.fromList(options)) {
@@ -404,7 +321,8 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
             break;
         case FTS:
             String ftsTableName = "v" + SQLite3Common.createTableName(i);
-            tableQuery = SQLite3CreateVirtualFTSTableGenerator.createTableStatement(ftsTableName, r);
+            tableQuery = SQLite3CreateVirtualFTSTableGenerator.createTableStatement(ftsTableName,
+                    globalState.getRandomly());
             break;
         case RTREE:
             String rTreeTableName = "rt" + i;
@@ -429,12 +347,7 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
                     Randomly.fromOptions("UTF-8", "UTF-16", "UTF-16le", "UTF-16be")));
         }
         for (String s : pragmasToExecute) {
-            if (globalState.getDmbsSpecificOptions().printStatements) {
-                System.out.println(s);
-            }
-            Query q = new QueryAdapter(s);
-            state.statements.add(q);
-            q.execute(globalState);
+            globalState.executeStatement(new QueryAdapter(s));
         }
     }
 
@@ -455,11 +368,6 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
     @Override
     public String getDBMSName() {
         return "sqlite3";
-    }
-
-    @Override
-    public String toString() {
-        return String.format("SQLite3Provider [database: %s]", databaseName);
     }
 
     @Override

@@ -12,11 +12,7 @@ import java.util.stream.Collectors;
 
 import sqlancer.AbstractAction;
 import sqlancer.CompositeTestOracle;
-import sqlancer.GlobalState;
 import sqlancer.IgnoreMeException;
-import sqlancer.Main.QueryManager;
-import sqlancer.Main.StateLogger;
-import sqlancer.MainOptions;
 import sqlancer.ProviderAdapter;
 import sqlancer.Query;
 import sqlancer.QueryAdapter;
@@ -72,21 +68,11 @@ public final class PostgresProvider extends ProviderAdapter<PostgresGlobalState,
         COMMIT(g -> {
             Query query;
             if (Randomly.getBoolean()) {
-                query = new QueryAdapter("COMMIT") {
-                    @Override
-                    public boolean couldAffectSchema() {
-                        return true;
-                    }
-                };
+                query = new QueryAdapter("COMMIT", true);
             } else if (Randomly.getBoolean()) {
                 query = PostgresTransactionGenerator.executeBegin();
             } else {
-                query = new QueryAdapter("ROLLBACK") {
-                    @Override
-                    public boolean couldAffectSchema() {
-                        return true;
-                    }
-                };
+                query = new QueryAdapter("ROLLBACK", true);
             }
             return query;
         }), //
@@ -195,27 +181,13 @@ public final class PostgresProvider extends ProviderAdapter<PostgresGlobalState,
     }
 
     @Override
-    public void generateAndTestDatabase(PostgresGlobalState globalState) throws SQLException {
-        MainOptions options = globalState.getOptions();
-        StateLogger logger = globalState.getLogger();
-        StateToReproduce state = globalState.getState();
-        String databaseName = globalState.getDatabaseName();
-        Connection con = globalState.getConnection();
-        QueryManager manager = globalState.getManager();
-        if (options.logEachSelect()) {
-            logger.writeCurrent(state);
-        }
-        globalState.setSchema(PostgresSchema.fromConnection(con, databaseName));
-        while (globalState.getSchema().getDatabaseTables().size() < 1) {
+    public void generateDatabase(PostgresGlobalState globalState) throws SQLException {
+        while (globalState.getSchema().getDatabaseTables().size() < Randomly.fromOptions(1, 2)) {
             try {
                 String tableName = SQLite3Common.createTableName(globalState.getSchema().getDatabaseTables().size());
                 Query createTable = PostgresTableGenerator.generate(tableName, globalState.getSchema(),
                         generateOnlyKnown, globalState);
-                if (options.logEachSelect()) {
-                    logger.writeCurrent(createTable.getQueryString());
-                }
-                manager.execute(createTable);
-                globalState.setSchema(PostgresSchema.fromConnection(con, databaseName));
+                globalState.executeStatement(createTable);
             } catch (IgnoreMeException e) {
 
             }
@@ -223,30 +195,17 @@ public final class PostgresProvider extends ProviderAdapter<PostgresGlobalState,
 
         StatementExecutor<PostgresGlobalState, Action> se = new StatementExecutor<>(globalState, Action.values(),
                 PostgresProvider::mapActions, (q) -> {
-                    if (q.couldAffectSchema()) {
-                        globalState.setSchema(PostgresSchema.fromConnection(con, databaseName));
-                    }
                     if (globalState.getSchema().getDatabaseTables().isEmpty()) {
                         throw new IgnoreMeException();
                     }
                 });
-        // TODO: transactions broke during refactoring
-        // catch (Throwable t) {
-        // if (t.getMessage().contains("current transaction is aborted")) {
-        // manager.execute(new QueryAdapter("ABORT"));
-        // globalState.setSchema(PostgresSchema.fromConnection(con, databaseName));
-        // } else {
-        // System.err.println(query.getQueryString());
-        // throw t;
-        // }
-        // }
         se.executeStatements();
-        manager.incrementCreateDatabase();
-        manager.execute(new QueryAdapter("COMMIT"));
-        globalState.setSchema(PostgresSchema.fromConnection(con, databaseName));
+        globalState.executeStatement(new QueryAdapter("COMMIT", true));
+        globalState.executeStatement(new QueryAdapter("SET SESSION statement_timeout = 5000;\n"));
+    }
 
-        manager.execute(new QueryAdapter("SET SESSION statement_timeout = 5000;\n"));
-
+    @Override
+    protected TestOracle getTestOracle(PostgresGlobalState globalState) throws SQLException {
         List<TestOracle> oracles = globalState.getDmbsSpecificOptions().oracle.stream().map(o -> {
             try {
                 return o.create(globalState);
@@ -254,17 +213,7 @@ public final class PostgresProvider extends ProviderAdapter<PostgresGlobalState,
                 throw new AssertionError(e1);
             }
         }).collect(Collectors.toList());
-        CompositeTestOracle oracle = new CompositeTestOracle(oracles);
-
-        for (int i = 0; i < options.getNrQueries(); i++) {
-            try {
-                oracle.check();
-            } catch (IgnoreMeException e) {
-                continue;
-            }
-            manager.incrementSelectQueryCount();
-        }
-
+        return new CompositeTestOracle(oracles);
     }
 
     @Override
@@ -290,7 +239,7 @@ public final class PostgresProvider extends ProviderAdapter<PostgresGlobalState,
         return con;
     }
 
-    private String getCreateDatabaseCommand(String databaseName, Connection con, GlobalState<?> state) {
+    private String getCreateDatabaseCommand(String databaseName, Connection con, PostgresGlobalState state) {
         StringBuilder sb = new StringBuilder();
         sb.append("CREATE DATABASE " + databaseName + " ");
         if (Randomly.getBoolean() && ((PostgresOptions) state.getDmbsSpecificOptions()).testCollations) {

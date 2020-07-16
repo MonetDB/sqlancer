@@ -12,9 +12,6 @@ import java.util.stream.Collectors;
 
 import sqlancer.AbstractAction;
 import sqlancer.IgnoreMeException;
-import sqlancer.Main.QueryManager;
-import sqlancer.Main.StateLogger;
-import sqlancer.MainOptions;
 import sqlancer.ProviderAdapter;
 import sqlancer.Query;
 import sqlancer.QueryAdapter;
@@ -45,9 +42,6 @@ import sqlancer.mysql.oracle.MySQLTLPWhereOracle;
 import sqlancer.sqlite3.gen.SQLite3Common;
 
 public class MySQLProvider extends ProviderAdapter<MySQLGlobalState, MySQLOptions> {
-
-    private QueryManager manager;
-    private String databaseName;
 
     public MySQLProvider() {
         super(MySQLGlobalState.class, MySQLOptions.class);
@@ -148,87 +142,27 @@ public class MySQLProvider extends ProviderAdapter<MySQLGlobalState, MySQLOption
     }
 
     @Override
-    public void generateAndTestDatabase(MySQLGlobalState globalState) throws SQLException {
-        this.databaseName = globalState.getDatabaseName();
-        this.manager = globalState.getManager();
-        Connection con = globalState.getConnection();
-        MainOptions options = globalState.getOptions();
-        StateLogger logger = globalState.getLogger();
-        StateToReproduce state = globalState.getState();
+    public void generateDatabase(MySQLGlobalState globalState) throws SQLException {
         Randomly r = globalState.getRandomly();
-        globalState.setSchema(MySQLSchema.fromConnection(con, databaseName));
-        if (options.logEachSelect()) {
-            logger.writeCurrent(state);
-        }
-
         while (globalState.getSchema().getDatabaseTables().size() < Randomly.smallNumber() + 1) {
             String tableName = SQLite3Common.createTableName(globalState.getSchema().getDatabaseTables().size());
             Query createTable = MySQLTableGenerator.generate(tableName, r, globalState.getSchema());
-            if (options.logEachSelect()) {
-                logger.writeCurrent(createTable.getQueryString());
-            }
-            manager.execute(createTable);
-            globalState.setSchema(MySQLSchema.fromConnection(con, databaseName));
+            globalState.executeStatement(createTable);
         }
 
         StatementExecutor<MySQLGlobalState, Action> se = new StatementExecutor<>(globalState, Action.values(),
                 MySQLProvider::mapActions, (q) -> {
-                    if (q.couldAffectSchema()) {
-                        globalState.setSchema(MySQLSchema.fromConnection(con, databaseName));
-                    }
                     if (globalState.getSchema().getDatabaseTables().isEmpty()) {
                         throw new IgnoreMeException();
                     }
                 });
         se.executeStatements();
-        manager.incrementCreateDatabase();
-
-        // for (MySQLTable t : globalState.getSchema().getDatabaseTables()) {
-        // if (!ensureTableHasRows(con, t, r)) {
-        // return;
-        // }
-        // }
-
-        globalState.setSchema(MySQLSchema.fromConnection(con, databaseName));
-
-        TestOracle oracle = new MySQLTLPWhereOracle(globalState);
-        for (int i = 0; i < options.getNrQueries(); i++) {
-            try {
-                oracle.check();
-                manager.incrementSelectQueryCount();
-            } catch (IgnoreMeException e) {
-
-            }
-        }
-
-        // MySQLQueryGenerator queryGenerator = new MySQLQueryGenerator(manager, r, con, databaseName);
-        // for (int i = 0; i < options.getNrQueries(); i++) {
-        // try {
-        // queryGenerator.generateAndCheckQuery((MySQLStateToReproduce) state, logger, options);
-        // } catch (IgnoreMeException e) {
-        //
-        // }
-        // manager.incrementSelectQueryCount();
-        // }
-
     }
 
-    // private boolean ensureTableHasRows(Connection con, MySQLTable randomTable, Randomly r) throws SQLException {
-    // int nrRows;
-    // int counter = 1;
-    // do {
-    // try {
-    // Query q = MySQLRowInserter.insertRow(randomTable, r);
-    // manager.execute(q);
-    // } catch (SQLException e) {
-    // if (!SQLite3PivotedQuerySynthesizer.shouldIgnoreException(e)) {
-    // throw new AssertionError(e);
-    // }
-    // }
-    // nrRows = getNrRows(con, randomTable);
-    // } while (nrRows == 0 && counter-- != 0);
-    // return nrRows != 0;
-    // }
+    @Override
+    protected TestOracle getTestOracle(MySQLGlobalState globalState) throws SQLException {
+        return new MySQLTLPWhereOracle(globalState); // FIXME: options for the other test oracles
+    }
 
     public static int getNrRows(Connection con, MySQLTable table) throws SQLException {
         try (Statement s = con.createStatement()) {
@@ -263,11 +197,6 @@ public class MySQLProvider extends ProviderAdapter<MySQLGlobalState, MySQLOption
     @Override
     public String getDBMSName() {
         return "mysql";
-    }
-
-    @Override
-    public String toString() {
-        return String.format("MySQLProvider [database: %s]", databaseName);
     }
 
     @Override

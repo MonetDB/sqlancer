@@ -1,6 +1,5 @@
 package sqlancer.duckdb;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -12,8 +11,6 @@ import sqlancer.AbstractAction;
 import sqlancer.CompositeTestOracle;
 import sqlancer.GlobalState;
 import sqlancer.IgnoreMeException;
-import sqlancer.Main.QueryManager;
-import sqlancer.Main.StateLogger;
 import sqlancer.ProviderAdapter;
 import sqlancer.Query;
 import sqlancer.QueryAdapter;
@@ -92,82 +89,45 @@ public class DuckDBProvider extends ProviderAdapter<DuckDBGlobalState, DuckDBOpt
         }
     }
 
-    public static class DuckDBGlobalState extends GlobalState<DuckDBOptions> {
+    public static class DuckDBGlobalState extends GlobalState<DuckDBOptions, DuckDBSchema> {
 
-        private DuckDBSchema schema;
-
-        public void setSchema(DuckDBSchema schema) {
-            this.schema = schema;
-        }
-
-        public DuckDBSchema getSchema() {
-            return schema;
+        @Override
+        protected void updateSchema() throws SQLException {
+            setSchema(DuckDBSchema.fromConnection(getConnection(), getDatabaseName()));
         }
 
     }
 
     @Override
-    public void generateAndTestDatabase(DuckDBGlobalState globalState) throws SQLException {
-        StateLogger logger = globalState.getLogger();
-        QueryManager manager = globalState.getManager();
-        globalState.setSchema(DuckDBSchema.fromConnection(globalState.getConnection(), globalState.getDatabaseName()));
-        if (globalState.getOptions().logEachSelect()) {
-            globalState.getLogger().writeCurrent(globalState.getState());
-        }
+    public void generateDatabase(DuckDBGlobalState globalState) throws SQLException {
         for (int i = 0; i < Randomly.fromOptions(1, 2); i++) {
             boolean success = false;
             do {
                 Query qt = new DuckDBTableGenerator().getQuery(globalState);
-                if (globalState.getOptions().logEachSelect()) {
-                    globalState.getLogger().writeCurrent(qt.getQueryString());
-                }
-                success = manager.execute(qt);
-                globalState.setSchema(
-                        DuckDBSchema.fromConnection(globalState.getConnection(), globalState.getDatabaseName()));
+                success = globalState.executeStatement(qt);
             } while (!success);
         }
-        if (globalState.getSchema().getDatabaseTables().size() == 0) {
+        if (globalState.getSchema().getDatabaseTables().isEmpty()) {
             throw new IgnoreMeException(); // TODO
         }
         StatementExecutor<DuckDBGlobalState, Action> se = new StatementExecutor<>(globalState, Action.values(),
                 DuckDBProvider::mapActions, (q) -> {
-                    if (q.couldAffectSchema()) {
-                        globalState.setSchema(DuckDBSchema.fromConnection(globalState.getConnection(),
-                                globalState.getDatabaseName()));
-                    }
                     if (globalState.getSchema().getDatabaseTables().isEmpty()) {
                         throw new IgnoreMeException();
                     }
                 });
         se.executeStatements();
-        manager.incrementCreateDatabase();
+    }
 
-        TestOracle oracle = new CompositeTestOracle(globalState.getDmbsSpecificOptions().oracle.stream().map(o -> {
+    @Override
+    protected TestOracle getTestOracle(DuckDBGlobalState globalState) throws SQLException {
+        return new CompositeTestOracle(globalState.getDmbsSpecificOptions().oracle.stream().map(o -> {
             try {
                 return o.create(globalState);
             } catch (SQLException e1) {
                 throw new AssertionError(e1);
             }
         }).collect(Collectors.toList()));
-
-        for (int i = 0; i < globalState.getOptions().getNrQueries(); i++) {
-            try {
-                oracle.check();
-                manager.incrementSelectQueryCount();
-            } catch (IgnoreMeException e) {
-
-            }
-        }
-        try {
-            if (globalState.getOptions().logEachSelect()) {
-                logger.getCurrentFileWriter().close();
-                logger.currentFileWriter = null;
-            }
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        globalState.getConnection().close();
     }
 
     @Override
