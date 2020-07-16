@@ -1,5 +1,6 @@
 package sqlancer.monet.oracle.tlp;
 
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -68,12 +69,15 @@ public class MonetTLPAggregateOracle extends MonetTLPBase {
         if (options.logEachSelect()) {
             logger.writeCurrent(metamorphicQuery);
         }
-        state.getState().queryString = "--" + originalQuery + ";\n--" + metamorphicQuery + "\n-- " + firstResult
-                + "\n-- " + secondResult;
+        String queryFormatString = "-- %s;\n-- result: %s";
+        String firstQueryString = String.format(queryFormatString, originalQuery, firstResult);
+        String secondQueryString = String.format(queryFormatString, metamorphicQuery, secondResult);
+        state.getState().queryString = String.format("%s\n%s", firstQueryString, secondQueryString);
         if (firstResult == null && secondResult != null
                 || firstResult != null && (!firstResult.contentEquals(secondResult)
                         && !ComparatorHelper.isEqualDouble(firstResult, secondResult))) {
-            throw new AssertionError();
+            String assertionMessage = String.format("the results mismatch!\n%s\n%s", firstQueryString, secondQueryString);
+            throw new AssertionError(assertionMessage);
         }
 
     }
@@ -96,6 +100,17 @@ public class MonetTLPAggregateOracle extends MonetTLPBase {
     }
 
     private String getAggregateResult(String queryString) throws SQLException {
+        // log TLP Aggregate SELECT queries on the current log file
+        if (state.getOptions().logEachSelect()) {
+            // TODO: refactor me
+            state.getLogger().writeCurrent(queryString);
+            try {
+                state.getLogger().getCurrentFileWriter().flush();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
         String resultString;
         QueryAdapter q = new QueryAdapter(queryString, errors);
         try (ResultSet result = q.executeAndGet(state)) {

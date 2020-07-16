@@ -12,9 +12,6 @@ import java.util.stream.Collectors;
 import sqlancer.AbstractAction;
 import sqlancer.CompositeTestOracle;
 import sqlancer.IgnoreMeException;
-import sqlancer.Main.QueryManager;
-import sqlancer.Main.StateLogger;
-import sqlancer.MainOptions;
 import sqlancer.ProviderAdapter;
 import sqlancer.Query;
 import sqlancer.QueryAdapter;
@@ -60,21 +57,11 @@ public final class MonetProvider extends ProviderAdapter<MonetGlobalState, Monet
         COMMIT(g -> {
             Query query;
             if (Randomly.getBoolean()) {
-                query = new QueryAdapter("COMMIT", Arrays.asList("not allowed in auto commit mode")) {
-                    @Override
-                    public boolean couldAffectSchema() {
-                        return true;
-                    }
-                };
+                query = new QueryAdapter("COMMIT", Arrays.asList("not allowed in auto commit mode"), true);
             } else if (Randomly.getBoolean()) {
                 query = MonetTransactionGenerator.executeBegin();
             } else {
-                query = new QueryAdapter("ROLLBACK") {
-                    @Override
-                    public boolean couldAffectSchema() {
-                        return true;
-                    }
-                };
+                query = new QueryAdapter("ROLLBACK", true);
             }
             return query;
         }), //
@@ -155,27 +142,13 @@ public final class MonetProvider extends ProviderAdapter<MonetGlobalState, Monet
     }
 
     @Override
-    public void generateAndTestDatabase(MonetGlobalState globalState) throws SQLException {
-        MainOptions options = globalState.getOptions();
-        StateLogger logger = globalState.getLogger();
-        StateToReproduce state = globalState.getState();
-        String databaseName = globalState.getDatabaseName();
-        Connection con = globalState.getConnection();
-        QueryManager manager = globalState.getManager();
-        if (options.logEachSelect()) {
-            logger.writeCurrent(state);
-        }
-        globalState.setSchema(MonetSchema.fromConnection(con, databaseName));
-        while (globalState.getSchema().getDatabaseTables().size() < 1) {
+    public void generateDatabase(MonetGlobalState globalState) throws SQLException {
+        while (globalState.getSchema().getDatabaseTables().size() < Randomly.fromOptions(1, 2)) {
             try {
                 String tableName = SQLite3Common.createTableName(globalState.getSchema().getDatabaseTables().size());
                 Query createTable = MonetTableGenerator.generate(tableName, globalState.getSchema(),
                         generateOnlyKnown, globalState);
-                if (options.logEachSelect()) {
-                    logger.writeCurrent(createTable.getQueryString());
-                }
-                manager.execute(createTable);
-                globalState.setSchema(MonetSchema.fromConnection(con, databaseName));
+                globalState.executeStatement(createTable);
             } catch (IgnoreMeException e) {
 
             }
@@ -183,30 +156,17 @@ public final class MonetProvider extends ProviderAdapter<MonetGlobalState, Monet
 
         StatementExecutor<MonetGlobalState, Action> se = new StatementExecutor<>(globalState, Action.values(),
                 MonetProvider::mapActions, (q) -> {
-                    if (q.couldAffectSchema()) {
-                        globalState.setSchema(MonetSchema.fromConnection(con, databaseName));
-                    }
                     if (globalState.getSchema().getDatabaseTables().isEmpty()) {
                         throw new IgnoreMeException();
                     }
                 });
-        // TODO: transactions broke during refactoring
-        // catch (Throwable t) {
-        // if (t.getMessage().contains("current transaction is aborted")) {
-        // manager.execute(new QueryAdapter("ABORT"));
-        // globalState.setSchema(MonetSchema.fromConnection(con, databaseName));
-        // } else {
-        // System.err.println(query.getQueryString());
-        // throw t;
-        // }
-        // }
         se.executeStatements();
-        manager.incrementCreateDatabase();
-        manager.execute(new QueryAdapter("COMMIT", Arrays.asList("not allowed in auto commit mode")));
-        globalState.setSchema(MonetSchema.fromConnection(con, databaseName));
+        globalState.executeStatement(new QueryAdapter("COMMIT", true));
+        globalState.executeStatement(new QueryAdapter("CALL sys.setquerytimeout(5000);\n"));
+    }
 
-        manager.execute(new QueryAdapter("CALL sys.setquerytimeout(5000);\n"));
-
+    @Override
+    protected TestOracle getTestOracle(MonetGlobalState globalState) throws SQLException {
         List<TestOracle> oracles = globalState.getDmbsSpecificOptions().oracle.stream().map(o -> {
             try {
                 return o.create(globalState);
@@ -214,17 +174,7 @@ public final class MonetProvider extends ProviderAdapter<MonetGlobalState, Monet
                 throw new AssertionError(e1);
             }
         }).collect(Collectors.toList());
-        CompositeTestOracle oracle = new CompositeTestOracle(oracles);
-
-        for (int i = 0; i < options.getNrQueries(); i++) {
-            try {
-                oracle.check();
-            } catch (IgnoreMeException e) {
-                continue;
-            }
-            manager.incrementSelectQueryCount();
-        }
-
+        return new CompositeTestOracle(oracles);
     }
 
     @Override

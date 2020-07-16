@@ -8,12 +8,11 @@ import java.util.List;
 import sqlancer.GlobalState;
 import sqlancer.Randomly;
 
-public class MonetGlobalState extends GlobalState<MonetOptions> {
+public class MonetGlobalState extends GlobalState<MonetOptions, MonetSchema> {
 
     private List<String> operators;
     private List<String> collates;
     private List<String> opClasses;
-    private MonetSchema schema;
 
     @Override
     public void setConnection(Connection con) {
@@ -27,17 +26,14 @@ public class MonetGlobalState extends GlobalState<MonetOptions> {
         }
     }
 
-    public void setSchema(MonetSchema schema) {
-        this.schema = schema;
-    }
-
-    public MonetSchema getSchema() {
-        return schema;
-    }
-
     private List<String> getCollnames(Connection con) throws SQLException {
         List<String> opClasses = Arrays.asList(new String[] {});
         return opClasses;
+    }
+
+    @Override
+    protected void updateSchema() throws SQLException {
+        setSchema(MonetSchema.fromConnection(getConnection(), getDatabaseName()));
     }
 
     private List<String> getOpclasses(Connection con) throws SQLException {

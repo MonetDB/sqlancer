@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import sqlancer.IgnoreMeException;
 import sqlancer.Randomly;
+import sqlancer.gen.ExpressionGenerator;
 import sqlancer.monet.MonetCompoundDataType;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetProvider;
@@ -43,7 +44,7 @@ import sqlancer.monet.ast.MonetPostfixOperation.PostfixOperator;
 import sqlancer.monet.ast.MonetPrefixOperation;
 import sqlancer.monet.ast.MonetPrefixOperation.PrefixOperator;
 
-public class MonetExpressionGenerator {
+public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpression> {
 
     private final int maxDepth;
 
@@ -512,4 +513,18 @@ public class MonetExpressionGenerator {
         return this;
     }
 
+    @Override
+    public MonetExpression generatePredicate() {
+        return generateExpression(0);
+    }
+
+    @Override
+    public MonetExpression negatePredicate(MonetExpression predicate) {
+        return new MonetPrefixOperation(predicate, MonetPrefixOperation.PrefixOperator.NOT);
+    }
+
+    @Override
+    public MonetExpression isNull(MonetExpression expr) {
+        return new MonetPostfixOperation(expr, PostfixOperator.IS_NULL);
+    }
 }
