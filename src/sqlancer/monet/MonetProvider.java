@@ -71,7 +71,6 @@ public final class MonetProvider extends ProviderAdapter<MonetGlobalState, Monet
         UPDATE(MonetUpdateGenerator::create), //
         TRUNCATE(MonetTruncateGenerator::create), //
         VACUUM(MonetVacuumGenerator::create), //
-        //SET(MonetSetGenerator::create), //
         CREATE_INDEX(MonetIndexGenerator::generate), //
         /*SET_CONSTRAINTS((g) -> {
             StringBuilder sb = new StringBuilder();
@@ -161,7 +160,6 @@ public final class MonetProvider extends ProviderAdapter<MonetGlobalState, Monet
                     }
                 });
         se.executeStatements();
-        globalState.executeStatement(new QueryAdapter("COMMIT", true));
         globalState.executeStatement(new QueryAdapter("CALL sys.setquerytimeout(5000);\n"));
     }
 
