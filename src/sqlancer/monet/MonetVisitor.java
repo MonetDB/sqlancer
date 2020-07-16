@@ -7,6 +7,8 @@ import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.ast.MonetAggregate;
 import sqlancer.monet.ast.MonetBetweenOperation;
 import sqlancer.monet.ast.MonetCastOperation;
+import sqlancer.monet.ast.MonetCaseOperation;
+import sqlancer.monet.ast.MonetCoalesceOperation;
 import sqlancer.monet.ast.MonetColumnValue;
 import sqlancer.monet.ast.MonetConstant;
 import sqlancer.monet.ast.MonetExpression;
@@ -42,6 +44,10 @@ public interface MonetVisitor {
 
     void visit(MonetInOperation op);
 
+    void visit(MonetCaseOperation op);
+
+    void visit(MonetCoalesceOperation op);
+
     void visit(MonetPostfixText op);
 
     void visit(MonetAggregate op);
@@ -69,6 +75,10 @@ public interface MonetVisitor {
             visit((MonetBetweenOperation) expression);
         } else if (expression instanceof MonetInOperation) {
             visit((MonetInOperation) expression);
+        } else if (expression instanceof MonetCaseOperation) {
+            visit((MonetCaseOperation) expression);
+        } else if (expression instanceof MonetCoalesceOperation) {
+            visit((MonetCoalesceOperation) expression);
         } else if (expression instanceof MonetAggregate) {
             visit((MonetAggregate) expression);
         } else if (expression instanceof MonetPostfixText) {

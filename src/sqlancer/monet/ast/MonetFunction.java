@@ -122,41 +122,7 @@ public class MonetFunction implements MonetExpression {
                 return new MonetDataType[] { MonetDataType.STRING };
             }
 
-        }/*,
-        // NULL_IF(2, "nullif") {
-        //
-        // @Override
-        // public MonetConstant apply(MonetConstant[] evaluatedArgs, MonetExpression... args) {
-        // MonetConstant equals = evaluatedArgs[0].isEquals(evaluatedArgs[1]);
-        // if (equals.isBoolean() && equals.asBoolean()) {
-        // return MonetConstant.createNullConstant();
-        // } else {
-        // // TODO: SELECT (nullif('1', FALSE)); yields '1', but should yield TRUE
-        // return evaluatedArgs[0];
-        // }
-        // }
-        //
-        // @Override
-        // public boolean supportsReturnType(MonetDataType type) {
-        // return true;
-        // }
-        //
-        // @Override
-        // public MonetDataType[] getInputTypesForReturnType(MonetDataType returnType, int nrArguments) {
-        // return getType(nrArguments, returnType);
-        // }
-        //
-        // @Override
-        // public boolean checkArguments(MonetExpression[] constants) {
-        // for (MonetExpression e : constants) {
-        // if (!(e instanceof MonetNullConstant)) {
-        // return true;
-        // }
-        // }
-        // return false;
-        // }
-        //
-        // },*/;
+        };
 
         private String functionName;
         final int nrArgs;

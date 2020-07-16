@@ -118,6 +118,10 @@ public enum MonetFunctionWithUnknownResult {
     GREATEST2("greatest", MonetDataType.REAL, MonetDataType.REAL, MonetDataType.REAL),
     GREATEST3("greatest", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.STRING),
 
+    NULLIF1("nullif", MonetDataType.INT, MonetDataType.INT, MonetDataType.INT),
+    NULLIF2("nullif", MonetDataType.REAL, MonetDataType.REAL, MonetDataType.REAL),
+    NULLIF3("nullif", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.STRING),
+
     /*IFTHENELSE1("ifthenelse", MonetDataType.INT, MonetDataType.BOOLEAN, MonetDataType.INT, MonetDataType.INT),
     IFTHENELSE2("ifthenelse", MonetDataType.REAL, MonetDataType.BOOLEAN, MonetDataType.REAL, MonetDataType.REAL),
     IFTHENELSE3("ifthenelse", MonetDataType.STRING, MonetDataType.BOOLEAN, MonetDataType.STRING, MonetDataType.STRING),*/

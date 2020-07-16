@@ -6,6 +6,8 @@ import java.util.Optional;
 import sqlancer.Randomly;
 import sqlancer.monet.ast.MonetAggregate;
 import sqlancer.monet.ast.MonetBetweenOperation;
+import sqlancer.monet.ast.MonetCaseOperation;
+import sqlancer.monet.ast.MonetCoalesceOperation;
 import sqlancer.monet.ast.MonetCastOperation;
 import sqlancer.monet.ast.MonetColumnValue;
 import sqlancer.monet.ast.MonetConstant;
@@ -265,6 +267,36 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
         }
         sb.append(" IN (");
         visit(op.getListElements());
+        sb.append(")");
+    }
+
+    @Override
+    public void visit(MonetCaseOperation op) {
+        sb.append("CASE ");
+        visit(op.getSwitchCondition());
+        for (int i = 0; i < op.getConditions().size(); i++) {
+            sb.append(" WHEN ");
+            visit(op.getConditions().get(i));
+            sb.append(" THEN ");
+            visit(op.getExpressions().get(i));
+        }
+        if (op.getElseExpr() != null) {
+            sb.append(" ELSE ");
+            visit(op.getElseExpr());
+        }
+        sb.append(" END");
+    }
+
+    @Override
+    public void visit(MonetCoalesceOperation op) {
+        sb.append("COALESCE (");
+        int i = 0;
+        for (MonetExpression arg : op.getConditions()) {
+            if (i++ != 0) {
+                sb.append(", ");
+            }
+            visit(arg);
+        }
         sb.append(")");
     }
 

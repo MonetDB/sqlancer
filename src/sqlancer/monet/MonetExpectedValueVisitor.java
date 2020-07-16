@@ -2,7 +2,9 @@ package sqlancer.monet;
 
 import sqlancer.monet.ast.MonetAggregate;
 import sqlancer.monet.ast.MonetBetweenOperation;
+import sqlancer.monet.ast.MonetCaseOperation;
 import sqlancer.monet.ast.MonetCastOperation;
+import sqlancer.monet.ast.MonetCoalesceOperation;
 import sqlancer.monet.ast.MonetColumnValue;
 import sqlancer.monet.ast.MonetConstant;
 import sqlancer.monet.ast.MonetExpression;
@@ -106,6 +108,25 @@ public final class MonetExpectedValueVisitor implements MonetVisitor {
         visit(op.getExpr());
         for (MonetExpression right : op.getListElements()) {
             visit(right);
+        }
+    }
+
+    @Override
+    public void visit(MonetCaseOperation op) {
+        visit(op.getSwitchCondition());
+        for (int i = 0; i < op.getConditions().size(); i++) {
+            visit(op.getConditions().get(i));
+            visit(op.getExpressions().get(i));
+        }
+        if (op.getElseExpr() != null) {
+            visit(op.getElseExpr());
+        }
+    }
+
+    @Override
+    public void visit(MonetCoalesceOperation op) {
+        for (int i = 0; i < op.getConditions().size(); i++) {
+            visit(op.getConditions().get(i));
         }
     }
 

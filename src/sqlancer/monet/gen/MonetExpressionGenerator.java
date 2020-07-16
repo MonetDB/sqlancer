@@ -26,6 +26,8 @@ import sqlancer.monet.ast.MonetBinaryBitOperation.MonetBinaryBitOperator;
 import sqlancer.monet.ast.MonetBinaryComparisonOperation;
 import sqlancer.monet.ast.MonetBinaryLogicalOperation;
 import sqlancer.monet.ast.MonetBinaryLogicalOperation.BinaryLogicalOperator;
+import sqlancer.monet.ast.MonetCaseOperation;
+import sqlancer.monet.ast.MonetCoalesceOperation;
 import sqlancer.monet.ast.MonetCastOperation;
 import sqlancer.monet.ast.MonetColumnValue;
 import sqlancer.monet.ast.MonetConcatOperation;
@@ -89,6 +91,22 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         return generateExpression(depth, MonetDataType.getRandomType());
     }
 
+    public List<MonetExpression> generateExpressions(int depth, int nr) {
+        List<MonetExpression> expressions = new ArrayList<>();
+        for (int i = 0; i < nr; i++) {
+            expressions.add(generateExpression(depth));
+        }
+        return expressions;
+    }
+
+    public List<MonetExpression> generateExpressions(int depth, int nr, MonetDataType originalType) {
+        List<MonetExpression> expressions = new ArrayList<>();
+        for (int i = 0; i < nr; i++) {
+            expressions.add(generateExpression(depth, originalType));
+        }
+        return expressions;
+    }
+
     public List<MonetExpression> generateOrderBy() {
         List<MonetExpression> orderBys = new ArrayList<>();
         for (int i = 0; i < Randomly.smallNumber(); i++) {
@@ -99,7 +117,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     }
 
     private enum BooleanExpression {
-        POSTFIX_OPERATOR, NOT, BINARY_LOGICAL_OPERATOR, BINARY_COMPARISON, FUNCTION, CAST, LIKE, BETWEEN, IN_OPERATION/*, BINARY_RANGE_COMPARISON*/;
+        POSTFIX_OPERATOR, NOT, BINARY_LOGICAL_OPERATOR, BINARY_COMPARISON, FUNCTION, CAST, LIKE, BETWEEN, IN_OPERATION, CASE, COALESCE;
     }
 
     private MonetExpression generateFunctionWithUnknownResult(int depth, MonetDataType type) {
@@ -172,6 +190,14 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
             MonetDataType type = getMeaningfulType();
             return new MonetBetweenOperation(generateExpression(depth + 1, type),
                     generateExpression(depth + 1, type), generateExpression(depth + 1, type), Randomly.getBoolean(), Randomly.getBoolean());
+        case CASE:
+            int noptions = Randomly.smallNumber() + 1;
+            return new MonetCaseOperation(generateExpression(depth + 1),
+                    generateExpressions(depth + 1, noptions), generateExpressions(depth + 1, noptions, MonetDataType.BOOLEAN),
+                    Randomly.getBoolean() ? generateExpression(depth + 1, MonetDataType.BOOLEAN) : null);
+        case COALESCE:
+            int options = Randomly.smallNumber() + 2;
+            return new MonetCoalesceOperation(generateExpressions(depth + 1, options, MonetDataType.BOOLEAN));
         default:
             throw new AssertionError();
         }
@@ -308,7 +334,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     }
 
     private enum TextExpression {
-        CAST, FUNCTION, CONCAT
+        CAST, FUNCTION, CONCAT, CASE, COALESCE
     }
 
     private MonetExpression generateTextExpression(int depth) {
@@ -323,6 +349,14 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
             return generateFunction(depth + 1, MonetDataType.STRING);
         case CONCAT:
             return generateConcat(depth);
+        case CASE:
+            int noptions = Randomly.smallNumber() + 1;
+            return new MonetCaseOperation(generateExpression(depth + 1),
+                generateExpressions(depth + 1, noptions), generateExpressions(depth + 1, noptions, MonetDataType.STRING),
+                Randomly.getBoolean() ? generateExpression(depth + 1, MonetDataType.STRING) : null);
+        case COALESCE:
+            int options = Randomly.smallNumber() + 2;
+            return new MonetCoalesceOperation(generateExpressions(depth + 1, options, MonetDataType.STRING));
         default:
             throw new AssertionError();
         }
@@ -352,7 +386,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     }
 
     private enum IntExpression {
-        UNARY_OPERATION, FUNCTION, CAST, BINARY_ARITHMETIC_EXPRESSION
+        UNARY_OPERATION, FUNCTION, CAST, BINARY_ARITHMETIC_EXPRESSION, CASE, COALESCE
     }
 
     private MonetExpression generateIntExpression(int depth) {
@@ -370,6 +404,14 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         case BINARY_ARITHMETIC_EXPRESSION:
             return new MonetBinaryArithmeticOperation(generateExpression(depth + 1, MonetDataType.INT),
                     generateExpression(depth + 1, MonetDataType.INT), MonetBinaryOperator.getRandom());
+        case CASE:
+            int noptions = Randomly.smallNumber() + 1;
+            return new MonetCaseOperation(generateExpression(depth + 1),
+                generateExpressions(depth + 1, noptions), generateExpressions(depth + 1, noptions, MonetDataType.INT),
+                Randomly.getBoolean() ? generateExpression(depth + 1, MonetDataType.INT) : null);
+        case COALESCE:
+            int options = Randomly.smallNumber() + 2;
+            return new MonetCoalesceOperation(generateExpressions(depth + 1, options, MonetDataType.INT));
         default:
             throw new AssertionError();
         }
