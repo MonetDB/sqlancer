@@ -1,23 +1,18 @@
 package sqlancer.monet.oracle;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import sqlancer.IgnoreMeException;
-import sqlancer.Main.StateLogger;
-import sqlancer.MainOptions;
+import sqlancer.NoRECBase;
 import sqlancer.Query;
 import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
-import sqlancer.StateToReproduce.MonetStateToReproduce;
 import sqlancer.TestOracle;
 import sqlancer.monet.MonetCompoundDataType;
 import sqlancer.monet.MonetGlobalState;
@@ -39,39 +34,27 @@ import sqlancer.monet.ast.MonetSelect.SelectType;
 import sqlancer.monet.gen.MonetCommon;
 import sqlancer.monet.gen.MonetExpressionGenerator;
 
-public class MonetNoRECOracle implements TestOracle {
+public class MonetNoRECOracle extends NoRECBase<MonetGlobalState> implements TestOracle {
 
     private final MonetSchema s;
-    private final Connection con;
-    private final MonetStateToReproduce state;
-    private String firstQueryString;
-    private String secondQueryString;
-    private final StateLogger logger;
-    private final MainOptions options;
-    private final Set<String> errors = new HashSet<>();
-    private final MonetGlobalState globalState;
 
     public MonetNoRECOracle(MonetGlobalState globalState) {
+        super(globalState);
         this.s = globalState.getSchema();
-        this.con = globalState.getConnection();
-        this.state = (MonetStateToReproduce) globalState.getState();
-        this.logger = globalState.getLogger();
-        this.options = globalState.getOptions();
-        this.globalState = globalState;
+        MonetCommon.addCommonExpressionErrors(errors);
+        MonetCommon.addCommonFetchErrors(errors);
     }
 
     @Override
     public void check() throws SQLException {
         // clear left-over query string from previous test
-        state.queryString = null;
-        MonetCommon.addCommonExpressionErrors(errors);
-        MonetCommon.addCommonFetchErrors(errors);
+        state.getState().queryString = null;
         MonetTables randomTables = s.getRandomTableNonEmptyTables();
         List<MonetColumn> columns = randomTables.getColumns();
         MonetExpression randomWhereCondition = getRandomWhereCondition(columns);
         List<MonetTable> tables = randomTables.getTables();
 
-        List<MonetJoin> joinStatements = getJoinStatements(globalState, columns, tables);
+        List<MonetJoin> joinStatements = getJoinStatements(state, columns, tables);
         List<MonetExpression> fromTables = tables.stream().map(t -> new MonetFromTable(t, Randomly.getBoolean()))
                 .collect(Collectors.toList());
         int secondCount = getUnoptimizedQueryCount(fromTables, randomWhereCondition, joinStatements);
@@ -81,9 +64,10 @@ public class MonetNoRECOracle implements TestOracle {
         }
         if (firstCount != secondCount) {
             String queryFormatString = "-- %s;\n-- count: %d";
-            String firstQueryStringWithCount = String.format(queryFormatString, firstQueryString, firstCount);
-            String secondQueryStringWithCount = String.format(queryFormatString, secondQueryString, secondCount);
-            state.queryString = String.format("%s\n%s", firstQueryStringWithCount, secondQueryStringWithCount);
+            String firstQueryStringWithCount = String.format(queryFormatString, optimizedQueryString, firstCount);
+            String secondQueryStringWithCount = String.format(queryFormatString, unoptimizedQueryString, secondCount);
+            state.getState().queryString = String.format("%s\n%s", firstQueryStringWithCount,
+                    secondQueryStringWithCount);
             String assertionMessage = String.format("the counts mismatch (%d and %d)!\n%s\n%s", firstCount, secondCount,
                     firstQueryStringWithCount, secondQueryStringWithCount);
             throw new AssertionError(assertionMessage);
@@ -106,8 +90,7 @@ public class MonetNoRECOracle implements TestOracle {
     }
 
     private MonetExpression getRandomWhereCondition(List<MonetColumn> columns) {
-        return new MonetExpressionGenerator(globalState).setColumns(columns).setGlobalState(globalState)
-                .generateExpression(MonetDataType.BOOLEAN);
+        return new MonetExpressionGenerator(state).setColumns(columns).generateExpression(MonetDataType.BOOLEAN);
     }
 
     private int getUnoptimizedQueryCount(List<MonetExpression> fromTables, MonetExpression randomWhereCondition,
@@ -121,17 +104,17 @@ public class MonetNoRECOracle implements TestOracle {
         select.setSelectType(SelectType.ALL);
         select.setJoinClauses(joinStatements);
         int secondCount = 0;
-        secondQueryString = "SELECT SUM(count) FROM (" + MonetVisitor.asString(select) + ") as res";
+        unoptimizedQueryString = "SELECT SUM(count) FROM (" + MonetVisitor.asString(select) + ") as res";
         if (options.logEachSelect()) {
-            logger.writeCurrent(secondQueryString);
+            logger.writeCurrent(unoptimizedQueryString);
         }
         errors.add("canceling statement due to statement timeout");
-        Query q = new QueryAdapter(secondQueryString, errors);
+        Query q = new QueryAdapter(unoptimizedQueryString, errors);
         ResultSet rs;
         try {
-            rs = q.executeAndGet(globalState);
+            rs = q.executeAndGet(state);
         } catch (Exception e) {
-            throw new AssertionError(secondQueryString, e);
+            throw new AssertionError(unoptimizedQueryString, e);
         }
         if (rs == null) {
             return -1;
@@ -151,18 +134,17 @@ public class MonetNoRECOracle implements TestOracle {
         select.setFromList(randomTables);
         select.setWhereClause(randomWhereCondition);
         if (Randomly.getBooleanWithSmallProbability()) {
-            select.setOrderByExpressions(new MonetExpressionGenerator(globalState).setColumns(columns)
-                    .setGlobalState(globalState).generateOrderBy());
+            select.setOrderByExpressions(new MonetExpressionGenerator(state).setColumns(columns).generateOrderBy());
         }
         select.setSelectType(SelectType.ALL);
         select.setJoinClauses(joinStatements);
         int firstCount = 0;
         try (Statement stat = con.createStatement()) {
-            firstQueryString = MonetVisitor.asString(select);
+            optimizedQueryString = MonetVisitor.asString(select);
             if (options.logEachSelect()) {
-                logger.writeCurrent(firstQueryString);
+                logger.writeCurrent(optimizedQueryString);
             }
-            try (ResultSet rs = stat.executeQuery(firstQueryString)) {
+            try (ResultSet rs = stat.executeQuery(optimizedQueryString)) {
                 while (rs.next()) {
                     firstCount++;
                 }

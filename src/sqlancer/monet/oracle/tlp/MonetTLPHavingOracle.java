@@ -47,7 +47,7 @@ public class MonetTLPHavingOracle extends MonetTLPBase {
     }
 
     @Override
-    MonetExpression generatePredicate() {
+    protected MonetExpression generatePredicate() {
         return gen.generateHavingClause();
     }
 

@@ -112,6 +112,7 @@ public class MonetSchema {
             return MonetDataType.INT;
         case "boolean":
             return MonetDataType.BOOLEAN;
+        case "any": /* we fit nulls as strings */
         case "text":
         case "string":
         case "clob":
