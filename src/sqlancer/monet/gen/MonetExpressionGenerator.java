@@ -292,7 +292,6 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
                     return generateIntExpression(depth);
                 }
             case STRING:
-                return generateTextExpression(depth);
             case DECIMAL:
             case REAL:
             case DOUBLE:
@@ -301,7 +300,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
             case DATE:
             case MONTH_INTERVAL:
             case SECOND_INTERVAL:
-                return generateConstant(r, dataType);
+                return generateAnyTypeExpression(depth, r, dataType);
             default:
                 throw new AssertionError(dataType);
             }
@@ -333,30 +332,32 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
 
     }
 
-    private enum TextExpression {
-        CAST, FUNCTION, CONCAT, CASE, COALESCE
+    private enum AnyTypeExpression {
+        CAST, FUNCTION, CASE, COALESCE, CONSTANT
     }
 
-    private MonetExpression generateTextExpression(int depth) {
-        TextExpression option;
-        List<TextExpression> validOptions = new ArrayList<>(Arrays.asList(TextExpression.values()));
+    private MonetExpression generateAnyTypeExpression(int depth, Randomly r, MonetDataType type) {
+        AnyTypeExpression option;
+        List<AnyTypeExpression> validOptions = new ArrayList<>(Arrays.asList(AnyTypeExpression.values()));
         option = Randomly.fromList(validOptions);
 
         switch (option) {
         case CAST:
-            return new MonetCastOperation(generateExpression(depth + 1), getCompoundDataType(MonetDataType.STRING));
+            return new MonetCastOperation(generateExpression(depth + 1), getCompoundDataType(type));
         case FUNCTION:
-            return generateFunction(depth + 1, MonetDataType.STRING);
-        case CONCAT:
-            return generateConcat(depth);
+            if (type == MonetDataType.STRING && Randomly.getBooleanWithSmallProbability())
+                return generateConcat(depth);
+            return generateFunction(depth + 1, type);
         case CASE:
             int noptions = Randomly.smallNumber() + 1;
             return new MonetCaseOperation(generateExpression(depth + 1),
-                generateExpressions(depth + 1, noptions), generateExpressions(depth + 1, noptions, MonetDataType.STRING),
-                Randomly.getBoolean() ? generateExpression(depth + 1, MonetDataType.STRING) : null);
+                generateExpressions(depth + 1, noptions), generateExpressions(depth + 1, noptions, type),
+                Randomly.getBoolean() ? generateExpression(depth + 1, type) : null);
+        case CONSTANT:
+            return generateConstant(r, type);
         case COALESCE:
             int options = Randomly.smallNumber() + 2;
-            return new MonetCoalesceOperation(generateExpressions(depth + 1, options, MonetDataType.STRING));
+            return new MonetCoalesceOperation(generateExpressions(depth + 1, options, type));
         default:
             throw new AssertionError();
         }
@@ -542,12 +543,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     }
 
     public MonetAggregate generateArgsForAggregate(MonetDataType dataType, MonetAggregateFunction agg) {
-        List<MonetDataType> types = agg.getTypes(dataType);
-        List<MonetExpression> args = new ArrayList<>();
-        for (MonetDataType argType : types) {
-            args.add(generateExpression(argType));
-        }
-        return new MonetAggregate(args, agg, Randomly.getBoolean());
+        return new MonetAggregate(generateExpressions(0, agg.getNrArgs(), dataType), agg, Randomly.getBoolean());
     }
 
     public MonetExpressionGenerator allowAggregates(boolean value) {
