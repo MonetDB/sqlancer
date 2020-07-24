@@ -1,11 +1,11 @@
 package sqlancer.clickhouse.gen;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import sqlancer.clickhouse.ClickHouseSchema;
 import sqlancer.clickhouse.ast.ClickHouseExpression;
 import sqlancer.clickhouse.ast.ClickHouseTableReference;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public final class ClickHouseCommon {
 
@@ -14,6 +14,14 @@ public final class ClickHouseCommon {
 
     public static String createColumnName(int nr) {
         return String.format("c%d", nr);
+    }
+
+    public static String createTableName(int nr) {
+        return String.format("t%d", nr);
+    }
+
+    public static String createConstraintName(int nr) {
+        return String.format("x%d", nr);
     }
 
     public static List<ClickHouseExpression> getTableRefs(List<ClickHouseSchema.ClickHouseTable> tables,

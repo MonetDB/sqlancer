@@ -17,8 +17,8 @@ import sqlancer.clickhouse.ast.ClickHouseColumnReference;
 import sqlancer.clickhouse.ast.ClickHouseConstant;
 import sqlancer.clickhouse.ast.ClickHouseExpression;
 import sqlancer.clickhouse.ast.ClickHouseUnaryPostfixOperation;
-import sqlancer.clickhouse.ast.ClickHouseUnaryPrefixOperation;
 import sqlancer.clickhouse.ast.ClickHouseUnaryPostfixOperation.ClickHouseUnaryPostfixOperator;
+import sqlancer.clickhouse.ast.ClickHouseUnaryPrefixOperation;
 import sqlancer.clickhouse.ast.ClickHouseUnaryPrefixOperation.ClickHouseUnaryPrefixOperator;
 import sqlancer.gen.TypedExpressionGenerator;
 
@@ -45,20 +45,26 @@ public class ClickHouseExpressionGenerator
             return generateLeafNode(type);
         }
         Expression expr = Randomly.fromOptions(Expression.values());
+        ClickHouseLancerDataType leftLeafType = ClickHouseLancerDataType.getRandom();
+        ClickHouseLancerDataType rightLeafType = ClickHouseLancerDataType.getRandom();
+        if (Randomly.getBoolean()) {
+            rightLeafType = leftLeafType;
+        }
+
         switch (expr) {
         case UNARY_PREFIX:
-            return new ClickHouseUnaryPrefixOperation(generateExpression(type, depth + 1),
+            return new ClickHouseUnaryPrefixOperation(generateExpression(leftLeafType, depth + 1),
                     ClickHouseUnaryPrefixOperation.ClickHouseUnaryPrefixOperator.getRandom());
         case UNARY_POSTFIX:
-            return new ClickHouseUnaryPostfixOperation(generateExpression(type, depth + 1),
+            return new ClickHouseUnaryPostfixOperation(generateExpression(leftLeafType, depth + 1),
                     ClickHouseUnaryPostfixOperation.ClickHouseUnaryPostfixOperator.getRandom(), false);
         case BINARY_COMPARISON:
-            return new ClickHouseBinaryComparisonOperation(generateExpression(type, depth + 1),
-                    generateExpression(type, depth + 1),
+            return new ClickHouseBinaryComparisonOperation(generateExpression(leftLeafType, depth + 1),
+                    generateExpression(rightLeafType, depth + 1),
                     ClickHouseBinaryComparisonOperation.ClickHouseBinaryComparisonOperator.getRandomOperator());
         case BINARY_LOGICAL:
-            return new ClickHouseBinaryLogicalOperation(generateExpression(type, depth + 1),
-                    generateExpression(type, depth + 1),
+            return new ClickHouseBinaryLogicalOperation(generateExpression(leftLeafType, depth + 1),
+                    generateExpression(rightLeafType, depth + 1),
                     ClickHouseBinaryLogicalOperation.ClickHouseBinaryLogicalOperator.getRandom());
         default:
             throw new AssertionError(expr);
@@ -67,6 +73,9 @@ public class ClickHouseExpressionGenerator
 
     @Override
     protected ClickHouseExpression generateColumn(ClickHouseLancerDataType type) {
+        if (columns.isEmpty()) {
+            return generateConstant(type);
+        }
         List<ClickHouseColumn> filteredColumns = columns.stream()
                 .filter(c -> c.getType().getType().name().equals(type.getType().name())).collect(Collectors.toList());
         ClickHouseColumn column = filteredColumns.isEmpty() ? Randomly.fromList(columns)

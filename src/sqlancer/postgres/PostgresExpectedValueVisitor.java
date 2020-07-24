@@ -16,6 +16,7 @@ import sqlancer.postgres.ast.PostgresPostfixText;
 import sqlancer.postgres.ast.PostgresPrefixOperation;
 import sqlancer.postgres.ast.PostgresSelect;
 import sqlancer.postgres.ast.PostgresSelect.PostgresFromTable;
+import sqlancer.postgres.ast.PostgresSelect.PostgresSubquery;
 import sqlancer.postgres.ast.PostgresSimilarTo;
 
 public final class PostgresExpectedValueVisitor implements PostgresVisitor {
@@ -30,7 +31,8 @@ public final class PostgresExpectedValueVisitor implements PostgresVisitor {
             sb.append("\t");
         }
         sb.append(v.get());
-        sb.append(" -- " + expr.getExpectedValue());
+        sb.append(" -- ");
+        sb.append(expr.getExpectedValue());
         sb.append("\n");
     }
 
@@ -152,6 +154,11 @@ public final class PostgresExpectedValueVisitor implements PostgresVisitor {
     @Override
     public void visit(PostgresFromTable from) {
         print(from);
+    }
+
+    @Override
+    public void visit(PostgresSubquery subquery) {
+        print(subquery);
     }
 
 }
