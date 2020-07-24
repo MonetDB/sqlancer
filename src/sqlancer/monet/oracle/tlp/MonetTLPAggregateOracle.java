@@ -136,13 +136,16 @@ public class MonetTLPAggregateOracle extends MonetTLPBase {
         case MIN:
             return aliasArgs(Arrays.asList(aggregate));
         // case AVG:
-        //// List<MonetExpression> arg = Arrays.asList(new MonetCast(aggregate.getExpr().get(0),
+        //// List<MonetExpression> arg = Arrays.asList(new
+        // MonetCast(aggregate.getExpr().get(0),
         // MonetDataType.DECIMAL.get()));
-        // MonetAggregate sum = new MonetAggregate(MonetAggregateFunction.SUM, aggregate.getExpr());
+        // MonetAggregate sum = new MonetAggregate(MonetAggregateFunction.SUM,
+        // aggregate.getExpr());
         // MonetCast count = new MonetCast(
         // new MonetAggregate(MonetAggregateFunction.COUNT, aggregate.getExpr()),
         // MonetDataType.DECIMAL.get());
-        //// MonetBinaryArithmeticOperation avg = new MonetBinaryArithmeticOperation(sum, count,
+        //// MonetBinaryArithmeticOperation avg = new
+        // MonetBinaryArithmeticOperation(sum, count,
         // MonetBinaryArithmeticOperator.DIV);
         // return aliasArgs(Arrays.asList(sum, count));
         default:

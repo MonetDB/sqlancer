@@ -37,6 +37,29 @@ public class MonetSelect extends SelectBase<MonetExpression> implements MonetExp
         }
     }
 
+    public static class MonetSubquery implements MonetExpression {
+        private final MonetSelect s;
+        private final String name;
+
+        public MonetSubquery(MonetSelect s, String name) {
+            this.s = s;
+            this.name = name;
+        }
+
+        public MonetSelect getSelect() {
+            return s;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public MonetDataType getExpressionType() {
+            return null;
+        }
+    }
+
     public enum SelectType {
         DISTINCT, ALL;
 

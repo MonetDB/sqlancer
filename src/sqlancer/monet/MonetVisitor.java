@@ -20,6 +20,7 @@ import sqlancer.monet.ast.MonetPostfixText;
 import sqlancer.monet.ast.MonetPrefixOperation;
 import sqlancer.monet.ast.MonetSelect;
 import sqlancer.monet.ast.MonetSelect.MonetFromTable;
+import sqlancer.monet.ast.MonetSelect.MonetSubquery;
 import sqlancer.monet.gen.MonetExpressionGenerator;
 
 public interface MonetVisitor {
@@ -54,6 +55,8 @@ public interface MonetVisitor {
 
     void visit(MonetFromTable from);
 
+    void visit(MonetSubquery subquery);
+
     default void visit(MonetExpression expression) {
         if (expression instanceof MonetConstant) {
             visit((MonetConstant) expression);
@@ -85,6 +88,8 @@ public interface MonetVisitor {
             visit((MonetPostfixText) expression);
         } else if (expression instanceof MonetFromTable) {
             visit((MonetFromTable) expression);
+        } else if (expression instanceof MonetSubquery) {
+            visit((MonetSubquery) expression);
         } else {
             throw new AssertionError(expression);
         }

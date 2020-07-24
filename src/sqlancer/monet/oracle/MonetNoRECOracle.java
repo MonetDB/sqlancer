@@ -30,9 +30,11 @@ import sqlancer.monet.ast.MonetJoin.MonetJoinType;
 import sqlancer.monet.ast.MonetPostfixText;
 import sqlancer.monet.ast.MonetSelect;
 import sqlancer.monet.ast.MonetSelect.MonetFromTable;
+import sqlancer.monet.ast.MonetSelect.MonetSubquery;
 import sqlancer.monet.ast.MonetSelect.SelectType;
 import sqlancer.monet.gen.MonetCommon;
 import sqlancer.monet.gen.MonetExpressionGenerator;
+import sqlancer.monet.oracle.tlp.MonetTLPBase;
 
 public class MonetNoRECOracle extends NoRECBase<MonetGlobalState> implements TestOracle {
 
@@ -83,7 +85,15 @@ public class MonetNoRECOracle extends NoRECBase<MonetGlobalState> implements Tes
             MonetTable table = Randomly.fromList(tables);
             tables.remove(table);
             MonetJoinType options = MonetJoinType.getRandom();
-            MonetJoin j = new MonetJoin(table, joinClause, options);
+            MonetJoin j = new MonetJoin(new MonetFromTable(table, Randomly.getBoolean()), joinClause, options);
+            joinStatements.add(j);
+        }
+        // JOIN subqueries
+        for (int i = 0; i < Randomly.smallNumber(); i++) {
+            MonetSubquery subquery = MonetTLPBase.createSubquery(globalState, String.format("sub%d", i));
+            MonetExpression joinClause = gen.generateExpression(MonetDataType.BOOLEAN);
+            MonetJoinType options = MonetJoinType.getRandom();
+            MonetJoin j = new MonetJoin(subquery, joinClause, options);
             joinStatements.add(j);
         }
         return joinStatements;

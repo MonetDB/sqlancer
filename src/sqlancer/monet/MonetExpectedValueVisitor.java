@@ -16,6 +16,7 @@ import sqlancer.monet.ast.MonetPostfixText;
 import sqlancer.monet.ast.MonetPrefixOperation;
 import sqlancer.monet.ast.MonetSelect;
 import sqlancer.monet.ast.MonetSelect.MonetFromTable;
+import sqlancer.monet.ast.MonetSelect.MonetSubquery;
 
 public final class MonetExpectedValueVisitor implements MonetVisitor {
 
@@ -29,20 +30,10 @@ public final class MonetExpectedValueVisitor implements MonetVisitor {
             sb.append("\t");
         }
         sb.append(v.get());
-        sb.append(" -- " + expr.getExpectedValue());
+        sb.append(" -- ");
+        sb.append(expr.getExpectedValue());
         sb.append("\n");
     }
-
-    // @Override
-    // public void visit(MonetExpression expr) {
-    // nrTabs++;
-    // try {
-    // super.visit(expr);
-    // } catch (IgnoreMeException e) {
-    //
-    // }
-    // nrTabs--;
-    // }
 
     @Override
     public void visit(MonetConstant constant) {
@@ -147,6 +138,11 @@ public final class MonetExpectedValueVisitor implements MonetVisitor {
     @Override
     public void visit(MonetFromTable from) {
         print(from);
+    }
+
+    @Override
+    public void visit(MonetSubquery subquery) {
+        print(subquery);
     }
 
 }

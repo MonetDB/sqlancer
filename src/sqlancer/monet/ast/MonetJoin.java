@@ -2,7 +2,6 @@ package sqlancer.monet.ast;
 
 import sqlancer.Randomly;
 import sqlancer.monet.MonetSchema.MonetDataType;
-import sqlancer.monet.MonetSchema.MonetTable;
 
 public class MonetJoin implements MonetExpression {
 
@@ -15,18 +14,18 @@ public class MonetJoin implements MonetExpression {
 
     }
 
-    private final MonetTable table;
+    private final MonetExpression tableReference;
     private final MonetExpression onClause;
     private final MonetJoinType type;
 
-    public MonetJoin(MonetTable table, MonetExpression onClause, MonetJoinType type) {
-        this.table = table;
+    public MonetJoin(MonetExpression tableReference, MonetExpression onClause, MonetJoinType type) {
+        this.tableReference = tableReference;
         this.onClause = onClause;
         this.type = type;
     }
 
-    public MonetTable getTable() {
-        return table;
+    public MonetExpression getTableReference() {
+        return tableReference;
     }
 
     public MonetExpression getOnClause() {

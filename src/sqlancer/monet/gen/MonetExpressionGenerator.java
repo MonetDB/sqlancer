@@ -87,7 +87,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         return new MonetExpressionGenerator(globalState).generateExpression(0);
     }
 
-    MonetExpression generateExpression(int depth) {
+    public MonetExpression generateExpression(int depth) {
         return generateExpression(depth, MonetDataType.getRandomType());
     }
 

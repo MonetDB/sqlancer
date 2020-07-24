@@ -22,6 +22,7 @@ import sqlancer.monet.ast.MonetPostfixText;
 import sqlancer.monet.ast.MonetPrefixOperation;
 import sqlancer.monet.ast.MonetSelect;
 import sqlancer.monet.ast.MonetSelect.MonetFromTable;
+import sqlancer.monet.ast.MonetSelect.MonetSubquery;
 import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.visitor.ToStringVisitor;
 
@@ -74,6 +75,14 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
     }
 
     @Override
+    public void visit(MonetSubquery subquery) {
+        sb.append("(");
+        visit(subquery.getSelect());
+        sb.append(") AS ");
+        sb.append(subquery.getName());
+    }
+
+    @Override
     public void visit(MonetSelect s) {
         sb.append("SELECT ");
         switch (s.getSelectOption()) {
@@ -122,7 +131,7 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
                 throw new AssertionError(j.getType());
             }
             sb.append(" ");
-            sb.append(j.getTable().getName());
+            visit(j.getTableReference());
             if (j.getType() != MonetJoinType.CROSS && j.getType() != MonetJoinType.NATURAL) {
                 sb.append(" ON ");
                 visit(j.getOnClause());

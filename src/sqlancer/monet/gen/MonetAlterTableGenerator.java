@@ -34,8 +34,6 @@ public class MonetAlterTableGenerator {
         ALTER_COLUMN_SET_DROP_NULL, // ALTER [ COLUMN ] column { SET | DROP } NOT NULL
         //ALTER_COLUMN_SET_STORAGE, // ALTER [ COLUMN ] column SET STORAGE { PLAIN | EXTERNAL | EXTENDED | MAIN }
         ADD_TABLE_CONSTRAINT // ADD table_constraint [ NOT VALID ]
-        //ADD_TABLE_CONSTRAINT_USING_INDEX, // ADD table_constraint_using_index
-
     }
 
     public MonetAlterTableGenerator(MonetTable randomTable, MonetGlobalState globalState,

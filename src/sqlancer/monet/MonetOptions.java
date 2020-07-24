@@ -9,7 +9,6 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 
 import sqlancer.CompositeTestOracle;
-import sqlancer.MainOptions.DBMSConverter;
 import sqlancer.TestOracle;
 import sqlancer.monet.oracle.MonetNoRECOracle;
 import sqlancer.monet.oracle.MonetPivotedQuerySynthesisOracle;
@@ -23,7 +22,7 @@ public class MonetOptions {
     @Parameter(names = "--bulk-insert")
     public boolean allowBulkInsert;
 
-    @Parameter(names = "--oracle", converter = DBMSConverter.class)
+    @Parameter(names = "--oracle")
     public List<MonetOracle> oracle = Arrays.asList(MonetOracle.QUERY_PARTITIONING);
 
     public enum MonetOracle {
