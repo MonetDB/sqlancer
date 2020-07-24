@@ -87,7 +87,31 @@ public class MonetSchema {
                         case STRING:
                             constant = MonetConstant.createTextConstant(randomRowValues.getString(columnIndex));
                             break;
-                        default:
+                        case DECIMAL:
+                            constant = MonetConstant.createDecimalConstant(randomRowValues.getBigDecimal(columnIndex));
+                            break;
+                        case REAL:
+                            constant = MonetConstant.createFloatConstant(randomRowValues.getFloat(columnIndex));
+                            break;
+                        case DOUBLE:
+                            constant = MonetConstant.createDoubleConstant(randomRowValues.getDouble(columnIndex));
+                            break;
+                        case TIME:
+                            constant = MonetConstant.createTimeConstant(randomRowValues.getTime(columnIndex).getTime());
+                            break;
+                        case TIMESTAMP:
+                            constant = MonetConstant.createTimestampConstant(randomRowValues.getTimestamp(columnIndex).getTime());
+                            break;
+                        case DATE:
+                            constant = MonetConstant.createDateConstant(randomRowValues.getDate(columnIndex).getTime());
+                            break;
+                        case MONTH_INTERVAL:
+                            constant = MonetConstant.createMonthIntervalConstant(randomRowValues.getBigDecimal(columnIndex).longValue());
+                            break;
+                        case SECOND_INTERVAL:
+                            constant = MonetConstant.createSecondIntervalConstant(randomRowValues.getBigDecimal(columnIndex).longValue());
+                            break;
+                         default:
                             throw new AssertionError(column.getType());
                         }
                     }

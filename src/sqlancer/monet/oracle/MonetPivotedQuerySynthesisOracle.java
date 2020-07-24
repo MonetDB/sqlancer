@@ -43,6 +43,7 @@ public class MonetPivotedQuerySynthesisOracle implements TestOracle {
         this.s = globalState.getSchema();
         options = globalState.getOptions();
         logger = globalState.getLogger();
+        this.state = (MonetStateToReproduce) globalState.getState();
     }
 
     @Override

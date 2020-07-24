@@ -41,7 +41,7 @@ public final class MonetCommon {
         errors.add(" no columns of tables ");
         errors.add("overflow in ");
         errors.add("number of characters for insert function must be non negative");
-        errors.add("Too many digits");
+        errors.add("many digits");
         errors.add("conversion of");
         errors.add("value too long for type");
         errors.add("Numerical argument out of domain");
