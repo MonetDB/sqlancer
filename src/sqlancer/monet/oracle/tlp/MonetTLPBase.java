@@ -12,6 +12,7 @@ import sqlancer.TestOracle;
 import sqlancer.gen.ExpressionGenerator;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema;
+import sqlancer.monet.MonetSchema.MonetColumn;
 import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.MonetSchema.MonetTable;
 import sqlancer.monet.MonetSchema.MonetTables;
@@ -60,7 +61,15 @@ public class MonetTLPBase extends TernaryLogicPartitioningOracleBase<MonetExpres
     }
 
     List<MonetExpression> generateFetchColumns() {
-        return Arrays.asList(new MonetColumnValue(targetTables.getColumns().get(0), null));
+        if (Randomly.getBooleanWithRatherLowProbability()) {
+            return Arrays.asList(new MonetColumnValue(MonetColumn.createDummy("*"), null));
+        }
+        List<MonetExpression> fetchColumns = new ArrayList<>();
+        List<MonetColumn> targetColumns = Randomly.nonEmptySubset(targetTables.getColumns());
+        for (MonetColumn c : targetColumns) {
+            fetchColumns.add(new MonetColumnValue(c, null));
+        }
+        return fetchColumns;
     }
 
     @Override

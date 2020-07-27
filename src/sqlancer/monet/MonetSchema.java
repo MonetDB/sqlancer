@@ -49,6 +49,9 @@ public class MonetSchema {
             super(name, null, columnType);
         }
 
+        public static MonetColumn createDummy(String name) {
+            return new MonetColumn(name, MonetDataType.INT);
+        }
     }
 
     public static class MonetTables extends AbstractTables<MonetTable, MonetColumn> {
