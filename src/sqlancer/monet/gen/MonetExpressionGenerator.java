@@ -333,7 +333,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     }
 
     private enum AnyTypeExpression {
-        CAST, FUNCTION, CASE, COALESCE, CONSTANT
+        CAST, FUNCTION, CONSTANT, CASE, COALESCE
     }
 
     private MonetExpression generateAnyTypeExpression(int depth, Randomly r, MonetDataType type) {
@@ -348,13 +348,13 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
             if (type == MonetDataType.STRING && Randomly.getBooleanWithSmallProbability())
                 return generateConcat(depth);
             return generateFunction(depth + 1, type);
+        case CONSTANT:
+            return generateConstant(r, type);
         case CASE:
             int noptions = Randomly.smallNumber() + 1;
             return new MonetCaseOperation(generateExpression(depth + 1),
                 generateExpressions(depth + 1, noptions), generateExpressions(depth + 1, noptions, type),
                 Randomly.getBoolean() ? generateExpression(depth + 1, type) : null);
-        case CONSTANT:
-            return generateConstant(r, type);
         case COALESCE:
             int options = Randomly.smallNumber() + 2;
             return new MonetCoalesceOperation(generateExpressions(depth + 1, options, type));

@@ -45,8 +45,9 @@ public final class MonetCommon {
         errors.add("conversion of");
         errors.add("value too long for type");
         errors.add("Numerical argument out of domain");
-        errors.add("value too large or not a number in:");
-        errors.add("value exceeds limits of type int");
+        errors.add("value too large or not a number in");
+        errors.add("value exceeds limits of type");
+        errors.add("Value too large to fit at");
         errors.add("are not equal");
         errors.add("Numerical result out of range");
         errors.add("Argument 2 to round function must be positive");
