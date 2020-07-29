@@ -144,6 +144,7 @@ public class MonetTableGenerator {
             constraintSubset.remove(ColumnConstraint.GENERATED);
             constraintSubset.remove(ColumnConstraint.DEFAULT);
             constraintSubset.remove(ColumnConstraint.NULL_OR_NOT_NULL);
+            constraintSubset.remove(ColumnConstraint.UNIQUE);
         }
         for (ColumnConstraint c : constraintSubset) {
             sb.append(" ");
