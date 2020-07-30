@@ -104,7 +104,9 @@ public final class MonetExpectedValueVisitor implements MonetVisitor {
 
     @Override
     public void visit(MonetCaseOperation op) {
-        visit(op.getSwitchCondition());
+        if (op.getSwitchCondition() != null) {
+            visit(op.getSwitchCondition());
+        }
         for (int i = 0; i < op.getConditions().size(); i++) {
             visit(op.getConditions().get(i));
             visit(op.getExpressions().get(i));

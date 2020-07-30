@@ -281,8 +281,11 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
 
     @Override
     public void visit(MonetCaseOperation op) {
-        sb.append("CASE ");
-        visit(op.getSwitchCondition());
+        sb.append("CASE");
+        if (op.getSwitchCondition() != null) {
+            sb.append(" ");
+            visit(op.getSwitchCondition());
+        }
         for (int i = 0; i < op.getConditions().size(); i++) {
             sb.append(" WHEN ");
             visit(op.getConditions().get(i));
@@ -298,7 +301,7 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
 
     @Override
     public void visit(MonetCoalesceOperation op) {
-        sb.append("COALESCE (");
+        sb.append("COALESCE(");
         int i = 0;
         for (MonetExpression arg : op.getConditions()) {
             if (i++ != 0) {

@@ -191,9 +191,10 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
             return new MonetBetweenOperation(generateExpression(depth + 1, type),
                     generateExpression(depth + 1, type), generateExpression(depth + 1, type), Randomly.getBoolean(), Randomly.getBoolean());
         case CASE:
+            MonetDataType tp = Randomly.fromOptions(MonetDataType.values());
             int noptions = Randomly.smallNumber() + 1;
-            return new MonetCaseOperation(generateExpression(depth + 1),
-                    generateExpressions(depth + 1, noptions), generateExpressions(depth + 1, noptions, MonetDataType.BOOLEAN),
+            return new MonetCaseOperation(Randomly.getBoolean() ? generateExpression(depth + 1, tp) : null,
+                    generateExpressions(depth + 1, noptions, tp), generateExpressions(depth + 1, noptions, MonetDataType.BOOLEAN),
                     Randomly.getBoolean() ? generateExpression(depth + 1, MonetDataType.BOOLEAN) : null);
         case COALESCE:
             int options = Randomly.smallNumber() + 2;
@@ -351,9 +352,10 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         case CONSTANT:
             return generateConstant(r, type);
         case CASE:
+            MonetDataType tp = Randomly.fromOptions(MonetDataType.values());
             int noptions = Randomly.smallNumber() + 1;
-            return new MonetCaseOperation(generateExpression(depth + 1),
-                generateExpressions(depth + 1, noptions), generateExpressions(depth + 1, noptions, type),
+            return new MonetCaseOperation(Randomly.getBoolean() ? generateExpression(depth + 1, tp) : null,
+                generateExpressions(depth + 1, noptions, tp), generateExpressions(depth + 1, noptions, type),
                 Randomly.getBoolean() ? generateExpression(depth + 1, type) : null);
         case COALESCE:
             int options = Randomly.smallNumber() + 2;
@@ -406,9 +408,10 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
             return new MonetBinaryArithmeticOperation(generateExpression(depth + 1, MonetDataType.INT),
                     generateExpression(depth + 1, MonetDataType.INT), MonetBinaryOperator.getRandom());
         case CASE:
+            MonetDataType tp = Randomly.fromOptions(MonetDataType.values());
             int noptions = Randomly.smallNumber() + 1;
-            return new MonetCaseOperation(generateExpression(depth + 1),
-                generateExpressions(depth + 1, noptions), generateExpressions(depth + 1, noptions, MonetDataType.INT),
+            return new MonetCaseOperation(Randomly.getBoolean() ? generateExpression(depth + 1, tp) : null,
+                generateExpressions(depth + 1, noptions, tp), generateExpressions(depth + 1, noptions, MonetDataType.INT),
                 Randomly.getBoolean() ? generateExpression(depth + 1, MonetDataType.INT) : null);
         case COALESCE:
             int options = Randomly.smallNumber() + 2;

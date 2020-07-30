@@ -10,8 +10,9 @@ public enum MonetFunctionWithUnknownResult {
 
     // String functions
     ASCII("ascii", MonetDataType.INT, MonetDataType.STRING),
-    
-    //SPACE("space", MonetDataType.STRING, MonetDataType.INT),
+
+    /* These functions are dangerous if the input amount is large
+    //SPACE("space", MonetDataType.STRING, MonetDataType.INT),*/
 
     LENGTH("\"length\"", MonetDataType.INT, MonetDataType.STRING),
     CHAR_LENGTH("char_length", MonetDataType.INT, MonetDataType.STRING),
@@ -19,8 +20,9 @@ public enum MonetFunctionWithUnknownResult {
 
     REPLACE("replace", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.STRING, MonetDataType.STRING), 
     REVERSE("reverse", MonetDataType.STRING, MonetDataType.STRING),
-    //RIGHT("\"right\"", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT),
-    //LEFT("\"left\"", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT),
+    /* These functions are dangerous if the input amount is large
+    RIGHT("\"right\"", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT),
+    LEFT("\"left\"", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT),*/
     UPPER("upper", MonetDataType.STRING, MonetDataType.STRING),
     LOWER("lower", MonetDataType.STRING, MonetDataType.STRING),
 
@@ -77,30 +79,18 @@ public enum MonetFunctionWithUnknownResult {
     SCALE_DOWN("scale_down", MonetDataType.REAL, MonetDataType.REAL, MonetDataType.REAL),
 
     // trigonometric functions - complete
-    ACOS("acos", MonetDataType.REAL, MonetDataType.REAL), //
-    //ACOSD("acosd", MonetDataType.REAL), //
-    ASIN("asin", MonetDataType.REAL, MonetDataType.REAL), //
-    //ASIND("asind", MonetDataType.REAL), //
-    ATAN("atan", MonetDataType.REAL, MonetDataType.REAL, MonetDataType.REAL), //
-    //ATAND("atand", MonetDataType.REAL), //
-    //ATAN2("atan2", MonetDataType.REAL, MonetDataType.REAL), //
-    //ATAN2D("atan2d", MonetDataType.REAL, MonetDataType.REAL), //
-    COS("cos", MonetDataType.REAL, MonetDataType.REAL), //
-    //COSD("cosd", MonetDataType.REAL), //
-    COT("cot", MonetDataType.REAL, MonetDataType.REAL), //
-    //COTD("cotd", MonetDataType.REAL), //
-    SIN("sin", MonetDataType.REAL, MonetDataType.REAL), //
-    //SIND("sind", MonetDataType.REAL), //
-    TAN("tan", MonetDataType.REAL, MonetDataType.REAL), //
-    //TAND("tand", MonetDataType.REAL), //
+    ACOS("acos", MonetDataType.REAL, MonetDataType.REAL),
+    ASIN("asin", MonetDataType.REAL, MonetDataType.REAL),
+    ATAN("atan", MonetDataType.REAL, MonetDataType.REAL, MonetDataType.REAL),
+    COS("cos", MonetDataType.REAL, MonetDataType.REAL),
+    COT("cot", MonetDataType.REAL, MonetDataType.REAL),
+    SIN("sin", MonetDataType.REAL, MonetDataType.REAL),
+    TAN("tan", MonetDataType.REAL, MonetDataType.REAL),
 
     // hyperbolic functions - complete
-    SINH("sinh", MonetDataType.REAL, MonetDataType.REAL), //
-    COSH("cosh", MonetDataType.REAL, MonetDataType.REAL), //
-    TANH("tanh", MonetDataType.REAL, MonetDataType.REAL),//, //
-    //ASINH("asinh", MonetDataType.REAL), //
-    //ACOSH("acosh", MonetDataType.REAL), //
-    //ATANH("atanh", MonetDataType.REAL), //
+    SINH("sinh", MonetDataType.REAL, MonetDataType.REAL),
+    COSH("cosh", MonetDataType.REAL, MonetDataType.REAL),
+    TANH("tanh", MonetDataType.REAL, MonetDataType.REAL),
 
     //TODO We need polimorfism!
 
