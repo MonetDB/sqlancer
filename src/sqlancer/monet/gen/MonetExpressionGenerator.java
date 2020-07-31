@@ -487,9 +487,9 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         case DATE:
             return MonetConstant.createDateConstant(r.getIntegerBounded(2147483647));
         case MONTH_INTERVAL:
-            return MonetConstant.createMonthIntervalConstant(r.getInteger());
+            return MonetConstant.createMonthIntervalConstant(r.getIntegerBounded(2147483647));
         case SECOND_INTERVAL:
-            return MonetConstant.createSecondIntervalConstant(r.getInteger());
+            return MonetConstant.createSecondIntervalConstant(r.getIntegerBounded(2147483647));
         default:
             throw new AssertionError(type);
         }

@@ -18,23 +18,23 @@ public class MonetAggregate extends FunctionNode<MonetAggregateFunction, MonetEx
     private final boolean isDistinct;
 
     public enum MonetAggregateFunction {
-        AVG(1, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL), 
-        COUNT(1), MAX(1), MIN(1),
+        AVG(1, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL), 
+        COUNT(1, MonetDataType.INT), MAX(1), MIN(1),
         LISTAGG(1, MonetDataType.STRING),
         GROUP_CONCAT(1, MonetDataType.STRING),
         SUM(1, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL),
         PROD(1, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL),
         MEDIAN(1, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL),
-        MEDIAN_AVG(1, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL),
+        MEDIAN_AVG(1, MonetDataType.DOUBLE, MonetDataType.REAL),
 
-        STDDEV_SAMP(1, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL),
-        STDDEV_POP(1, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL),
-        VAR_POP(1, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL),
-        VAR_SAMP(1, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL),
+        STDDEV_SAMP(1, MonetDataType.DOUBLE, MonetDataType.REAL),
+        STDDEV_POP(1, MonetDataType.DOUBLE, MonetDataType.REAL),
+        VAR_POP(1, MonetDataType.DOUBLE, MonetDataType.REAL),
+        VAR_SAMP(1, MonetDataType.DOUBLE, MonetDataType.REAL),
 
-        COVAR_POP(2, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL),
-        COVAR_SAMP(2, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL),
-        CORR(2, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL);
+        COVAR_POP(2, MonetDataType.DOUBLE, MonetDataType.REAL),
+        COVAR_SAMP(2, MonetDataType.DOUBLE, MonetDataType.REAL),
+        CORR(2, MonetDataType.DOUBLE, MonetDataType.REAL);
 
         private final int nrArgs;
 

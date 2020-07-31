@@ -58,7 +58,6 @@ public enum MonetFunctionWithUnknownResult {
     RTRIM2("rtrim", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.STRING),
 
     // mathematical functions
-    ABS("abs", MonetDataType.REAL, MonetDataType.REAL),
     ROUND("round", MonetDataType.REAL, MonetDataType.REAL, MonetDataType.INT),
     SIGN("sign", MonetDataType.REAL, MonetDataType.REAL),
     CBRT("cbrt", MonetDataType.REAL, MonetDataType.REAL),
