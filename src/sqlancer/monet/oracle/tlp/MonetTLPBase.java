@@ -42,8 +42,6 @@ public class MonetTLPBase extends TernaryLogicPartitioningOracleBase<MonetExpres
 
     @Override
     public void check() throws SQLException {
-        // clear left-over query string from previous test
-        state.getState().queryString = null;
         s = state.getSchema();
         targetTables = s.getRandomTableNonEmptyTables();
         gen = new MonetExpressionGenerator(state).setColumns(targetTables.getColumns());

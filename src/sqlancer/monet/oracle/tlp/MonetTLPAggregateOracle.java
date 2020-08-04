@@ -72,11 +72,15 @@ public class MonetTLPAggregateOracle extends MonetTLPBase {
         String queryFormatString = "-- %s;\n-- result: %s";
         String firstQueryString = String.format(queryFormatString, originalQuery, firstResult);
         String secondQueryString = String.format(queryFormatString, metamorphicQuery, secondResult);
-        state.getState().queryString = String.format("%s\n%s", firstQueryString, secondQueryString);
-        if (firstResult == null && secondResult != null
-                || firstResult != null && (!firstResult.contentEquals(secondResult)
-                        && !ComparatorHelper.isEqualDouble(firstResult, secondResult))) {
-            String assertionMessage = String.format("the results mismatch!\n%s\n%s", firstQueryString, secondQueryString);
+        state.getState().getLocalState().log(String.format("%s\n%s", firstQueryString, secondQueryString));
+        if (firstResult == null && secondResult != null || firstResult != null && secondResult == null
+                || firstResult != null && !firstResult.contentEquals(secondResult)
+                        && !ComparatorHelper.isEqualDouble(firstResult, secondResult)) {
+            if (secondResult != null && secondResult.contains("Inf")) {
+                throw new IgnoreMeException(); // FIXME: average computation
+            }
+            String assertionMessage = String.format("the results mismatch!\n%s\n%s", firstQueryString,
+                    secondQueryString);
             throw new AssertionError(assertionMessage);
         }
 

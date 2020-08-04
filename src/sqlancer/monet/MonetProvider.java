@@ -172,7 +172,7 @@ public final class MonetProvider extends ProviderAdapter<MonetGlobalState, Monet
                 throw new AssertionError(e1);
             }
         }).collect(Collectors.toList());
-        return new CompositeTestOracle(oracles);
+        return new CompositeTestOracle(oracles, globalState);
     }
 
     @Override

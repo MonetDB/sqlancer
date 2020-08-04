@@ -49,8 +49,6 @@ public class MonetNoRECOracle extends NoRECBase<MonetGlobalState> implements Tes
 
     @Override
     public void check() throws SQLException {
-        // clear left-over query string from previous test
-        state.getState().queryString = null;
         MonetTables randomTables = s.getRandomTableNonEmptyTables();
         List<MonetColumn> columns = randomTables.getColumns();
         MonetExpression randomWhereCondition = getRandomWhereCondition(columns);
@@ -68,8 +66,8 @@ public class MonetNoRECOracle extends NoRECBase<MonetGlobalState> implements Tes
             String queryFormatString = "-- %s;\n-- count: %d";
             String firstQueryStringWithCount = String.format(queryFormatString, optimizedQueryString, firstCount);
             String secondQueryStringWithCount = String.format(queryFormatString, unoptimizedQueryString, secondCount);
-            state.getState().queryString = String.format("%s\n%s", firstQueryStringWithCount,
-                    secondQueryStringWithCount);
+            state.getState().getLocalState()
+                    .log(String.format("%s\n%s", firstQueryStringWithCount, secondQueryStringWithCount));
             String assertionMessage = String.format("the counts mismatch (%d and %d)!\n%s\n%s", firstCount, secondCount,
                     firstQueryStringWithCount, secondQueryStringWithCount);
             throw new AssertionError(assertionMessage);

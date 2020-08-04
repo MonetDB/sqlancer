@@ -53,7 +53,7 @@ public class MonetOptions {
                 oracles.add(new MonetTLPWhereOracle(globalState));
                 oracles.add(new MonetTLPHavingOracle(globalState));
                 oracles.add(new MonetTLPAggregateOracle(globalState));
-                return new CompositeTestOracle(oracles);
+                return new CompositeTestOracle(oracles, globalState);
             }
         };
 
