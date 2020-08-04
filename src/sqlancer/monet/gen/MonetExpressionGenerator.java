@@ -536,7 +536,11 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     }
 
     public MonetExpression generateAggregate() {
-        return getAggregate(MonetDataType.getRandomType());
+        if (Randomly.getBooleanWithRatherLowProbability()) {
+            return new MonetAggregate(new ArrayList<MonetExpression>(), MonetAggregateFunction.COUNT_ALL, Randomly.getBoolean());
+        } else {
+            return getAggregate(MonetDataType.getRandomType());
+        }
     }
 
     private MonetExpression getAggregate(MonetDataType dataType) {

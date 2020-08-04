@@ -21,6 +21,7 @@ import sqlancer.monet.ast.MonetPostfixOperation;
 import sqlancer.monet.ast.MonetPostfixText;
 import sqlancer.monet.ast.MonetPrefixOperation;
 import sqlancer.monet.ast.MonetSelect;
+import sqlancer.monet.ast.MonetAggregate.MonetAggregateFunction;
 import sqlancer.monet.ast.MonetSelect.MonetFromTable;
 import sqlancer.monet.ast.MonetSelect.MonetSubquery;
 import sqlancer.monet.MonetSchema.MonetDataType;
@@ -320,14 +321,15 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
 
     @Override
     public void visit(MonetAggregate op) {
-        sb.append(op.getFunction());
+        sb.append(op.getFunction().getName());
         sb.append("(");
-        /*if (op.isDistinct()) { Doesn't work for TLP
-            sb.append("DISTINCT ");
-        } else {*/
+
+        if (op.getFunction() == MonetAggregateFunction.COUNT_ALL) {
+            sb.append("*");
+        } else {
             sb.append("ALL ");
-        //}
-        visit(op.getArgs());
+            visit(op.getArgs());
+        }
         sb.append(")");
     }
 }

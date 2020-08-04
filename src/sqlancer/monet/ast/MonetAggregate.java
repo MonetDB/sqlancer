@@ -18,31 +18,34 @@ public class MonetAggregate extends FunctionNode<MonetAggregateFunction, MonetEx
     private final boolean isDistinct;
 
     public enum MonetAggregateFunction {
-        AVG(1, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL), 
-        COUNT(1, MonetDataType.INT), MAX(1), MIN(1),
-        LISTAGG(1, MonetDataType.STRING),
-        GROUP_CONCAT(1, MonetDataType.STRING),
-        SUM(1, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL),
-        PROD(1, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL),
-        MEDIAN(1, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL),
-        MEDIAN_AVG(1, MonetDataType.DOUBLE, MonetDataType.REAL),
+        AVG("avg", 1, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL), 
+        COUNT("count", 1, MonetDataType.INT), COUNT_ALL("count", 0), MAX("max", 1), MIN("min", 1),
+        LISTAGG("litagg", 1, MonetDataType.STRING),
+        GROUP_CONCAT("group_concat", 1, MonetDataType.STRING),
+        SUM("sum", 1, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL),
+        PROD("prod", 1, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL),
+        MEDIAN("median", 1, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL),
+        MEDIAN_AVG("median_avg", 1, MonetDataType.DOUBLE, MonetDataType.REAL),
 
-        STDDEV_SAMP(1, MonetDataType.DOUBLE, MonetDataType.REAL),
-        STDDEV_POP(1, MonetDataType.DOUBLE, MonetDataType.REAL),
-        VAR_POP(1, MonetDataType.DOUBLE, MonetDataType.REAL),
-        VAR_SAMP(1, MonetDataType.DOUBLE, MonetDataType.REAL),
+        STDDEV_POP("stddev_pop", 1, MonetDataType.DOUBLE, MonetDataType.REAL),
+        STDDEV_SAMP("stddev_samp", 1, MonetDataType.DOUBLE, MonetDataType.REAL),
+        VAR_POP("var_pop", 1, MonetDataType.DOUBLE, MonetDataType.REAL),
+        VAR_SAMP("var_samp", 1, MonetDataType.DOUBLE, MonetDataType.REAL),
 
-        COVAR_POP(2, MonetDataType.DOUBLE, MonetDataType.REAL),
-        COVAR_SAMP(2, MonetDataType.DOUBLE, MonetDataType.REAL),
-        CORR(2, MonetDataType.DOUBLE, MonetDataType.REAL);
+        COVAR_POP("covar_pop", 2, MonetDataType.DOUBLE, MonetDataType.REAL),
+        COVAR_SAMP("covar_samp", 2, MonetDataType.DOUBLE, MonetDataType.REAL),
+        CORR("corr", 2, MonetDataType.DOUBLE, MonetDataType.REAL);
 
         private final int nrArgs;
 
+        private final String name;
+
         private MonetDataType[] supportedReturnTypes;
 
-        MonetAggregateFunction(int nrArgs, MonetDataType... supportedReturnTypes) {
+        MonetAggregateFunction(String name, int nrArgs, MonetDataType... supportedReturnTypes) {
             this.supportedReturnTypes = supportedReturnTypes.clone();
             this.nrArgs = nrArgs;
+            this.name = name;
         }
 
         public static MonetAggregateFunction getRandom() {
@@ -77,6 +80,10 @@ public class MonetAggregate extends FunctionNode<MonetAggregateFunction, MonetEx
 
         public int getNrArgs() {
             return nrArgs;
+        }
+
+        public String getName() {
+            return name;
         }
     }
 

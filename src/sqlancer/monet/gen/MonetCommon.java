@@ -54,6 +54,8 @@ public final class MonetCommon {
         errors.add("Overflow");
         errors.add("Invalid result");
         errors.add("is not a number");
+        errors.add("on both sides of the JOIN expression");
+        errors.add("specified more than once");
         /* TODO the following errors should be removed */
         errors.add("Decimal ");
         errors.add("Timestamp ");
