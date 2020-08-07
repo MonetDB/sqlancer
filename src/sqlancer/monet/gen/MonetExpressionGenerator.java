@@ -455,15 +455,16 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         if (Randomly.getBooleanWithSmallProbability()) {
             return MonetConstant.createNullConstant();
         }
-        // if (Randomly.getBooleanWithSmallProbability()) {
-        // return MonetConstant.createTextConstant(r.getString());
-        // }
         switch (type) {
         case INT:
+            long val = r.getInteger();
+            if (val == (long) Byte.MIN_VALUE || val == (long) Short.MIN_VALUE || val == (long) Integer.MIN_VALUE || val == Long.MIN_VALUE) { /* Monet uses MIN_VALUEs as NULL */
+                val++;
+            }
             if (Randomly.getBooleanWithSmallProbability()) {
-                return MonetConstant.createTextConstant(String.valueOf(r.getInteger()));
+                return MonetConstant.createTextConstant(String.valueOf(val));
             } else {
-                return MonetConstant.createIntConstant(r.getInteger());
+                return MonetConstant.createIntConstant(val);
             }
         case BOOLEAN:
             if (Randomly.getBooleanWithSmallProbability()) {
@@ -487,9 +488,9 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         case DATE:
             return MonetConstant.createDateConstant(r.getIntegerBounded(2147483647));
         case MONTH_INTERVAL:
-            return MonetConstant.createMonthIntervalConstant(r.getIntegerBounded(2147483647));
+            return MonetConstant.createMonthIntervalConstant(r.getIntegerBounded(-2147483647, 2147483647));
         case SECOND_INTERVAL:
-            return MonetConstant.createSecondIntervalConstant(r.getIntegerBounded(2147483647));
+            return MonetConstant.createSecondIntervalConstant(r.getIntegerBounded(-2147483647, 2147483647));
         default:
             throw new AssertionError(type);
         }

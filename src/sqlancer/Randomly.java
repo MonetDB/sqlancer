@@ -199,9 +199,9 @@ public final class Randomly {
         }
     }
 
-    public long getIntegerBounded(int max) {
+    private long getIntegerBoundedImp(int min, int max) {
         if (smallBiasProbability()) {
-            return Randomly.fromOptions(-1L, (long)max, 0L, 1L, 0L);
+            return Randomly.fromOptions(-1L, (long)max, (long)min, 1L, 0L);
         } else {
             if (cacheProbability()) {
                 Long l = getFromLongCache();
@@ -213,6 +213,14 @@ public final class Randomly {
             addToCache(nextLong);
             return nextLong;
         }
+    }
+
+    public long getIntegerBounded(int max) {
+        return getIntegerBoundedImp(0, max);
+    }
+
+    public long getIntegerBounded(int min, int max) {
+        return getIntegerBoundedImp(min, max);
     }
 
     public String getString() {
