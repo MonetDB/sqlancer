@@ -13,6 +13,7 @@ import sqlancer.NoRECBase;
 import sqlancer.Query;
 import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.SQLancerResultSet;
 import sqlancer.TestOracle;
 import sqlancer.monet.MonetCompoundDataType;
 import sqlancer.monet.MonetGlobalState;
@@ -112,13 +113,13 @@ public class MonetNoRECOracle extends NoRECBase<MonetGlobalState> implements Tes
         select.setSelectType(SelectType.ALL);
         select.setJoinClauses(joinStatements);
         int secondCount = 0;
-        unoptimizedQueryString = "SELECT SUM(count) FROM (" + MonetVisitor.asString(select) + ") as res";
+        unoptimizedQueryString = "SELECT CAST(SUM(count) AS BIGINT) FROM (" + MonetVisitor.asString(select) + ") as res";
         if (options.logEachSelect()) {
             logger.writeCurrent(unoptimizedQueryString);
         }
         errors.add("canceling statement due to statement timeout");
         Query q = new QueryAdapter(unoptimizedQueryString, errors);
-        ResultSet rs;
+        SQLancerResultSet rs;
         try {
             rs = q.executeAndGet(state);
         } catch (Exception e) {

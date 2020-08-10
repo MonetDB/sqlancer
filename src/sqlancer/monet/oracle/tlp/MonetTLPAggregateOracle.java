@@ -1,7 +1,6 @@
 package sqlancer.monet.oracle.tlp;
 
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +12,7 @@ import sqlancer.ComparatorHelper;
 import sqlancer.IgnoreMeException;
 import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.SQLancerResultSet;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.MonetVisitor;
@@ -117,7 +117,7 @@ public class MonetTLPAggregateOracle extends MonetTLPBase {
         }
         String resultString;
         QueryAdapter q = new QueryAdapter(queryString, errors);
-        try (ResultSet result = q.executeAndGet(state)) {
+        try (SQLancerResultSet result = q.executeAndGet(state)) {
             if (result == null) {
                 throw new IgnoreMeException();
             }
