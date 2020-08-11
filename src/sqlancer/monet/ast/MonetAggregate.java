@@ -20,7 +20,7 @@ public class MonetAggregate extends FunctionNode<MonetAggregateFunction, MonetEx
     public enum MonetAggregateFunction {
         AVG("avg", 1, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL), 
         COUNT("count", 1, MonetDataType.INT), COUNT_ALL("count", 0), MAX("max", 1), MIN("min", 1),
-        LISTAGG("litagg", 1, MonetDataType.STRING),
+        LISTAGG("listagg", 1, MonetDataType.STRING),
         GROUP_CONCAT("group_concat", 1, MonetDataType.STRING),
         SUM("sum", 1, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL),
         PROD("prod", 1, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL),
