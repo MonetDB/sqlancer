@@ -1,6 +1,8 @@
 package sqlancer.monet.gen;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import sqlancer.Query;
 import sqlancer.QueryAdapter;
@@ -28,8 +30,9 @@ public final class MonetTruncateGenerator {
             sb.append(" ");
             sb.append(Randomly.fromOptions("CASCADE", "RESTRICT"));
         }
-        return new QueryAdapter(sb.toString(),
-                Arrays.asList("cannot truncate a table referenced in a foreign key constraint", "is not a table", "cannot truncate view"));
+        Set<String> errors = new HashSet<>(Arrays.asList("cannot truncate a table referenced in a foreign key constraint", "is not a table", "cannot truncate view"));
+        MonetCommon.addCommonInsertUpdateErrors(errors);
+        return new QueryAdapter(sb.toString(), errors);
     }
 
 }

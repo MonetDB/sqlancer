@@ -70,6 +70,7 @@ public final class MonetCommon {
         errors.add("value too large or not a number in");
         errors.add("PRIMARY KEY constraint");
         errors.add("UNIQUE constraint");
+        errors.add("FOREIGN KEY constraint");
     }
 
     public static boolean appendDataType(MonetDataType type, StringBuilder sb, boolean allowSerial,

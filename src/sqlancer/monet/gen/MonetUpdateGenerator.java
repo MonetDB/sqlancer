@@ -58,11 +58,10 @@ public final class MonetUpdateGenerator {
             }
         }
         errors.add("invalid input syntax for ");
-        errors.add("violates check constraint");
         errors.add("but expression is of type");
-
         errors.add("conversion of");
         errors.add("cannot update view");
+
         MonetCommon.addCommonExpressionErrors(errors);
         if (!Randomly.getBooleanWithSmallProbability()) {
             sb.append(" WHERE ");

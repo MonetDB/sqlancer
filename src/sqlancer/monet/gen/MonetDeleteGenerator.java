@@ -19,8 +19,7 @@ public final class MonetDeleteGenerator {
     public static Query create(MonetGlobalState globalState) {
         MonetTable table = globalState.getSchema().getRandomTable(t -> !t.isView());
         Set<String> errors = new HashSet<>();
-        errors.add("violates foreign key constraint");
-        errors.add("violates not-null constraint");
+        MonetCommon.addCommonInsertUpdateErrors(errors);
         StringBuilder sb = new StringBuilder("DELETE FROM");
         sb.append(" ");
         sb.append(table.getName());

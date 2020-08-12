@@ -69,11 +69,7 @@ public final class MonetInsertGenerator {
         errors.add("duplicate key value violates unique constraint");
         errors.add("identity column defined as GENERATED ALWAYS");
         errors.add("out of range");
-        errors.add("violates check constraint");
-        errors.add("no partition of relation");
         errors.add("invalid input syntax");
-        errors.add("FOREIGN KEY constraint");
-        errors.add("data type unknown");
 
         return new QueryAdapter(sb.toString(), errors);
     }
