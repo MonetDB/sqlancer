@@ -26,7 +26,6 @@ public final class MonetInsertGenerator {
         MonetCommon.addCommonExpressionErrors(errors);
         MonetCommon.addCommonInsertUpdateErrors(errors);
         errors.add("multiple assignments to same column");
-        errors.add("violates foreign key constraint");
         errors.add("violates not-null constraint");
 
         errors.add("cannot insert into view");
@@ -73,8 +72,7 @@ public final class MonetInsertGenerator {
         errors.add("violates check constraint");
         errors.add("no partition of relation");
         errors.add("invalid input syntax");
-        errors.add("division by zero");
-        errors.add("violates foreign key constraint");
+        errors.add("FOREIGN KEY constraint");
         errors.add("data type unknown");
 
         return new QueryAdapter(sb.toString(), errors);

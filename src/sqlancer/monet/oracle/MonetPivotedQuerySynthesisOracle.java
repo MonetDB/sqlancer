@@ -112,7 +112,15 @@ public class MonetPivotedQuerySynthesisOracle implements TestOracle {
                 sb2.append(rw.getValues().get(c).getTextRepresentation());
             }
         }
-        sb2.append(") as result;");
+        sb2.append(") as result(");
+        i = 0;
+        for (MonetColumn c : fetchColumns) {
+            if (i++ != 0) {
+                sb2.append(",");
+            }
+            sb2.append(c.getFullQualifiedName());
+        }
+        sb2.append(");");
         state.queryThatSelectsRow = sb2.toString();
 
         MonetToStringVisitor visitor = new MonetToStringVisitor();
@@ -158,8 +166,17 @@ public class MonetPivotedQuerySynthesisOracle implements TestOracle {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT * FROM ("); // ANOTHER SELECT TO USE ORDER BY without restrictions
         sb.append(queryString);
-        sb.append(") as result WHERE ");
+        sb.append(") as result(");
         int i = 0;
+        for (MonetColumn c : fetchColumns) {
+            if (i++ != 0) {
+                sb.append(",");
+            }
+            sb.append(c.getTable().getName());
+            sb.append(c.getName());
+        }
+        sb.append(") WHERE ");
+        i = 0;
         for (MonetColumn c : fetchColumns) {
             if (i++ != 0) {
                 sb.append(" AND ");

@@ -6,6 +6,7 @@ import sqlancer.monet.MonetSchema.MonetColumn;
 import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.ast.MonetAggregate;
 import sqlancer.monet.ast.MonetBetweenOperation;
+import sqlancer.monet.ast.MonetBinaryComparisonOperation;
 import sqlancer.monet.ast.MonetCastOperation;
 import sqlancer.monet.ast.MonetCaseOperation;
 import sqlancer.monet.ast.MonetCoalesceOperation;
@@ -14,6 +15,7 @@ import sqlancer.monet.ast.MonetConstant;
 import sqlancer.monet.ast.MonetExpression;
 import sqlancer.monet.ast.MonetFunction;
 import sqlancer.monet.ast.MonetInOperation;
+import sqlancer.monet.ast.MonetLikeOperation;
 import sqlancer.monet.ast.MonetOrderByTerm;
 import sqlancer.monet.ast.MonetPostfixOperation;
 import sqlancer.monet.ast.MonetPostfixText;
@@ -90,6 +92,10 @@ public interface MonetVisitor {
             visit((MonetFromTable) expression);
         } else if (expression instanceof MonetSubquery) {
             visit((MonetSubquery) expression);
+        } else if (expression instanceof MonetLikeOperation) {
+            visit((MonetLikeOperation) expression);
+        } else if (expression instanceof MonetBinaryComparisonOperation) {
+            visit((MonetBinaryComparisonOperation) expression);
         } else {
             throw new AssertionError(expression);
         }

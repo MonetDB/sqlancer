@@ -198,7 +198,8 @@ public final class MonetCommon {
             sb.append("(");
             sb.append(otherColumns.stream().map(c -> c.getName()).collect(Collectors.joining(", ")));
             sb.append(")");
-            errors.add("could not find referenced PRIMARY KEY in table");
+            errors.add("could not find referenced");
+            errors.add("is not compatible with the referenced");
             if (Randomly.getBoolean()) {
                 sb.append(Randomly.fromOptions(" MATCH FULL", " MATCH SIMPLE", " MATCH PARTIAL"));
             }
