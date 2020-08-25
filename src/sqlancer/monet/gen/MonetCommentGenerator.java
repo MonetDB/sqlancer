@@ -7,6 +7,7 @@ import sqlancer.common.query.Query;
 import sqlancer.common.query.QueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetTable;
+import sqlancer.monet.ast.MonetConstant;
 
 /**
  * @see https://www.postgresql.org/docs/devel/sql-comment.html
@@ -52,9 +53,7 @@ public final class MonetCommentGenerator {
         if (Randomly.getBoolean()) {
             sb.append("NULL");
         } else {
-            sb.append("'");
-            sb.append(globalState.getRandomly().getString().replace("'", "''"));
-            sb.append("'");
+            sb.append(MonetConstant.createTextConstant(globalState.getRandomly().getString()).getTextRepresentation());
         }
         return new QueryAdapter(sb.toString(), ExpectedErrors.from("no such table", "no such column", "no such index", "COMMENT ON tmp object not allowed"));
     }

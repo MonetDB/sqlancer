@@ -1,5 +1,6 @@
 package sqlancer.monet.gen;
 
+import java.util.Arrays;
 import java.util.List;
 
 import sqlancer.IgnoreMeException;
@@ -56,13 +57,7 @@ public class MonetAlterTableGenerator {
         errors.add("not supported on TEMPORARY table");
         errors.add("ALTER TABLE: can't alter temporary table");        
 
-        List<Action> action;
-        if (Randomly.getBoolean()) {
-            action = Randomly.nonEmptySubset(Action.values());
-        } else {
-            // make it more likely that the ALTER TABLE succeeds
-            action = Randomly.subset(Randomly.smallNumber(), Action.values());
-        }
+        List<Action> action = Randomly.nonEmptySubset(Arrays.asList(Action.values()), 1);
         if (randomTable.getColumns().size() == 1) {
             action.remove(Action.ALTER_TABLE_DROP_COLUMN);
         }

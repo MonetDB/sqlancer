@@ -13,7 +13,6 @@ import sqlancer.common.query.ExpectedErrors;
 import sqlancer.common.query.Query;
 import sqlancer.common.query.QueryAdapter;
 import sqlancer.common.query.QueryProvider;
-import sqlancer.common.query.SQLancerResultSet;
 import sqlancer.monet.gen.MonetAlterTableGenerator;
 import sqlancer.monet.gen.MonetAnalyzeGenerator;
 import sqlancer.monet.gen.MonetCommentGenerator;

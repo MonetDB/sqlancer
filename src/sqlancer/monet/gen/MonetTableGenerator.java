@@ -56,11 +56,11 @@ public class MonetTableGenerator {
     private Query generate() {
         columnCanHavePrimaryKey = true;
         sb.append("CREATE");
-        if (Randomly.getBoolean()) {
+        /*if (Randomly.getBoolean()) {
             sb.append(" ");
             isTemporaryTable = true;
             sb.append(Randomly.fromOptions("TEMPORARY", "TEMP"));
-        }
+        }*/
         sb.append(" TABLE");
         if (Randomly.getBoolean()) {
             sb.append(" IF NOT EXISTS");
