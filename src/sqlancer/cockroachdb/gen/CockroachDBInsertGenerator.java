@@ -1,18 +1,17 @@
 package sqlancer.cockroachdb.gen;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
 import sqlancer.cockroachdb.CockroachDBErrors;
 import sqlancer.cockroachdb.CockroachDBProvider.CockroachDBGlobalState;
 import sqlancer.cockroachdb.CockroachDBSchema.CockroachDBColumn;
 import sqlancer.cockroachdb.CockroachDBSchema.CockroachDBTable;
 import sqlancer.cockroachdb.CockroachDBVisitor;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 
 public final class CockroachDBInsertGenerator {
 
@@ -20,7 +19,7 @@ public final class CockroachDBInsertGenerator {
     }
 
     public static Query insert(CockroachDBGlobalState globalState) {
-        Set<String> errors = new HashSet<>();
+        ExpectedErrors errors = new ExpectedErrors();
 
         CockroachDBErrors.addExpressionErrors(errors); // e.g., caused by computed columns
         errors.add("violates not-null constraint");

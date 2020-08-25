@@ -1,13 +1,12 @@
 package sqlancer.tidb.gen;
 
 import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.tidb.TiDBErrors;
 import sqlancer.tidb.TiDBExpressionGenerator;
 import sqlancer.tidb.TiDBProvider.TiDBGlobalState;
@@ -21,7 +20,7 @@ public final class TiDBUpdateGenerator {
     }
 
     public static Query getQuery(TiDBGlobalState globalState) throws SQLException {
-        Set<String> errors = new HashSet<>();
+        ExpectedErrors errors = new ExpectedErrors();
         TiDBTable table = globalState.getSchema().getRandomTable(t -> !t.isView());
         TiDBExpressionGenerator gen = new TiDBExpressionGenerator(globalState).setColumns(table.getColumns());
         StringBuilder sb = new StringBuilder("UPDATE ");

@@ -1,13 +1,10 @@
 package sqlancer.clickhouse.oracle.tlp;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import sqlancer.Randomly;
-import sqlancer.TernaryLogicPartitioningOracleBase;
-import sqlancer.TestOracle;
 import sqlancer.clickhouse.ClickHouseErrors;
 import sqlancer.clickhouse.ClickHouseProvider.ClickHouseGlobalState;
 import sqlancer.clickhouse.ClickHouseSchema;
@@ -19,7 +16,9 @@ import sqlancer.clickhouse.ast.ClickHouseExpression.ClickHouseJoin;
 import sqlancer.clickhouse.ast.ClickHouseSelect;
 import sqlancer.clickhouse.gen.ClickHouseCommon;
 import sqlancer.clickhouse.gen.ClickHouseExpressionGenerator;
-import sqlancer.gen.ExpressionGenerator;
+import sqlancer.common.gen.ExpressionGenerator;
+import sqlancer.common.oracle.TernaryLogicPartitioningOracleBase;
+import sqlancer.common.oracle.TestOracle;
 
 public class ClickHouseTLPBase extends TernaryLogicPartitioningOracleBase<ClickHouseExpression, ClickHouseGlobalState>
         implements TestOracle {
@@ -52,10 +51,8 @@ public class ClickHouseTLPBase extends TernaryLogicPartitioningOracleBase<ClickH
     }
 
     List<ClickHouseExpression> generateFetchColumns() {
-        List<ClickHouseExpression> columns = new ArrayList<>();
-        columns = Randomly.nonEmptySubset(targetTables.getColumns()).stream()
+        return Randomly.nonEmptySubset(targetTables.getColumns()).stream()
                 .map(c -> new ClickHouseColumnReference(c, null)).collect(Collectors.toList());
-        return columns;
     }
 
     @Override

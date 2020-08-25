@@ -4,22 +4,17 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import sqlancer.AbstractAction;
-import sqlancer.CompositeTestOracle;
 import sqlancer.GlobalState;
 import sqlancer.IgnoreMeException;
 import sqlancer.ProviderAdapter;
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
-import sqlancer.QueryProvider;
 import sqlancer.Randomly;
 import sqlancer.StatementExecutor;
-import sqlancer.TestOracle;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.QueryProvider;
 import sqlancer.tidb.TiDBProvider.TiDBGlobalState;
 import sqlancer.tidb.gen.TiDBAlterTableGenerator;
 import sqlancer.tidb.gen.TiDBAnalyzeTableGenerator;
@@ -51,7 +46,7 @@ public class TiDBProvider extends ProviderAdapter<TiDBGlobalState, TiDBOptions> 
         VIEW_GENERATOR(TiDBViewGenerator::getQuery), //
         ALTER_TABLE(TiDBAlterTableGenerator::getQuery), //
         EXPLAIN((g) -> {
-            Set<String> errors = new HashSet<>();
+            ExpectedErrors errors = new ExpectedErrors();
             TiDBErrors.addExpressionErrors(errors);
             TiDBErrors.addExpressionHavingErrors(errors);
             return new QueryAdapter(
@@ -133,18 +128,6 @@ public class TiDBProvider extends ProviderAdapter<TiDBGlobalState, TiDBOptions> 
                 throw new AssertionError(e);
             }
         }
-    }
-
-    @Override
-    protected TestOracle getTestOracle(TiDBGlobalState globalState) throws SQLException {
-        List<TestOracle> oracles = globalState.getDmbsSpecificOptions().oracle.stream().map(o -> {
-            try {
-                return o.create(globalState);
-            } catch (SQLException e1) {
-                throw new AssertionError(e1);
-            }
-        }).collect(Collectors.toList());
-        return new CompositeTestOracle(oracles, globalState);
     }
 
     @Override

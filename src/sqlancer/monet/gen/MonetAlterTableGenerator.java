@@ -1,14 +1,12 @@
 package sqlancer.monet.gen;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import sqlancer.IgnoreMeException;
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetColumn;
 import sqlancer.monet.MonetSchema.MonetTable;
@@ -23,7 +21,7 @@ public class MonetAlterTableGenerator {
     //private List<String> opClasses;
     private MonetGlobalState globalState;
 
-    private enum Action {
+    protected enum Action {
         //ALTER_TABLE_ADD_COLUMN, // [ COLUMN ] column data_type [ COLLATE collation ] [
         // column_constraint [ ... ] ]
         ALTER_TABLE_DROP_COLUMN, // DROP [ COLUMN ] [ IF EXISTS ] column [ RESTRICT | CASCADE ]
@@ -49,34 +47,40 @@ public class MonetAlterTableGenerator {
         return new MonetAlterTableGenerator(randomTable, globalState, generateOnlyKnown).generate();
     }
 
-    public Query generate() {
-        Set<String> errors = new HashSet<>();
+    public List<Action> getActions(ExpectedErrors errors) {
         MonetCommon.addCommonExpressionErrors(errors);
         MonetCommon.addCommonInsertUpdateErrors(errors);
         MonetCommon.addCommonTableErrors(errors);
 
         errors.add("conversion of");
         errors.add("not supported on TEMPORARY table");
-        errors.add("ALTER TABLE: can't alter temporary table");
-        StringBuilder sb = new StringBuilder();
-        sb.append("ALTER TABLE ");
-        sb.append(" ");
-        sb.append(randomTable.getName());
-        sb.append(" ");
-        int i = 0;
-        List<Action> action= Randomly.nonEmptySubset(Arrays.asList(Action.values()), 1);
-        /*if (Randomly.getBoolean()) {
+        errors.add("ALTER TABLE: can't alter temporary table");        
+
+        List<Action> action;
+        if (Randomly.getBoolean()) {
             action = Randomly.nonEmptySubset(Action.values());
         } else {
             // make it more likely that the ALTER TABLE succeeds
             action = Randomly.subset(Randomly.smallNumber(), Action.values());
-        }*/
+        }
         if (randomTable.getColumns().size() == 1) {
             action.remove(Action.ALTER_TABLE_DROP_COLUMN);
         }
         if (action.isEmpty()) {
             throw new IgnoreMeException();
         }
+        return action;
+    }
+
+    public Query generate() {
+        ExpectedErrors errors = new ExpectedErrors();
+        int i = 0;
+        List<Action> action = getActions(errors);
+        StringBuilder sb = new StringBuilder();
+        sb.append("ALTER TABLE ");
+        sb.append(" ");
+        sb.append(randomTable.getName());
+        sb.append(" ");
         for (Action a : action) {
             if (i++ != 0) {
                 sb.append(", ");

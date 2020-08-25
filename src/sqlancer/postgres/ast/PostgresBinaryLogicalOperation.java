@@ -1,8 +1,8 @@
 package sqlancer.postgres.ast;
 
 import sqlancer.Randomly;
-import sqlancer.ast.BinaryOperatorNode;
-import sqlancer.ast.BinaryOperatorNode.Operator;
+import sqlancer.common.ast.BinaryOperatorNode;
+import sqlancer.common.ast.BinaryOperatorNode.Operator;
 import sqlancer.postgres.PostgresSchema.PostgresDataType;
 import sqlancer.postgres.ast.PostgresBinaryLogicalOperation.BinaryLogicalOperator;
 
@@ -77,7 +77,12 @@ public class PostgresBinaryLogicalOperation extends BinaryOperatorNode<PostgresE
 
     @Override
     public PostgresConstant getExpectedValue() {
-        return getOp().apply(getLeft().getExpectedValue(), getRight().getExpectedValue());
+        PostgresConstant leftExpectedValue = getLeft().getExpectedValue();
+        PostgresConstant rightExpectedValue = getRight().getExpectedValue();
+        if (leftExpectedValue == null || rightExpectedValue == null) {
+            return null;
+        }
+        return getOp().apply(leftExpectedValue, rightExpectedValue);
     }
 
 }

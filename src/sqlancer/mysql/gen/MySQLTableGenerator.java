@@ -7,9 +7,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import sqlancer.IgnoreMeException;
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.mysql.MySQLBugs;
 import sqlancer.mysql.MySQLSchema;
 import sqlancer.mysql.MySQLSchema.MySQLDataType;
@@ -42,7 +43,7 @@ public class MySQLTableGenerator {
     }
 
     private Query create() {
-        List<String> errors = new ArrayList<>();
+        ExpectedErrors errors = new ExpectedErrors();
 
         sb.append("CREATE");
         // TODO support temporary tables in the schema
@@ -86,13 +87,14 @@ public class MySQLTableGenerator {
 
     }
 
-    private void addCommonErrors(List<String> list) {
+    private void addCommonErrors(ExpectedErrors list) {
         list.add("The storage engine for the table doesn't support");
         list.add("doesn't have this option");
         list.add("must include all columns");
         list.add("not allowed type for this type of partitioning");
         list.add("doesn't support BLOB/TEXT columns");
         list.add("A BLOB field is not allowed in partition function");
+        list.add("Too many keys specified; max 1 keys allowed");
     }
 
     private enum PartitionOptions {

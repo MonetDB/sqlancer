@@ -1,11 +1,9 @@
 package sqlancer.postgres.gen;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.postgres.PostgresGlobalState;
 import sqlancer.postgres.PostgresVisitor;
 import sqlancer.postgres.ast.PostgresSelect;
@@ -17,7 +15,7 @@ public final class PostgresViewGenerator {
     }
 
     public static Query create(PostgresGlobalState globalState) {
-        Set<String> errors = new HashSet<>();
+        ExpectedErrors errors = new ExpectedErrors();
         StringBuilder sb = new StringBuilder("CREATE");
         boolean materialized;
         boolean recursive = false;

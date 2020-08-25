@@ -5,10 +5,10 @@ import sqlancer.monet.MonetSchema.MonetDataType;
 public interface MonetExpression {
 
     default MonetDataType getExpressionType() {
-        throw new AssertionError("operator does not support PQS evaluation!");
+        return null;
     }
 
     default MonetConstant getExpectedValue() {
-        throw new AssertionError("operator does not support PQS evaluation!");
+        return null;
     }
 }

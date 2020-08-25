@@ -1,11 +1,9 @@
 package sqlancer.postgres.gen;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 
 public final class PostgresTransactionGenerator {
 
@@ -13,7 +11,7 @@ public final class PostgresTransactionGenerator {
     }
 
     public static Query executeBegin() {
-        List<String> errors = new ArrayList<>();
+        ExpectedErrors errors = new ExpectedErrors();
         StringBuilder sb = new StringBuilder("BEGIN");
         if (Randomly.getBoolean()) {
             errors.add("SET TRANSACTION ISOLATION LEVEL must be called before any query");

@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.mariadb.MariaDBBugs;
 import sqlancer.mariadb.MariaDBSchema;
 import sqlancer.mariadb.MariaDBSchema.MariaDBDataType;
@@ -22,7 +23,7 @@ public class MariaDBTableGenerator {
     private PrimaryKeyState primaryKeyState = Randomly.fromOptions(PrimaryKeyState.values());
     private final List<String> columnNames = new ArrayList<>();
     private final Randomly r;
-    private final List<String> errors = new ArrayList<>();
+    private final ExpectedErrors errors = new ExpectedErrors();
 
     public MariaDBTableGenerator(String tableName, Randomly r, MariaDBSchema newSchema) {
         this.tableName = tableName;

@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import sqlancer.IgnoreMeException;
 import sqlancer.Randomly;
-import sqlancer.gen.ExpressionGenerator;
+import sqlancer.common.gen.ExpressionGenerator;
 import sqlancer.monet.MonetCompoundDataType;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetProvider;
@@ -56,16 +57,22 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
 
     private MonetRowValue rw;
 
-    //private boolean expectedResult;
+    /*private boolean expectedResult;*/
 
-    /*private MonetGlobalState globalState;*/
+    private MonetGlobalState globalState;
 
     private boolean allowAggregateFunctions;
+
+    private final Map<String, Character> functionsAndTypes;
+
+    private final List<Character> allowedFunctionTypes;
 
     public MonetExpressionGenerator(MonetGlobalState globalState) {
         this.r = globalState.getRandomly();
         this.maxDepth = globalState.getOptions().getMaxExpressionDepth();
-        //this.globalState = globalState;
+        this.globalState = globalState;
+        this.functionsAndTypes = globalState.getFunctionsAndTypes();
+        this.allowedFunctionTypes = globalState.getAllowedFunctionTypes();
     }
 
     public MonetExpressionGenerator setColumns(List<MonetColumn> columns) {
@@ -123,6 +130,10 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     private MonetExpression generateFunctionWithUnknownResult(int depth, MonetDataType type) {
         List<MonetFunctionWithUnknownResult> supportedFunctions = MonetFunctionWithUnknownResult
                 .getSupportedFunctions(type);
+        // filters functions by allowed type (STABLE 's', IMMUTABLE 'i', VOLATILE 'v')
+        supportedFunctions = supportedFunctions.stream()
+                .filter(f -> allowedFunctionTypes.contains(functionsAndTypes.get(f.getName())))
+                .collect(Collectors.toList());
         if (supportedFunctions.isEmpty()) {
             throw new IgnoreMeException();
         }
@@ -133,6 +144,9 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     private MonetExpression generateFunctionWithKnownResult(int depth, MonetDataType type) {
         List<MonetFunctionWithResult> functions = Stream.of(MonetFunction.MonetFunctionWithResult.values())
                 .filter(f -> f.supportsReturnType(type)).collect(Collectors.toList());
+        // filters functions by allowed type (STABLE 's', IMMUTABLE 'i', VOLATILE 'v')
+        functions = functions.stream().filter(f -> allowedFunctionTypes.contains(functionsAndTypes.get(f.getName())))
+                .collect(Collectors.toList());
         if (functions.isEmpty()) {
             throw new IgnoreMeException();
         }
@@ -443,12 +457,23 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     public static MonetExpression generateTrueCondition(List<MonetColumn> columns, MonetRowValue rw,
             MonetGlobalState globalState) {
         MonetExpression expr = new MonetExpressionGenerator(globalState).setColumns(columns).setRowValue(rw)
-                .expectedResult().generateExpression(0, MonetDataType.BOOLEAN);
+            .generateExpressionWithExpectedResult(MonetDataType.BOOLEAN);
         if (expr.getExpectedValue().isNull()) {
             return MonetPostfixOperation.create(expr, PostfixOperator.IS_NULL);
         }
         return MonetPostfixOperation.create(expr, expr.getExpectedValue().cast(MonetDataType.BOOLEAN).asBoolean()
                 ? PostfixOperator.IS_TRUE : PostfixOperator.IS_FALSE);
+    }
+
+    private MonetExpression generateExpressionWithExpectedResult(MonetDataType type) {
+        //this.expectedResult = true;
+        MonetExpressionGenerator gen = new MonetExpressionGenerator(globalState).setColumns(columns)
+                .setRowValue(rw);
+        MonetExpression expr;
+        do {
+            expr = gen.generateExpression(type);
+        } while (expr.getExpectedValue() == null);
+        return expr;
     }
 
     public static MonetExpression generateConstant(Randomly r, MonetDataType type) {

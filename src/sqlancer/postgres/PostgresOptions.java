@@ -8,8 +8,11 @@ import java.util.List;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 
-import sqlancer.CompositeTestOracle;
-import sqlancer.TestOracle;
+import sqlancer.DBMSSpecificOptions;
+import sqlancer.OracleFactory;
+import sqlancer.common.oracle.CompositeTestOracle;
+import sqlancer.common.oracle.TestOracle;
+import sqlancer.postgres.PostgresOptions.PostgresOracleFactory;
 import sqlancer.postgres.oracle.PostgresNoRECOracle;
 import sqlancer.postgres.oracle.PostgresPivotedQuerySynthesisOracle;
 import sqlancer.postgres.oracle.tlp.PostgresTLPAggregateOracle;
@@ -17,21 +20,21 @@ import sqlancer.postgres.oracle.tlp.PostgresTLPHavingOracle;
 import sqlancer.postgres.oracle.tlp.PostgresTLPWhereOracle;
 
 @Parameters
-public class PostgresOptions {
+public class PostgresOptions implements DBMSSpecificOptions<PostgresOracleFactory> {
 
-    @Parameter(names = "--bulk-insert")
+    @Parameter(names = "--bulk-insert", description = "Specifies whether INSERT statements should be issued in bulk", arity = 1)
     public boolean allowBulkInsert;
 
-    @Parameter(names = "--oracle")
-    public List<PostgresOracle> oracle = Arrays.asList(PostgresOracle.QUERY_PARTITIONING);
+    @Parameter(names = "--oracle", description = "Specifies which test oracle should be used for PostgreSQL")
+    public List<PostgresOracleFactory> oracle = Arrays.asList(PostgresOracleFactory.QUERY_PARTITIONING);
 
-    @Parameter(names = "--test-collations", arity = 1)
+    @Parameter(names = "--test-collations", description = "Specifies whether to test different collations", arity = 1)
     public boolean testCollations = true;
 
-    @Parameter(names = "--connection-url")
+    @Parameter(names = "--connection-url", description = "Specifies the URL for connecting to the PostgreSQL server", arity = 1)
     public String connectionURL = "postgresql://localhost:5432/test";
 
-    public enum PostgresOracle {
+    public enum PostgresOracleFactory implements OracleFactory<PostgresGlobalState> {
         NOREC {
             @Override
             public TestOracle create(PostgresGlobalState globalState) throws SQLException {
@@ -42,6 +45,11 @@ public class PostgresOptions {
             @Override
             public TestOracle create(PostgresGlobalState globalState) throws SQLException {
                 return new PostgresPivotedQuerySynthesisOracle(globalState);
+            }
+
+            @Override
+            public boolean requiresAllTablesToContainRows() {
+                return true;
             }
         },
         HAVING {
@@ -63,8 +71,11 @@ public class PostgresOptions {
             }
         };
 
-        public abstract TestOracle create(PostgresGlobalState globalState) throws SQLException;
+    }
 
+    @Override
+    public List<PostgresOracleFactory> getTestOracleFactory() {
+        return oracle;
     }
 
 }

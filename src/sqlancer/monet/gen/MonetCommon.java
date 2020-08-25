@@ -1,12 +1,12 @@
 package sqlancer.monet.gen;
 
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import sqlancer.IgnoreMeException;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetProvider;
 import sqlancer.monet.MonetSchema.MonetColumn;
@@ -18,13 +18,13 @@ public final class MonetCommon {
     private MonetCommon() {
     }
 
-    public static void addCommonFetchErrors(Set<String> errors) {
+    public static void addCommonFetchErrors(ExpectedErrors errors) {
     }
 
-    public static void addCommonTableErrors(Set<String> errors) {
+    public static void addCommonTableErrors(ExpectedErrors errors) {
     }
 
-    public static void addCommonExpressionErrors(Set<String> errors) {
+    public static void addCommonExpressionErrors(ExpectedErrors errors) {
         errors.add("LIKE pattern must not end with escape character");
         errors.add("by zero"); /* Divisions by zero */
         errors.add("shift operand too large in ");
@@ -64,7 +64,7 @@ public final class MonetCommon {
         errors.add("Time ");
     }
 
-    public static void addCommonInsertUpdateErrors(Set<String> errors) {
+    public static void addCommonInsertUpdateErrors(ExpectedErrors errors) {
         errors.add("NOT NULL constraint violated for column");
         errors.add("SQL feature not yet available for expressions and default values");
         errors.add("value too large or not a number in");
@@ -137,7 +137,7 @@ public final class MonetCommon {
     }
 
     public static void addTableConstraints(boolean excludePrimaryKey, StringBuilder sb, MonetTable table,
-            MonetGlobalState globalState, Set<String> errors) {
+            MonetGlobalState globalState, ExpectedErrors errors) {
         // TODO constraint name
         List<TableConstraints> tableConstraints = Randomly.nonEmptySubset(TableConstraints.values());
         if (excludePrimaryKey) {
@@ -154,12 +154,12 @@ public final class MonetCommon {
     }
 
     public static void addTableConstraint(StringBuilder sb, MonetTable table, MonetGlobalState globalState,
-            Set<String> errors) {
+            ExpectedErrors errors) {
         addTableConstraint(sb, table, globalState, Randomly.fromOptions(TableConstraints.values()), errors);
     }
 
     private static void addTableConstraint(StringBuilder sb, MonetTable table, MonetGlobalState globalState,
-            TableConstraints t, Set<String> errors) {
+            TableConstraints t, ExpectedErrors errors) {
         List<MonetColumn> randomNonEmptyColumnSubset = table.getRandomNonEmptyColumnSubset();
         List<MonetColumn> otherColumns;
         MonetCommon.addCommonExpressionErrors(errors);
@@ -222,7 +222,7 @@ public final class MonetCommon {
         sb.append(Randomly.fromOptions("NO ACTION", "RESTRICT", "CASCADE", "SET NULL", "SET DEFAULT"));
     }*/
 
-    public static void addGroupingErrors(Set<String> errors) {
+    public static void addGroupingErrors(ExpectedErrors errors) {
         errors.add("must appear in the GROUP BY clause or be used in an aggregate function");
         errors.add("aggregate functions are not allowed in GROUP BY");
     }

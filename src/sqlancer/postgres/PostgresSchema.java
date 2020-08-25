@@ -7,38 +7,38 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import sqlancer.IgnoreMeException;
 import sqlancer.Randomly;
-import sqlancer.StateToReproduce.PostgresStateToReproduce;
+import sqlancer.common.schema.AbstractRowValue;
+import sqlancer.common.schema.AbstractSchema;
+import sqlancer.common.schema.AbstractTable;
+import sqlancer.common.schema.AbstractTableColumn;
+import sqlancer.common.schema.AbstractTables;
+import sqlancer.common.schema.TableIndex;
+import sqlancer.postgres.PostgresSchema.PostgresTable;
 import sqlancer.postgres.PostgresSchema.PostgresTable.TableType;
 import sqlancer.postgres.ast.PostgresConstant;
-import sqlancer.schema.AbstractTable;
-import sqlancer.schema.AbstractTableColumn;
-import sqlancer.schema.AbstractTables;
-import sqlancer.schema.TableIndex;
 
-public class PostgresSchema {
+public class PostgresSchema extends AbstractSchema<PostgresTable> {
 
-    private final List<PostgresTable> databaseTables;
     private final String databaseName;
 
     public enum PostgresDataType {
         INT, BOOLEAN, TEXT, DECIMAL, FLOAT, REAL, RANGE, MONEY, BIT, INET;
 
         public static PostgresDataType getRandomType() {
-            List<PostgresDataType> dataTypes = Arrays.asList(values());
+            List<PostgresDataType> dataTypes = new ArrayList<>(Arrays.asList(values()));
             if (PostgresProvider.generateOnlyKnown) {
                 dataTypes.remove(PostgresDataType.DECIMAL);
                 dataTypes.remove(PostgresDataType.FLOAT);
                 dataTypes.remove(PostgresDataType.REAL);
                 dataTypes.remove(PostgresDataType.INET);
+                dataTypes.remove(PostgresDataType.RANGE);
+                dataTypes.remove(PostgresDataType.MONEY);
+                dataTypes.remove(PostgresDataType.BIT);
             }
             return Randomly.fromList(dataTypes);
         }
@@ -62,7 +62,7 @@ public class PostgresSchema {
             super(tables);
         }
 
-        public PostgresRowValue getRandomRowValue(Connection con, PostgresStateToReproduce state) throws SQLException {
+        public PostgresRowValue getRandomRowValue(Connection con) throws SQLException {
             String randomRow = String.format("SELECT %s FROM %s ORDER BY RANDOM() LIMIT 1", columnNamesAsString(
                     c -> c.getTable().getName() + "." + c.getName() + " AS " + c.getTable().getName() + c.getName()),
                     // columnNamesAsString(c -> "typeof(" + c.getTable().getName() + "." +
@@ -72,7 +72,7 @@ public class PostgresSchema {
             try (Statement s = con.createStatement()) {
                 ResultSet randomRowValues = s.executeQuery(randomRow);
                 if (!randomRowValues.next()) {
-                    throw new AssertionError("could not find random row! " + randomRow + "\n" + state);
+                    throw new AssertionError("could not find random row! " + randomRow + "\n");
                 }
                 for (int i = 0; i < getColumns().size(); i++) {
                     PostgresColumn column = getColumns().get(i);
@@ -99,7 +99,6 @@ public class PostgresSchema {
                     values.put(column, constant);
                 }
                 assert !randomRowValues.next();
-                state.randomRowValues = values;
                 return new PostgresRowValue(this, values);
             }
 
@@ -107,7 +106,7 @@ public class PostgresSchema {
 
     }
 
-    private static PostgresDataType getColumnType(String typeString) {
+    public static PostgresDataType getColumnType(String typeString) {
         switch (typeString) {
         case "smallint":
         case "integer":
@@ -140,55 +139,10 @@ public class PostgresSchema {
         }
     }
 
-    public static class PostgresRowValue {
+    public static class PostgresRowValue extends AbstractRowValue<PostgresTables, PostgresColumn, PostgresConstant> {
 
-        private final PostgresTables tables;
-        private final Map<PostgresColumn, PostgresConstant> values;
-
-        PostgresRowValue(PostgresTables tables, Map<PostgresColumn, PostgresConstant> values) {
-            this.tables = tables;
-            this.values = values;
-        }
-
-        public PostgresTables getTable() {
-            return tables;
-        }
-
-        public Map<PostgresColumn, PostgresConstant> getValues() {
-            return values;
-        }
-
-        @Override
-        public String toString() {
-            StringBuffer sb = new StringBuffer();
-            int i = 0;
-            for (PostgresColumn c : tables.getColumns()) {
-                if (i++ != 0) {
-                    sb.append(", ");
-                }
-                sb.append(values.get(c));
-            }
-            return sb.toString();
-        }
-
-        public String getRowValuesAsString() {
-            List<PostgresColumn> columnsToCheck = tables.getColumns();
-            return getRowValuesAsString(columnsToCheck);
-        }
-
-        public String getRowValuesAsString(List<PostgresColumn> columnsToCheck) {
-            StringBuilder sb = new StringBuilder();
-            Map<PostgresColumn, PostgresConstant> expectedValues = getValues();
-            for (int i = 0; i < columnsToCheck.size(); i++) {
-                if (i != 0) {
-                    sb.append(", ");
-                }
-                PostgresConstant expectedColumnValue = expectedValues.get(columnsToCheck.get(i));
-                PostgresToStringVisitor visitor = new PostgresToStringVisitor();
-                visitor.visit(expectedColumnValue);
-                sb.append(visitor.get());
-            }
-            return sb.toString();
+        protected PostgresRowValue(PostgresTables tables, Map<PostgresColumn, PostgresConstant> values) {
+            super(tables, values);
         }
 
     }
@@ -259,12 +213,11 @@ public class PostgresSchema {
     }
 
     public static PostgresSchema fromConnection(Connection con, String databaseName) throws SQLException {
-        Exception ex = null;
         try {
             List<PostgresTable> databaseTables = new ArrayList<>();
             try (Statement s = con.createStatement()) {
                 try (ResultSet rs = s.executeQuery(
-                        "SELECT table_name, table_schema, table_type, is_insertable_into FROM information_schema.tables WHERE table_schema='public' OR table_schema LIKE 'pg_temp_%';")) {
+                        "SELECT table_name, table_schema, table_type, is_insertable_into FROM information_schema.tables WHERE table_schema='public' OR table_schema LIKE 'pg_temp_%' ORDER BY table_name;")) {
                     while (rs.next()) {
                         String tableName = rs.getString("table_name");
                         String tableTypeSchema = rs.getString("table_schema");
@@ -289,15 +242,14 @@ public class PostgresSchema {
             }
             return new PostgresSchema(databaseTables, databaseName);
         } catch (SQLIntegrityConstraintViolationException e) {
-            ex = e;
+            throw new AssertionError(e);
         }
-        throw new AssertionError(ex);
     }
 
-    private static List<PostgresStatisticsObject> getStatistics(Connection con) throws SQLException {
+    protected static List<PostgresStatisticsObject> getStatistics(Connection con) throws SQLException {
         List<PostgresStatisticsObject> statistics = new ArrayList<>();
         try (Statement s = con.createStatement()) {
-            try (ResultSet rs = s.executeQuery("SELECT stxname FROM pg_statistic_ext;")) {
+            try (ResultSet rs = s.executeQuery("SELECT stxname FROM pg_statistic_ext ORDER BY stxname;")) {
                 while (rs.next()) {
                     statistics.add(new PostgresStatisticsObject(rs.getString("stxname")));
                 }
@@ -306,7 +258,7 @@ public class PostgresSchema {
         return statistics;
     }
 
-    private static PostgresTable.TableType getTableType(String tableTypeStr) throws AssertionError {
+    protected static PostgresTable.TableType getTableType(String tableTypeStr) throws AssertionError {
         PostgresTable.TableType tableType;
         if (tableTypeStr.contentEquals("public")) {
             tableType = TableType.STANDARD;
@@ -318,11 +270,11 @@ public class PostgresSchema {
         return tableType;
     }
 
-    private static List<PostgresIndex> getIndexes(Connection con, String tableName) throws SQLException {
+    protected static List<PostgresIndex> getIndexes(Connection con, String tableName) throws SQLException {
         List<PostgresIndex> indexes = new ArrayList<>();
         try (Statement s = con.createStatement()) {
-            try (ResultSet rs = s
-                    .executeQuery(String.format("SELECT indexname FROM pg_indexes WHERE tablename='%s';", tableName))) {
+            try (ResultSet rs = s.executeQuery(String
+                    .format("SELECT indexname FROM pg_indexes WHERE tablename='%s' ORDER BY indexname;", tableName))) {
                 while (rs.next()) {
                     String indexName = rs.getString("indexname");
                     if (indexName.length() != 2) {
@@ -336,12 +288,12 @@ public class PostgresSchema {
         return indexes;
     }
 
-    private static List<PostgresColumn> getTableColumns(Connection con, String tableName) throws SQLException {
+    protected static List<PostgresColumn> getTableColumns(Connection con, String tableName) throws SQLException {
         List<PostgresColumn> columns = new ArrayList<>();
         try (Statement s = con.createStatement()) {
             try (ResultSet rs = s
                     .executeQuery("select column_name, data_type from INFORMATION_SCHEMA.COLUMNS where table_name = '"
-                            + tableName + "'")) {
+                            + tableName + "' ORDER BY column_name")) {
                 while (rs.next()) {
                     String columnName = rs.getString("column_name");
                     String dataType = rs.getString("data_type");
@@ -354,47 +306,16 @@ public class PostgresSchema {
     }
 
     public PostgresSchema(List<PostgresTable> databaseTables, String databaseName) {
-        this.databaseTables = Collections.unmodifiableList(databaseTables);
+        super(databaseTables);
         this.databaseName = databaseName;
     }
 
-    @Override
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        for (PostgresTable t : getDatabaseTables()) {
-            sb.append(t);
-            sb.append("\n");
-        }
-        return sb.toString();
-    }
-
-    public PostgresTable getRandomTable() {
-        return Randomly.fromList(getDatabaseTables());
-    }
-
     public PostgresTables getRandomTableNonEmptyTables() {
-        return new PostgresTables(Randomly.nonEmptySubset(databaseTables));
-    }
-
-    public List<PostgresTable> getDatabaseTables() {
-        return databaseTables;
-    }
-
-    public List<PostgresTable> getDatabaseTablesRandomSubsetNotEmpty() {
-        return Randomly.nonEmptySubset(databaseTables);
+        return new PostgresTables(Randomly.nonEmptySubset(getDatabaseTables()));
     }
 
     public String getDatabaseName() {
         return databaseName;
-    }
-
-    public PostgresTable getRandomTable(Function<PostgresTable, Boolean> f) {
-        List<PostgresTable> relevantTables = databaseTables.stream().filter(t -> f.apply(t))
-                .collect(Collectors.toList());
-        if (relevantTables.isEmpty()) {
-            throw new IgnoreMeException();
-        }
-        return Randomly.fromList(relevantTables);
     }
 
 }

@@ -1,11 +1,11 @@
 package sqlancer.postgres.gen;
 
-import java.util.Arrays;
 import java.util.List;
 
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.postgres.PostgresGlobalState;
 import sqlancer.postgres.PostgresSchema.PostgresIndex;
 import sqlancer.sqlite3.gen.SQLite3Common;
@@ -44,8 +44,8 @@ public final class PostgresDropIndexGenerator {
             sb.append(Randomly.fromOptions("CASCADE", "RESTRICT"));
         }
         return new QueryAdapter(sb.toString(),
-                Arrays.asList("cannot drop desired object(s) because other objects depend on them", "cannot drop index",
-                        "does not exist"),
+                ExpectedErrors.from("cannot drop desired object(s) because other objects depend on them",
+                        "cannot drop index", "does not exist"),
                 true);
     }
 

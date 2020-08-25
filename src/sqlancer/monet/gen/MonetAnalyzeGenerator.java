@@ -1,11 +1,11 @@
 package sqlancer.monet.gen;
 
-import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetTable;
 
@@ -31,7 +31,7 @@ public final class MonetAnalyzeGenerator {
         if (Randomly.getBoolean()) {
             sb.append(" MINMAX");
         }
-        return new QueryAdapter(sb.toString(), Arrays.asList("does not exist", "is not persistent"));
+        return new QueryAdapter(sb.toString(), ExpectedErrors.from("does not exist", "is not persistent"));
     }
 
 }

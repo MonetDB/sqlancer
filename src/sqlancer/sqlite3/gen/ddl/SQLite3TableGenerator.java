@@ -5,9 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.sqlite3.SQLite3Errors;
 import sqlancer.sqlite3.SQLite3Provider.SQLite3GlobalState;
 import sqlancer.sqlite3.gen.SQLite3ColumnBuilder;
@@ -47,7 +48,7 @@ public class SQLite3TableGenerator {
     public static Query createTableStatement(String tableName, SQLite3GlobalState globalState) {
         SQLite3TableGenerator sqLite3TableGenerator = new SQLite3TableGenerator(tableName, globalState);
         sqLite3TableGenerator.start();
-        List<String> errors = new ArrayList<>();
+        ExpectedErrors errors = new ExpectedErrors();
         SQLite3Errors.addTableManipulationErrors(errors);
         errors.add("second argument to likelihood() must be a constant between 0.0 and 1.0");
         errors.add("non-deterministic functions prohibited in generated columns");

@@ -159,6 +159,8 @@ public class MonetFunction implements MonetExpression {
         /**
          * Gets the number of arguments if the function is non-variadic. If the function is variadic, the minimum number
          * of arguments is returned.
+         *
+         * @return the number of arguments
          */
         public int getNrArgs() {
             return nrArgs;
@@ -195,10 +197,15 @@ public class MonetFunction implements MonetExpression {
 
     @Override
     public MonetConstant getExpectedValue() {
-        assert functionWithKnownResult != null;
+        if (functionWithKnownResult == null) {
+            return null;
+        }
         MonetConstant[] constants = new MonetConstant[args.length];
         for (int i = 0; i < constants.length; i++) {
             constants[i] = args[i].getExpectedValue();
+            if (constants[i] == null) {
+                return null;
+            }
         }
         return functionWithKnownResult.apply(constants, args);
     }

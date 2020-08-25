@@ -3,21 +3,17 @@ package sqlancer.duckdb;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import sqlancer.AbstractAction;
-import sqlancer.CompositeTestOracle;
 import sqlancer.GlobalState;
 import sqlancer.IgnoreMeException;
 import sqlancer.ProviderAdapter;
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
-import sqlancer.QueryProvider;
 import sqlancer.Randomly;
 import sqlancer.StatementExecutor;
-import sqlancer.TestOracle;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.QueryProvider;
 import sqlancer.duckdb.DuckDBProvider.DuckDBGlobalState;
 import sqlancer.duckdb.gen.DuckDBDeleteGenerator;
 import sqlancer.duckdb.gen.DuckDBIndexGenerator;
@@ -43,7 +39,7 @@ public class DuckDBProvider extends ProviderAdapter<DuckDBGlobalState, DuckDBOpt
         UPDATE(DuckDBUpdateGenerator::getQuery), //
         CREATE_VIEW(DuckDBViewGenerator::generate), //
         EXPLAIN((g) -> {
-            Set<String> errors = new HashSet<>();
+            ExpectedErrors errors = new ExpectedErrors();
             DuckDBErrors.addExpressionErrors(errors);
             DuckDBErrors.addGroupByErrors(errors);
             return new QueryAdapter(
@@ -117,17 +113,6 @@ public class DuckDBProvider extends ProviderAdapter<DuckDBGlobalState, DuckDBOpt
                     }
                 });
         se.executeStatements();
-    }
-
-    @Override
-    protected TestOracle getTestOracle(DuckDBGlobalState globalState) throws SQLException {
-        return new CompositeTestOracle(globalState.getDmbsSpecificOptions().oracle.stream().map(o -> {
-            try {
-                return o.create(globalState);
-            } catch (SQLException e1) {
-                throw new AssertionError(e1);
-            }
-        }).collect(Collectors.toList()), globalState);
     }
 
     @Override

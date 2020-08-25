@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import sqlancer.Randomly;
-import sqlancer.gen.ExpressionGenerator;
+import sqlancer.common.gen.ExpressionGenerator;
 import sqlancer.sqlite3.SQLite3Provider.SQLite3GlobalState;
 import sqlancer.sqlite3.ast.SQLite3Aggregate;
 import sqlancer.sqlite3.ast.SQLite3Aggregate.SQLite3AggregateFunction;
@@ -157,11 +157,8 @@ public class SQLite3ExpressionGenerator implements ExpressionGenerator<SQLite3Ex
         return expr;
     }
 
-    /**
-     *
-     * @see https://www.sqlite.org/syntax/literal-value.html
-     *
-     * @return
+    /*
+     * https://www.sqlite.org/syntax/literal-value.html
      */
     private SQLite3Expression getRandomLiteralValueInternal(Randomly r) {
         LiteralValueType randomLiteral = Randomly.fromOptions(LiteralValueType.values());
@@ -327,7 +324,7 @@ public class SQLite3ExpressionGenerator implements ExpressionGenerator<SQLite3Ex
         STANDARD_COMPARISON, BETWEEN, IN
     }
 
-    /**
+    /*
      * https://www.sqlite.org/rowvalue.html
      */
     private SQLite3Expression getRowValueComparison(int depth) {
@@ -655,6 +652,14 @@ public class SQLite3ExpressionGenerator implements ExpressionGenerator<SQLite3Ex
     @Override
     public SQLite3Expression isNull(SQLite3Expression expr) {
         return new SQLite3PostfixUnaryOperation(PostfixUnaryOperator.ISNULL, expr);
+    }
+
+    public SQLite3Expression generateResultKnownExpression() {
+        SQLite3Expression expr;
+        do {
+            expr = generateExpression();
+        } while (expr.getExpectedValue() == null);
+        return expr;
     }
 
 }

@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import sqlancer.Randomly;
-import sqlancer.ast.SelectBase;
+import sqlancer.common.ast.SelectBase;
 import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.MonetSchema.MonetTable;
 

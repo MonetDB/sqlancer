@@ -1,11 +1,11 @@
 package sqlancer.monet.gen;
 
-import java.util.Arrays;
 import java.util.List;
 
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetIndex;
 
@@ -23,7 +23,7 @@ public final class MonetDropIndexGenerator {
         } else {
             sb.append(Randomly.fromList(indexes).getIndexName());
         }
-        return new QueryAdapter(sb.toString(), Arrays.asList("no such index"), true);
+        return new QueryAdapter(sb.toString(), ExpectedErrors.from("no such index"), true);
     }
 
 }

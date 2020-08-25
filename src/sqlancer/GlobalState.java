@@ -5,14 +5,19 @@ import java.sql.SQLException;
 
 import sqlancer.Main.QueryManager;
 import sqlancer.Main.StateLogger;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.SQLancerResultSet;
+import sqlancer.common.schema.AbstractSchema;
 
 /**
  * Represents a global state that is valid for a testing session on a given database.
  *
  * @param <O>
- *            the option parameter.
+ *            the option parameter
+ * @param <S>
+ *            the schema parameter
  */
-public abstract class GlobalState<O, S> {
+public abstract class GlobalState<O extends DBMSSpecificOptions<?>, S extends AbstractSchema<?>> {
 
     private Connection con;
     private Randomly r;

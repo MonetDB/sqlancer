@@ -8,19 +8,22 @@ import java.util.List;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 
-import sqlancer.CompositeTestOracle;
-import sqlancer.TestOracle;
+import sqlancer.DBMSSpecificOptions;
+import sqlancer.OracleFactory;
+import sqlancer.common.oracle.CompositeTestOracle;
+import sqlancer.common.oracle.TestOracle;
+import sqlancer.tidb.TiDBOptions.TiDBOracleFactory;
 import sqlancer.tidb.TiDBProvider.TiDBGlobalState;
 import sqlancer.tidb.oracle.TiDBTLPHavingOracle;
 import sqlancer.tidb.oracle.TiDBTLPWhereOracle;
 
 @Parameters
-public class TiDBOptions {
+public class TiDBOptions implements DBMSSpecificOptions<TiDBOracleFactory> {
 
     @Parameter(names = "--oracle")
-    public List<TiDBOracle> oracle = Arrays.asList(TiDBOracle.QUERY_PARTITIONING);
+    public List<TiDBOracleFactory> oracle = Arrays.asList(TiDBOracleFactory.QUERY_PARTITIONING);
 
-    public enum TiDBOracle {
+    public enum TiDBOracleFactory implements OracleFactory<TiDBGlobalState> {
         HAVING {
             @Override
             public TestOracle create(TiDBGlobalState globalState) throws SQLException {
@@ -43,8 +46,11 @@ public class TiDBOptions {
             }
         };
 
-        public abstract TestOracle create(TiDBGlobalState globalState) throws SQLException;
+    }
 
+    @Override
+    public List<TiDBOracleFactory> getTestOracleFactory() {
+        return oracle;
     }
 
 }

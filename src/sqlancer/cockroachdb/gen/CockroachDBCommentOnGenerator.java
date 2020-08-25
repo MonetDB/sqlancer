@@ -1,18 +1,17 @@
 package sqlancer.cockroachdb.gen;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import sqlancer.IgnoreMeException;
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
 import sqlancer.cockroachdb.CockroachDBErrors;
 import sqlancer.cockroachdb.CockroachDBProvider.CockroachDBGlobalState;
 import sqlancer.cockroachdb.CockroachDBSchema.CockroachDBColumn;
 import sqlancer.cockroachdb.CockroachDBSchema.CockroachDBTable;
-import sqlancer.schema.TableIndex;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.schema.TableIndex;
 
 public final class CockroachDBCommentOnGenerator {
 
@@ -55,7 +54,7 @@ public final class CockroachDBCommentOnGenerator {
         sb.append(" IS '");
         sb.append(globalState.getRandomly().getString().replace("'", "''"));
         sb.append("'");
-        Set<String> errors = new HashSet<>();
+        ExpectedErrors errors = new ExpectedErrors();
         CockroachDBErrors.addTransactionErrors(errors);
         return new QueryAdapter(sb.toString(), errors);
     }

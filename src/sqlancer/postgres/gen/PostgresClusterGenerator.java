@@ -1,11 +1,9 @@
 package sqlancer.postgres.gen;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.postgres.PostgresGlobalState;
 import sqlancer.postgres.PostgresSchema.PostgresTable;
 
@@ -15,7 +13,7 @@ public final class PostgresClusterGenerator {
     }
 
     public static Query create(PostgresGlobalState globalState) {
-        Set<String> errors = new HashSet<>();
+        ExpectedErrors errors = new ExpectedErrors();
         errors.add("there is no previously clustered index for table");
         errors.add("cannot cluster a partitioned table");
         errors.add("access method does not support clustering");

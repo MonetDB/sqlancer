@@ -4,23 +4,20 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import sqlancer.AbstractAction;
-import sqlancer.CompositeTestOracle;
 import sqlancer.GlobalState;
 import sqlancer.IgnoreMeException;
 import sqlancer.ProviderAdapter;
-import sqlancer.Query;
-import sqlancer.QueryProvider;
 import sqlancer.Randomly;
 import sqlancer.StatementExecutor;
-import sqlancer.TestOracle;
 import sqlancer.clickhouse.ClickHouseProvider.ClickHouseGlobalState;
 import sqlancer.clickhouse.gen.ClickHouseCommon;
 import sqlancer.clickhouse.gen.ClickHouseInsertGenerator;
 import sqlancer.clickhouse.gen.ClickHouseTableGenerator;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryProvider;
 
 public class ClickHouseProvider extends ProviderAdapter<ClickHouseGlobalState, ClickHouseOptions> {
 
@@ -100,18 +97,6 @@ public class ClickHouseProvider extends ProviderAdapter<ClickHouseGlobalState, C
                     }
                 });
         se.executeStatements();
-    }
-
-    @Override
-    protected TestOracle getTestOracle(ClickHouseGlobalState globalState) throws SQLException {
-        List<TestOracle> oracles = globalState.getDmbsSpecificOptions().oracle.stream().map(o -> {
-            try {
-                return o.create(globalState);
-            } catch (SQLException e1) {
-                throw new AssertionError(e1);
-            }
-        }).collect(Collectors.toList());
-        return new CompositeTestOracle(oracles, globalState);
     }
 
     @Override

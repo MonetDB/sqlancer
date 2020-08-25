@@ -3,13 +3,13 @@ package sqlancer.mysql.gen.admin;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.mysql.MySQLGlobalState;
 import sqlancer.mysql.MySQLSchema.MySQLTable;
 
-/**
+/*
  * https://dev.mysql.com/doc/refman/8.0/en/flush.html#flush-tables-variants
  */
 public class MySQLFlush {

@@ -9,12 +9,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import sqlancer.IgnoreMeException;
-import sqlancer.NoRECBase;
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
-import sqlancer.SQLancerResultSet;
-import sqlancer.TestOracle;
+import sqlancer.common.oracle.NoRECBase;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLancerResultSet;
 import sqlancer.monet.MonetCompoundDataType;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema;
@@ -37,7 +36,7 @@ import sqlancer.monet.gen.MonetCommon;
 import sqlancer.monet.gen.MonetExpressionGenerator;
 import sqlancer.monet.oracle.tlp.MonetTLPBase;
 
-public class MonetNoRECOracle extends NoRECBase<MonetGlobalState> implements TestOracle {
+public class MonetNoRECOracle extends NoRECBase<MonetGlobalState> {
 
     private final MonetSchema s;
 
@@ -89,7 +88,9 @@ public class MonetNoRECOracle extends NoRECBase<MonetGlobalState> implements Tes
         }
         // JOIN subqueries
         for (int i = 0; i < Randomly.smallNumber(); i++) {
-            MonetSubquery subquery = MonetTLPBase.createSubquery(globalState, String.format("sub%d", i));
+            MonetTables subqueryTables = globalState.getSchema().getRandomTableNonEmptyTables();
+            MonetSubquery subquery = MonetTLPBase.createSubquery(globalState, String.format("sub%d", i),
+                    subqueryTables);
             MonetExpression joinClause = gen.generateExpression(MonetDataType.BOOLEAN);
             MonetJoinType options = MonetJoinType.getRandom();
             MonetJoin j = new MonetJoin(subquery, joinClause, options);

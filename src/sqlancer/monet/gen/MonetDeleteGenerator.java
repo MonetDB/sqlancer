@@ -1,11 +1,9 @@
 package sqlancer.monet.gen;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.MonetSchema.MonetTable;
@@ -18,7 +16,7 @@ public final class MonetDeleteGenerator {
 
     public static Query create(MonetGlobalState globalState) {
         MonetTable table = globalState.getSchema().getRandomTable(t -> !t.isView());
-        Set<String> errors = new HashSet<>();
+        ExpectedErrors errors = new ExpectedErrors();
         MonetCommon.addCommonInsertUpdateErrors(errors);
         StringBuilder sb = new StringBuilder("DELETE FROM");
         sb.append(" ");

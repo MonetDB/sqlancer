@@ -26,15 +26,23 @@ public class MonetInOperation implements MonetExpression {
 
     @Override
     public MonetConstant getExpectedValue() {
-        if (expr.getExpectedValue().isNull()) {
+        MonetConstant leftValue = expr.getExpectedValue();
+        if (leftValue == null) {
+            return null;
+        }
+        if (leftValue.isNull()) {
             return MonetConstant.createNullConstant();
         }
         boolean isNull = false;
         for (MonetExpression expr : getListElements()) {
-            if (expr.getExpectedValue().isNull()) {
+            MonetConstant rightExpectedValue = expr.getExpectedValue();
+            if (rightExpectedValue == null) {
+                return null;
+            }
+            if (rightExpectedValue.isNull()) {
                 isNull = true;
-            } else if (expr.getExpectedValue().isEquals(this.expr.getExpectedValue()).isBoolean()
-                    && expr.getExpectedValue().isEquals(this.expr.getExpectedValue()).asBoolean()) {
+            } else if (rightExpectedValue.isEquals(this.expr.getExpectedValue()).isBoolean()
+                    && rightExpectedValue.isEquals(this.expr.getExpectedValue()).asBoolean()) {
                 return MonetConstant.createBooleanConstant(isTrue);
             }
         }

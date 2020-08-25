@@ -3,8 +3,8 @@ package sqlancer.monet.ast;
 import java.util.function.BinaryOperator;
 
 import sqlancer.Randomly;
-import sqlancer.ast.BinaryOperatorNode;
-import sqlancer.ast.BinaryOperatorNode.Operator;
+import sqlancer.common.ast.BinaryOperatorNode;
+import sqlancer.common.ast.BinaryOperatorNode.Operator;
 import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.ast.MonetBinaryArithmeticOperation.MonetBinaryOperator;
 
@@ -89,6 +89,9 @@ public class MonetBinaryArithmeticOperation extends BinaryOperatorNode<MonetExpr
     public MonetConstant getExpectedValue() {
         MonetConstant leftExpected = getLeft().getExpectedValue();
         MonetConstant rightExpected = getRight().getExpectedValue();
+        if (leftExpected == null || rightExpected == null) {
+            return null;
+        }
         return getOp().apply(leftExpected, rightExpected);
     }
 

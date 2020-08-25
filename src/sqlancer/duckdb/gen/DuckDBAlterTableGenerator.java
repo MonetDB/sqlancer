@@ -1,11 +1,9 @@
 package sqlancer.duckdb.gen;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.duckdb.DuckDBErrors;
 import sqlancer.duckdb.DuckDBProvider.DuckDBGlobalState;
 import sqlancer.duckdb.DuckDBSchema.DuckDBCompositeDataType;
@@ -22,7 +20,7 @@ public final class DuckDBAlterTableGenerator {
     }
 
     public static Query getQuery(DuckDBGlobalState globalState) {
-        Set<String> errors = new HashSet<>();
+        ExpectedErrors errors = new ExpectedErrors();
         errors.add(" does not have a column with name \"rowid\"");
         errors.add("Table does not contain column rowid referenced in alter statement");
         StringBuilder sb = new StringBuilder("ALTER TABLE ");

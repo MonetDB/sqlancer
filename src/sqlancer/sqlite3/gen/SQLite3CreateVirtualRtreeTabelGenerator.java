@@ -1,13 +1,12 @@
 package sqlancer.sqlite3.gen;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.sqlite3.SQLite3Provider.SQLite3GlobalState;
 import sqlancer.sqlite3.schema.SQLite3Schema.SQLite3Column;
 
@@ -17,7 +16,7 @@ public final class SQLite3CreateVirtualRtreeTabelGenerator {
     }
 
     public static Query createTableStatement(String rTreeTableName, SQLite3GlobalState globalState) {
-        Set<String> errors = new HashSet<>();
+        ExpectedErrors errors = new ExpectedErrors();
         List<SQLite3Column> columns = new ArrayList<>();
         StringBuilder sb = new StringBuilder("CREATE VIRTUAL TABLE ");
         sb.append(rTreeTableName);

@@ -1,6 +1,6 @@
 package sqlancer.postgres.ast;
 
-import sqlancer.ast.BinaryNode;
+import sqlancer.common.ast.BinaryNode;
 import sqlancer.postgres.PostgresSchema.PostgresDataType;
 
 public class PostgresConcatOperation extends BinaryNode<PostgresExpression> implements PostgresExpression {
@@ -16,11 +16,16 @@ public class PostgresConcatOperation extends BinaryNode<PostgresExpression> impl
 
     @Override
     public PostgresConstant getExpectedValue() {
-        if (getLeft().getExpectedValue().isNull() || getRight().getExpectedValue().isNull()) {
+        PostgresConstant leftExpectedValue = getLeft().getExpectedValue();
+        PostgresConstant rightExpectedValue = getRight().getExpectedValue();
+        if (leftExpectedValue == null || rightExpectedValue == null) {
+            return null;
+        }
+        if (leftExpectedValue.isNull() || rightExpectedValue.isNull()) {
             return PostgresConstant.createNullConstant();
         }
-        String leftStr = getLeft().getExpectedValue().cast(PostgresDataType.TEXT).getUnquotedTextRepresentation();
-        String rightStr = getRight().getExpectedValue().cast(PostgresDataType.TEXT).getUnquotedTextRepresentation();
+        String leftStr = leftExpectedValue.cast(PostgresDataType.TEXT).getUnquotedTextRepresentation();
+        String rightStr = rightExpectedValue.cast(PostgresDataType.TEXT).getUnquotedTextRepresentation();
         return PostgresConstant.createTextConstant(leftStr + rightStr);
     }
 

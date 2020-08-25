@@ -77,7 +77,7 @@ public abstract class MonetConstant implements MonetExpression {
             case STRING:
                 return MonetConstant.createTextConstant(value ? "true" : "false");
             default:
-                throw new AssertionError();
+                return null;
             }
         }
 
@@ -202,7 +202,7 @@ public abstract class MonetConstant implements MonetExpression {
             case STRING:
                 return this;
             default:
-                throw new AssertionError(this);
+                return null;
             }
         }
 
@@ -297,7 +297,7 @@ public abstract class MonetConstant implements MonetExpression {
             case STRING:
                 return MonetConstant.createTextConstant(String.valueOf(val));
             default:
-                throw new AssertionError(type);
+                return null;
             }
         }
 
@@ -396,7 +396,7 @@ public abstract class MonetConstant implements MonetExpression {
 
         @Override
         public MonetConstant cast(MonetDataType type) {
-            throw new AssertionError();
+            return null;
 
         }
     }

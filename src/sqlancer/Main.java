@@ -26,8 +26,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.JCommander.Builder;
 
+import sqlancer.citus.CitusProvider;
 import sqlancer.clickhouse.ClickHouseProvider;
 import sqlancer.cockroachdb.CockroachDBProvider;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.SQLancerResultSet;
 import sqlancer.duckdb.DuckDBProvider;
 import sqlancer.mariadb.MariaDBProvider;
 import sqlancer.monet.MonetProvider;
@@ -64,7 +67,6 @@ public final class Main {
         public FileWriter currentFileWriter;
         private static final List<String> INITIALIZED_PROVIDER_NAMES = new ArrayList<>();
         private final boolean logEachSelect;
-        private final DatabaseProvider<?, ?> provider;
 
         private static final class AlsoWriteToConsoleFileWriter extends FileWriter {
 
@@ -86,7 +88,6 @@ public final class Main {
         }
 
         public StateLogger(String databaseName, DatabaseProvider<?, ?> provider, MainOptions options) {
-            this.provider = provider;
             File dir = new File(LOG_DIRECTORY, provider.getDBMSName());
             if (dir.exists() && !dir.isDirectory()) {
                 throw new AssertionError(dir);
@@ -99,25 +100,27 @@ public final class Main {
             }
         }
 
-        private synchronized void ensureExistsAndIsEmpty(File dir, DatabaseProvider<?, ?> provider) {
+        private void ensureExistsAndIsEmpty(File dir, DatabaseProvider<?, ?> provider) {
             if (INITIALIZED_PROVIDER_NAMES.contains(provider.getDBMSName())) {
                 return;
             }
-            if (!dir.exists()) {
-                try {
-                    Files.createDirectories(dir.toPath());
-                } catch (IOException e) {
-                    throw new AssertionError(e);
+            synchronized (INITIALIZED_PROVIDER_NAMES) {
+                if (!dir.exists()) {
+                    try {
+                        Files.createDirectories(dir.toPath());
+                    } catch (IOException e) {
+                        throw new AssertionError(e);
+                    }
                 }
-            }
-            File[] listFiles = dir.listFiles();
-            assert listFiles != null : "directory was just created, so it should exist";
-            for (File file : listFiles) {
-                if (!file.isDirectory()) {
-                    file.delete();
+                File[] listFiles = dir.listFiles();
+                assert listFiles != null : "directory was just created, so it should exist";
+                for (File file : listFiles) {
+                    if (!file.isDirectory()) {
+                        file.delete();
+                    }
                 }
+                INITIALIZED_PROVIDER_NAMES.add(provider.getDBMSName());
             }
-            INITIALIZED_PROVIDER_NAMES.add(provider.getDBMSName());
         }
 
         private FileWriter getLogFileWriter() {
@@ -239,7 +242,6 @@ public final class Main {
             } catch (IOException e) {
                 throw new AssertionError(e);
             }
-            provider.printDatabaseSpecificState(writer, state);
         }
 
     }
@@ -288,23 +290,23 @@ public final class Main {
         System.exit(executeMain(args));
     }
 
-    public static class DBMSExecutor<G extends GlobalState<O, ?>, O> {
+    public static class DBMSExecutor<G extends GlobalState<O, ?>, O extends DBMSSpecificOptions<?>> {
 
         private final DatabaseProvider<G, O> provider;
         private final MainOptions options;
         private final O command;
         private final String databaseName;
-        private final long seed;
         private StateLogger logger;
         private StateToReproduce stateToRepro;
+        private final Randomly r;
 
         public DBMSExecutor(DatabaseProvider<G, O> provider, MainOptions options, O dbmsSpecificOptions,
-                String databaseName, long seed) {
+                String databaseName, Randomly r) {
             this.provider = provider;
             this.options = options;
             this.databaseName = databaseName;
-            this.seed = seed;
             this.command = dbmsSpecificOptions;
+            this.r = r;
         }
 
         private G createGlobalState() {
@@ -322,10 +324,9 @@ public final class Main {
         public void run() throws SQLException {
             G state = createGlobalState();
             stateToRepro = provider.getStateToReproduce(databaseName);
-            stateToRepro.seedValue = seed;
+            stateToRepro.seedValue = r.getSeed();
             state.setState(stateToRepro);
             logger = new StateLogger(databaseName, provider, options);
-            Randomly r = new Randomly(seed);
             state.setRandomly(r);
             state.setDatabaseName(databaseName);
             state.setMainOptions(options);
@@ -363,7 +364,7 @@ public final class Main {
         }
     }
 
-    public static class DBMSExecutorFactory<G extends GlobalState<O, ?>, O> {
+    public static class DBMSExecutorFactory<G extends GlobalState<O, ?>, O extends DBMSSpecificOptions<?>> {
 
         private final DatabaseProvider<G, O> provider;
         private final MainOptions options;
@@ -388,10 +389,10 @@ public final class Main {
         }
 
         @SuppressWarnings("unchecked")
-        public DBMSExecutor<G, O> getDBMSExecutor(String databaseName, long seed) {
+        public DBMSExecutor<G, O> getDBMSExecutor(String databaseName, Randomly r) {
             try {
                 return new DBMSExecutor<G, O>(provider.getClass().getDeclaredConstructor().newInstance(), options,
-                        command, databaseName, seed);
+                        command, databaseName, r);
             } catch (Exception e) {
                 throw new AssertionError(e);
             }
@@ -416,11 +417,12 @@ public final class Main {
         JCommander jc = commandBuilder.programName("SQLancer").build();
         jc.parse(args);
 
-        if (jc.getParsedCommand() == null) {
+        if (jc.getParsedCommand() == null || options.isHelp()) {
             jc.usage();
             return options.getErrorExitCode();
         }
 
+        Randomly.initialize(options);
         if (options.printProgressInformation()) {
             startProgressMonitor();
             if (options.printProgressSummary()) {
@@ -459,7 +461,6 @@ public final class Main {
             } else {
                 seed = options.getRandomSeed() + i;
             }
-
             execService.execute(new Runnable() {
 
                 @Override
@@ -469,17 +470,17 @@ public final class Main {
                 }
 
                 private void runThread(final String databaseName) {
+                    Randomly r = new Randomly(seed);
                     try {
                         if (options.getMaxGeneratedDatabases() == -1) {
                             // run without a limit
                             boolean continueRunning = true;
                             while (continueRunning) {
-                                continueRunning = run(options, execService, executorFactory, seed, databaseName);
+                                continueRunning = run(options, execService, executorFactory, r, databaseName);
                             }
                         } else {
                             for (int i = 0; i < options.getMaxGeneratedDatabases(); i++) {
-                                boolean continueRunning = run(options, execService, executorFactory, seed,
-                                        databaseName);
+                                boolean continueRunning = run(options, execService, executorFactory, r, databaseName);
                                 if (!continueRunning) {
                                     break;
                                 }
@@ -494,8 +495,8 @@ public final class Main {
                 }
 
                 private boolean run(MainOptions options, ExecutorService execService,
-                        DBMSExecutorFactory<?, ?> executorFactory, final long seed, final String databaseName) {
-                    DBMSExecutor<?, ?> executor = executorFactory.getDBMSExecutor(databaseName, seed);
+                        DBMSExecutorFactory<?, ?> executorFactory, Randomly r, final String databaseName) {
+                    DBMSExecutor<?, ?> executor = executorFactory.getDBMSExecutor(databaseName, r);
                     try {
                         executor.run();
                         return true;
@@ -544,6 +545,7 @@ public final class Main {
         providers.add(new MonetProvider());
         providers.add(new TiDBProvider());
         providers.add(new PostgresProvider());
+        providers.add(new CitusProvider());
         providers.add(new ClickHouseProvider());
         providers.add(new DuckDBProvider());
         return providers;

@@ -3,16 +3,25 @@ package sqlancer.monet;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import sqlancer.GlobalState;
 import sqlancer.Randomly;
 
 public class MonetGlobalState extends GlobalState<MonetOptions, MonetSchema> {
 
+    public static final char IMMUTABLE = 'i';
+    public static final char STABLE = 's';
+    public static final char VOLATILE = 'v';
+
     private List<String> operators;
     private List<String> collates;
     private List<String> opClasses;
+    // store and allow filtering by function volatility classifications
+    private final Map<String, Character> functionsAndTypes = new HashMap<>();
+    private List<Character> allowedFunctionTypes = Arrays.asList(IMMUTABLE, STABLE, VOLATILE);
 
     @Override
     public void setConnection(Connection con) {
@@ -29,11 +38,6 @@ public class MonetGlobalState extends GlobalState<MonetOptions, MonetSchema> {
     private List<String> getCollnames(Connection con) throws SQLException {
         List<String> opClasses = Arrays.asList(new String[] {});
         return opClasses;
-    }
-
-    @Override
-    protected void updateSchema() throws SQLException {
-        setSchema(MonetSchema.fromConnection(getConnection(), getDatabaseName()));
     }
 
     private List<String> getOpclasses(Connection con) throws SQLException {
@@ -68,6 +72,31 @@ public class MonetGlobalState extends GlobalState<MonetOptions, MonetSchema> {
 
     public String getRandomOpclass() {
         return Randomly.fromList(opClasses);
+    }
+
+    @Override
+    public void updateSchema() throws SQLException {
+        setSchema(MonetSchema.fromConnection(getConnection(), getDatabaseName()));
+    }
+
+    public void addFunctionAndType(String functionName, Character functionType) {
+        this.functionsAndTypes.put(functionName, functionType);
+    }
+
+    public Map<String, Character> getFunctionsAndTypes() {
+        return this.functionsAndTypes;
+    }
+
+    public void setAllowedFunctionTypes(List<Character> types) {
+        this.allowedFunctionTypes = types;
+    }
+
+    public void setDefaultAllowedFunctionTypes() {
+        this.allowedFunctionTypes = Arrays.asList(IMMUTABLE, STABLE, VOLATILE);
+    }
+
+    public List<Character> getAllowedFunctionTypes() {
+        return this.allowedFunctionTypes;
     }
 
 }

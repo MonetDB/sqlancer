@@ -1,8 +1,8 @@
 package sqlancer.monet.ast;
 
 import sqlancer.Randomly;
-import sqlancer.ast.BinaryOperatorNode;
-import sqlancer.ast.BinaryOperatorNode.Operator;
+import sqlancer.common.ast.BinaryOperatorNode;
+import sqlancer.common.ast.BinaryOperatorNode.Operator;
 import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.ast.MonetBinaryComparisonOperation.MonetBinaryComparisonOperator;
 

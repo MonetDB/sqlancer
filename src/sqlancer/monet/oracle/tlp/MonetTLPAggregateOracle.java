@@ -6,13 +6,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import sqlancer.Main.StateLogger;
-import sqlancer.MainOptions;
 import sqlancer.ComparatorHelper;
 import sqlancer.IgnoreMeException;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
-import sqlancer.SQLancerResultSet;
+import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLancerResultSet;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.MonetVisitor;
@@ -34,19 +32,19 @@ public class MonetTLPAggregateOracle extends MonetTLPBase {
     private String secondResult;
     private String originalQuery;
     private String metamorphicQuery;
-    private StateLogger logger;
-    private MainOptions options;
 
     public MonetTLPAggregateOracle(MonetGlobalState state) {
         super(state);
         MonetCommon.addGroupingErrors(errors);
-        logger = state.getLogger();
-        options = state.getOptions();
     }
 
     @Override
     public void check() throws SQLException {
         super.check();
+        aggregateCheck();
+    }
+
+    protected void aggregateCheck() throws SQLException {
         MonetAggregateFunction aggregateFunction = Randomly.fromOptions(MonetAggregateFunction.MAX,
                 MonetAggregateFunction.MIN, MonetAggregateFunction.SUM,
                 MonetAggregateFunction.COUNT);
@@ -66,9 +64,6 @@ public class MonetTLPAggregateOracle extends MonetTLPBase {
         metamorphicQuery = createMetamorphicUnionQuery(select, aggregate, select.getFromList());
         secondResult = getAggregateResult(metamorphicQuery);
 
-        if (options.logEachSelect()) {
-            logger.writeCurrent(metamorphicQuery);
-        }
         String queryFormatString = "-- %s;\n-- result: %s";
         String firstQueryString = String.format(queryFormatString, originalQuery, firstResult);
         String secondQueryString = String.format(queryFormatString, metamorphicQuery, secondResult);
@@ -83,7 +78,6 @@ public class MonetTLPAggregateOracle extends MonetTLPBase {
                     secondQueryString);
             throw new AssertionError(assertionMessage);
         }
-
     }
 
     private String createMetamorphicUnionQuery(MonetSelect select, MonetAggregate aggregate,

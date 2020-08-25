@@ -1,7 +1,6 @@
 package sqlancer.sqlite3;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -15,14 +14,13 @@ import sqlancer.AbstractAction;
 import sqlancer.GlobalState;
 import sqlancer.IgnoreMeException;
 import sqlancer.ProviderAdapter;
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
-import sqlancer.QueryProvider;
 import sqlancer.Randomly;
-import sqlancer.StateToReproduce;
-import sqlancer.StateToReproduce.SQLite3StateToReproduce;
 import sqlancer.StatementExecutor;
-import sqlancer.TestOracle;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.QueryProvider;
+import sqlancer.sqlite3.SQLite3Options.SQLite3OracleFactory;
 import sqlancer.sqlite3.SQLite3Provider.SQLite3GlobalState;
 import sqlancer.sqlite3.gen.SQLite3AnalyzeGenerator;
 import sqlancer.sqlite3.gen.SQLite3Common;
@@ -98,14 +96,14 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
         CHECK_RTREE_TABLE((g) -> {
             SQLite3Table table = g.getSchema().getRandomTableOrBailout(t -> t.getName().startsWith("r"));
             String format = String.format("SELECT rtreecheck('%s');", table.getName());
-            return new QueryAdapter(format);
+            return new QueryAdapter(format, ExpectedErrors.from("The database file is locked"));
         }), //
         VIRTUAL_TABLE_ACTION(SQLite3VirtualFTSTableCommandGenerator::create), //
         CREATE_VIEW(SQLite3ViewGenerator::generate), //
         CREATE_TRIGGER(SQLite3CreateTriggerGenerator::create), //
         MANIPULATE_STAT_TABLE((g) -> {
             List<SQLite3Column> columns = new ArrayList<>();
-            SQLite3Table t = new SQLite3Table("sqlite_stat1", columns, TableKind.MAIN, false, 1, false, false, false);
+            SQLite3Table t = new SQLite3Table("sqlite_stat1", columns, TableKind.MAIN, false, false, false, false);
             if (Randomly.getBoolean()) {
                 return SQLite3DeleteGenerator.deleteContent(g, t);
             } else {
@@ -120,6 +118,8 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
                         }
                         indexName = rs.getString("name");
                     }
+                } catch (SQLException e) {
+                    throw new IgnoreMeException();
                 }
                 sb.append(" VALUES");
                 sb.append("('");
@@ -154,7 +154,8 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
                     sb.append(" noskipscan");
                 }
                 sb.append("')");
-                return new QueryAdapter(sb.toString(), Arrays.asList("no such table"));
+                return new QueryAdapter(sb.toString(),
+                        ExpectedErrors.from("no such table", "The database file is locked"));
             }
         });
 
@@ -279,26 +280,13 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
         }
     }
 
-    @Override
-    protected TestOracle getTestOracle(SQLite3GlobalState globalState) throws SQLException {
-        TestOracle oracle = globalState.getDmbsSpecificOptions().oracle.create(globalState);
-        if (oracle.onlyWorksForNonEmptyTables()) {
-            for (SQLite3Table table : globalState.getSchema().getDatabaseTables()) {
-                int nrRows = SQLite3Schema.getNrRows(globalState, table.getName());
-                if (nrRows == 0) {
-                    throw new IgnoreMeException();
-                }
-            }
-        }
-        return oracle;
-    }
-
     private void checkTablesForGeneratedColumnLoops(SQLite3GlobalState globalState) throws SQLException {
         for (SQLite3Table table : globalState.getSchema().getDatabaseTables()) {
             Query q = new QueryAdapter("SELECT * FROM " + table.getName(),
-                    Arrays.asList("needs an odd number of arguments", " requires an even number of arguments",
+                    ExpectedErrors.from("needs an odd number of arguments", " requires an even number of arguments",
                             "generated column loop", "integer overflow", "malformed JSON",
-                            "JSON cannot hold BLOB values", "JSON path error", "labels must be TEXT"));
+                            "JSON cannot hold BLOB values", "JSON path error", "labels must be TEXT",
+                            "table does not support scanning"));
             if (!q.execute(globalState)) {
                 throw new IgnoreMeException();
             }
@@ -339,7 +327,8 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
         if (!Randomly.getBooleanWithSmallProbability()) {
             pragmasToExecute.addAll(DEFAULT_PRAGMAS);
         }
-        if (Randomly.getBoolean() && !mustKnowResult) {
+        if (Randomly.getBoolean() && globalState.getDmbsSpecificOptions().oracles != SQLite3OracleFactory.PQS) {
+            // the PQS implementation currently assumes the default behavior of LIKE
             pragmasToExecute.add("PRAGMA case_sensitive_like=ON;");
         }
         if (Randomly.getBoolean()) {
@@ -368,15 +357,6 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
     @Override
     public String getDBMSName() {
         return "sqlite3";
-    }
-
-    @Override
-    public void printDatabaseSpecificState(FileWriter writer, StateToReproduce state) {
-    }
-
-    @Override
-    public StateToReproduce getStateToReproduce(String databaseName) {
-        return new SQLite3StateToReproduce(databaseName);
     }
 
 }

@@ -1,6 +1,6 @@
 package sqlancer.monet.ast;
 
-import sqlancer.ast.BinaryNode;
+import sqlancer.common.ast.BinaryNode;
 import sqlancer.monet.MonetSchema.MonetDataType;
 
 public class MonetConcatOperation extends BinaryNode<MonetExpression> implements MonetExpression {
@@ -16,11 +16,16 @@ public class MonetConcatOperation extends BinaryNode<MonetExpression> implements
 
     @Override
     public MonetConstant getExpectedValue() {
-        if (getLeft().getExpectedValue().isNull() || getRight().getExpectedValue().isNull()) {
+        MonetConstant leftExpectedValue = getLeft().getExpectedValue();
+        MonetConstant rightExpectedValue = getRight().getExpectedValue();
+        if (leftExpectedValue == null || rightExpectedValue == null) {
+            return null;
+        }
+        if (leftExpectedValue.isNull() || rightExpectedValue.isNull()) {
             return MonetConstant.createNullConstant();
         }
-        String leftStr = getLeft().getExpectedValue().cast(MonetDataType.STRING).getUnquotedTextRepresentation();
-        String rightStr = getRight().getExpectedValue().cast(MonetDataType.STRING).getUnquotedTextRepresentation();
+        String leftStr = leftExpectedValue.cast(MonetDataType.STRING).getUnquotedTextRepresentation();
+        String rightStr = rightExpectedValue.cast(MonetDataType.STRING).getUnquotedTextRepresentation();
         return MonetConstant.createTextConstant(leftStr + rightStr);
     }
 

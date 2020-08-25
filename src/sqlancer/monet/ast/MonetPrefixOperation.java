@@ -1,7 +1,7 @@
 package sqlancer.monet.ast;
 
 import sqlancer.IgnoreMeException;
-import sqlancer.ast.BinaryOperatorNode.Operator;
+import sqlancer.common.ast.BinaryOperatorNode.Operator;
 import sqlancer.monet.MonetSchema.MonetDataType;
 
 public class MonetPrefixOperation implements MonetExpression {
@@ -51,7 +51,11 @@ public class MonetPrefixOperation implements MonetExpression {
                     // TODO
                     throw new IgnoreMeException();
                 }
-                return MonetConstant.createIntConstant(-expectedValue.asInt());
+                try {
+                    return MonetConstant.createIntConstant(-expectedValue.asInt());
+                } catch (UnsupportedOperationException e) {
+                    return null;
+                }
             }
 
         };
@@ -90,7 +94,11 @@ public class MonetPrefixOperation implements MonetExpression {
 
     @Override
     public MonetConstant getExpectedValue() {
-        return op.getExpectedValue(expr.getExpectedValue());
+        MonetConstant expectedValue = expr.getExpectedValue();
+        if (expectedValue == null) {
+            return null;
+        }
+        return op.getExpectedValue(expectedValue);
     }
 
     public MonetDataType[] getInputDataTypes() {

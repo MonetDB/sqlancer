@@ -5,7 +5,7 @@ import java.util.List;
 
 import sqlancer.IgnoreMeException;
 import sqlancer.Randomly;
-import sqlancer.gen.UntypedExpressionGenerator;
+import sqlancer.common.gen.UntypedExpressionGenerator;
 import sqlancer.mysql.MySQLBugs;
 import sqlancer.mysql.MySQLGlobalState;
 import sqlancer.mysql.MySQLSchema.MySQLColumn;
@@ -26,6 +26,8 @@ import sqlancer.mysql.ast.MySQLConstant.MySQLDoubleConstant;
 import sqlancer.mysql.ast.MySQLExists;
 import sqlancer.mysql.ast.MySQLExpression;
 import sqlancer.mysql.ast.MySQLInOperation;
+import sqlancer.mysql.ast.MySQLOrderByTerm;
+import sqlancer.mysql.ast.MySQLOrderByTerm.MySQLOrder;
 import sqlancer.mysql.ast.MySQLStringExpression;
 import sqlancer.mysql.ast.MySQLUnaryPostfixOperation;
 import sqlancer.mysql.ast.MySQLUnaryPrefixOperation;
@@ -196,6 +198,21 @@ public class MySQLExpressionGenerator extends UntypedExpressionGenerator<MySQLEx
     @Override
     public MySQLExpression isNull(MySQLExpression expr) {
         return new MySQLUnaryPostfixOperation(expr, MySQLUnaryPostfixOperation.UnaryPostfixOperator.IS_NULL, false);
+    }
+
+    @Override
+    public List<MySQLExpression> generateOrderBys() {
+        List<MySQLExpression> expressions = super.generateOrderBys();
+        List<MySQLExpression> newOrderBys = new ArrayList<>();
+        for (MySQLExpression expr : expressions) {
+            if (Randomly.getBoolean()) {
+                MySQLOrderByTerm newExpr = new MySQLOrderByTerm(expr, MySQLOrder.getRandomOrder());
+                newOrderBys.add(newExpr);
+            } else {
+                newOrderBys.add(expr);
+            }
+        }
+        return newOrderBys;
     }
 
 }

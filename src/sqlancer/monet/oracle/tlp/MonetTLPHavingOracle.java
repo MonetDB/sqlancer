@@ -22,6 +22,10 @@ public class MonetTLPHavingOracle extends MonetTLPBase {
     @Override
     public void check() throws SQLException {
         super.check();
+        havingCheck();
+    }
+
+    protected void havingCheck() throws SQLException {
         if (Randomly.getBoolean()) {
             select.setWhereClause(gen.generateExpression(MonetDataType.BOOLEAN));
         }

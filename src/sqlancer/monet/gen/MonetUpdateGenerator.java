@@ -1,13 +1,11 @@
 package sqlancer.monet.gen;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetColumn;
 import sqlancer.monet.MonetSchema.MonetDataType;
@@ -26,10 +24,10 @@ public final class MonetUpdateGenerator {
         sb.append("UPDATE ");
         sb.append(randomTable.getName());
         sb.append(" SET ");
-        Set<String> errors = new HashSet<>(Arrays.asList(
+        ExpectedErrors errors = ExpectedErrors.from(
                 "reached maximum value of sequence", "violates foreign key constraint", "violates not-null constraint",
                 "violates unique constraint", "out of range", "cannot cast", "must be type boolean", "division by zero",
-                "You might need to add explicit type casts.", "invalid regular expression"));
+                "You might need to add explicit type casts.", "invalid regular expression");
         errors.add("multiple assignments to same column"); // view whose columns refer to a column in the referenced
                                                            // table multiple times
         List<MonetColumn> columns = randomTable.getRandomNonEmptyColumnSubset();

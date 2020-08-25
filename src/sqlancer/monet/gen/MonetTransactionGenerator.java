@@ -1,9 +1,8 @@
 package sqlancer.monet.gen;
 
-import java.util.ArrayList;
-
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 
 public final class MonetTransactionGenerator {
 
@@ -11,7 +10,7 @@ public final class MonetTransactionGenerator {
     }
 
     public static Query executeBegin() {
-        return new QueryAdapter("START TRANSACTION", new ArrayList<>(), true);
+        return new QueryAdapter("START TRANSACTION", new ExpectedErrors(), true);
     }
 
 }

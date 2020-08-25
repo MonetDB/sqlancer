@@ -1,13 +1,11 @@
 package sqlancer.cockroachdb.gen;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
 import sqlancer.cockroachdb.CockroachDBErrors;
 import sqlancer.cockroachdb.CockroachDBProvider.CockroachDBGlobalState;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 
 public final class CockroachDBShowGenerator {
 
@@ -20,7 +18,7 @@ public final class CockroachDBShowGenerator {
     }
 
     public static Query show(CockroachDBGlobalState globalState) {
-        Set<String> errors = new HashSet<>();
+        ExpectedErrors errors = new ExpectedErrors();
         StringBuilder sb = new StringBuilder();
         switch (Randomly.fromOptions(Option.values())) {
         case EXPERIMENTAL_FINGERPRINTS:

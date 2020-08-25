@@ -1,11 +1,9 @@
 package sqlancer.postgres.gen;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.postgres.PostgresGlobalState;
 import sqlancer.postgres.PostgresSchema.PostgresDataType;
 import sqlancer.postgres.PostgresSchema.PostgresTable;
@@ -18,7 +16,7 @@ public final class PostgresDeleteGenerator {
 
     public static Query create(PostgresGlobalState globalState) {
         PostgresTable table = globalState.getSchema().getRandomTable(t -> !t.isView());
-        Set<String> errors = new HashSet<>();
+        ExpectedErrors errors = new ExpectedErrors();
         errors.add("violates foreign key constraint");
         errors.add("violates not-null constraint");
         errors.add("could not determine which collation to use for string comparison");

@@ -1,12 +1,11 @@
 package sqlancer.cockroachdb.gen;
 
-import java.util.Arrays;
-
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
 import sqlancer.cockroachdb.CockroachDBProvider.CockroachDBGlobalState;
 import sqlancer.cockroachdb.CockroachDBSchema.CockroachDBTable;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 
 public final class CockroachDBCreateStatisticsGenerator {
 
@@ -25,7 +24,7 @@ public final class CockroachDBCreateStatisticsGenerator {
         sb.append(randomTable.getName());
 
         return new QueryAdapter(sb.toString(),
-                Arrays.asList("current transaction is aborted, commands ignored until end of transaction block",
+                ExpectedErrors.from("current transaction is aborted, commands ignored until end of transaction block",
                         "ERROR: unable to encode table key: *tree.DArray" /*
                                                                            * https://github.com/cockroachdb/cockroach/
                                                                            * issues/46964

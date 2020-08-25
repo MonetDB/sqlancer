@@ -1,8 +1,8 @@
 package sqlancer.monet.ast;
 
 import sqlancer.Randomly;
-import sqlancer.ast.BinaryOperatorNode;
-import sqlancer.ast.BinaryOperatorNode.Operator;
+import sqlancer.common.ast.BinaryOperatorNode;
+import sqlancer.common.ast.BinaryOperatorNode.Operator;
 import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.ast.MonetBinaryLogicalOperation.BinaryLogicalOperator;
 
@@ -77,7 +77,12 @@ public class MonetBinaryLogicalOperation extends BinaryOperatorNode<MonetExpress
 
     @Override
     public MonetConstant getExpectedValue() {
-        return getOp().apply(getLeft().getExpectedValue(), getRight().getExpectedValue());
+        MonetConstant leftExpectedValue = getLeft().getExpectedValue();
+        MonetConstant rightExpectedValue = getRight().getExpectedValue();
+        if (leftExpectedValue == null || rightExpectedValue == null) {
+            return null;
+        }
+        return getOp().apply(leftExpectedValue, rightExpectedValue);
     }
 
 }

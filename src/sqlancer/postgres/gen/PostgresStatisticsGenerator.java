@@ -1,13 +1,13 @@
 package sqlancer.postgres.gen;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import sqlancer.IgnoreMeException;
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.postgres.PostgresGlobalState;
 import sqlancer.postgres.PostgresSchema.PostgresColumn;
 import sqlancer.postgres.PostgresSchema.PostgresStatisticsObject;
@@ -44,7 +44,8 @@ public final class PostgresStatisticsGenerator {
         sb.append(randomColumns.stream().map(c -> c.getName()).collect(Collectors.joining(", ")));
         sb.append(" FROM ");
         sb.append(randomTable.getName());
-        return new QueryAdapter(sb.toString(), Arrays.asList("cannot have more than 8 columns in statistics"), true);
+        return new QueryAdapter(sb.toString(), ExpectedErrors.from("cannot have more than 8 columns in statistics"),
+                true);
     }
 
     public static Query remove(PostgresGlobalState globalState) {

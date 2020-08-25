@@ -1,12 +1,11 @@
 package sqlancer.mysql.gen;
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.mysql.MySQLErrors;
 import sqlancer.mysql.MySQLGlobalState;
 import sqlancer.mysql.MySQLSchema.MySQLTable;
@@ -28,7 +27,7 @@ public class MySQLDeleteGenerator {
     private Query generate() {
         MySQLTable randomTable = globalState.getSchema().getRandomTable();
         MySQLExpressionGenerator gen = new MySQLExpressionGenerator(globalState).setColumns(randomTable.getColumns());
-        Set<String> errors = new HashSet<>();
+        ExpectedErrors errors = new ExpectedErrors();
         sb.append("DELETE");
         if (Randomly.getBoolean()) {
             sb.append(" LOW_PRIORITY");

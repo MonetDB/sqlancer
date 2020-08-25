@@ -7,38 +7,41 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import sqlancer.IgnoreMeException;
 import sqlancer.Randomly;
-import sqlancer.StateToReproduce.MonetStateToReproduce;
+import sqlancer.common.schema.AbstractRowValue;
+import sqlancer.common.schema.AbstractSchema;
+import sqlancer.common.schema.AbstractTable;
+import sqlancer.common.schema.AbstractTableColumn;
+import sqlancer.common.schema.AbstractTables;
+import sqlancer.common.schema.TableIndex;
+import sqlancer.monet.MonetSchema.MonetTable;
 import sqlancer.monet.MonetSchema.MonetTable.TableType;
 import sqlancer.monet.ast.MonetConstant;
-import sqlancer.schema.AbstractTable;
-import sqlancer.schema.AbstractTableColumn;
-import sqlancer.schema.AbstractTables;
-import sqlancer.schema.TableIndex;
 
-public class MonetSchema {
+public class MonetSchema extends AbstractSchema<MonetTable> {
 
-    private final List<MonetTable> databaseTables;
     private final String databaseName;
 
     public enum MonetDataType {
         INT, BOOLEAN, STRING, DECIMAL, REAL, DOUBLE, TIME, TIMESTAMP, DATE, MONTH_INTERVAL, SECOND_INTERVAL;
 
         public static MonetDataType getRandomType() {
-            List<MonetDataType> dataTypes = Arrays.asList(values());
-            /*if (MonetProvider.generateOnlyKnown) {
+            List<MonetDataType> dataTypes = new ArrayList<>(Arrays.asList(values()));
+            if (MonetProvider.generateOnlyKnown) {
                 dataTypes.remove(MonetDataType.DECIMAL);
-                dataTypes.remove(MonetDataType.FLOAT);
+                dataTypes.remove(MonetDataType.DOUBLE);
                 dataTypes.remove(MonetDataType.REAL);
-            }*/
+                dataTypes.remove(MonetDataType.BOOLEAN);
+                dataTypes.remove(MonetDataType.TIME);
+                dataTypes.remove(MonetDataType.TIMESTAMP);
+                dataTypes.remove(MonetDataType.DATE);
+                dataTypes.remove(MonetDataType.MONTH_INTERVAL);
+                dataTypes.remove(MonetDataType.SECOND_INTERVAL);
+            }
             return Randomly.fromList(dataTypes);
         }
     }
@@ -60,7 +63,7 @@ public class MonetSchema {
             super(tables);
         }
 
-        public MonetRowValue getRandomRowValue(Connection con, MonetStateToReproduce state) throws SQLException {
+        public MonetRowValue getRandomRowValue(Connection con) throws SQLException {
             String randomRow = String.format("SELECT %s FROM %s ORDER BY RAND() LIMIT 1", columnNamesAsString(
                     c -> c.getTable().getName() + "." + c.getName() + " AS " + c.getTable().getName() + c.getName()),
                     // columnNamesAsString(c -> "typeof(" + c.getTable().getName() + "." +
@@ -70,7 +73,7 @@ public class MonetSchema {
             try (Statement s = con.createStatement()) {
                 ResultSet randomRowValues = s.executeQuery(randomRow);
                 if (!randomRowValues.next()) {
-                    throw new AssertionError("could not find random row! " + randomRow + "\n" + state);
+                    throw new AssertionError("could not find random row! " + randomRow + "\n");
                 }
                 for (int i = 0; i < getColumns().size(); i++) {
                     MonetColumn column = getColumns().get(i);
@@ -121,14 +124,13 @@ public class MonetSchema {
                     values.put(column, constant);
                 }
                 assert (!randomRowValues.next());
-                state.randomRowValues = values;
                 return new MonetRowValue(this, values);
             }
         }
 
     }
 
-    private static MonetDataType getColumnType(String typeString) {
+    public static MonetDataType getColumnType(String typeString) {
         switch (typeString) {
         case "tinyint":
         case "int":
@@ -175,55 +177,10 @@ public class MonetSchema {
         }
     }
 
-    public static class MonetRowValue {
+    public static class MonetRowValue extends AbstractRowValue<MonetTables, MonetColumn, MonetConstant> {
 
-        private final MonetTables tables;
-        private final Map<MonetColumn, MonetConstant> values;
-
-        MonetRowValue(MonetTables tables, Map<MonetColumn, MonetConstant> values) {
-            this.tables = tables;
-            this.values = values;
-        }
-
-        public MonetTables getTable() {
-            return tables;
-        }
-
-        public Map<MonetColumn, MonetConstant> getValues() {
-            return values;
-        }
-
-        @Override
-        public String toString() {
-            StringBuffer sb = new StringBuffer();
-            int i = 0;
-            for (MonetColumn c : tables.getColumns()) {
-                if (i++ != 0) {
-                    sb.append(", ");
-                }
-                sb.append(values.get(c));
-            }
-            return sb.toString();
-        }
-
-        public String getRowValuesAsString() {
-            List<MonetColumn> columnsToCheck = tables.getColumns();
-            return getRowValuesAsString(columnsToCheck);
-        }
-
-        public String getRowValuesAsString(List<MonetColumn> columnsToCheck) {
-            StringBuilder sb = new StringBuilder();
-            Map<MonetColumn, MonetConstant> expectedValues = getValues();
-            for (int i = 0; i < columnsToCheck.size(); i++) {
-                if (i != 0) {
-                    sb.append(", ");
-                }
-                MonetConstant expectedColumnValue = expectedValues.get(columnsToCheck.get(i));
-                MonetToStringVisitor visitor = new MonetToStringVisitor();
-                visitor.visit(expectedColumnValue);
-                sb.append(visitor.get());
-            }
-            return sb.toString();
+        protected MonetRowValue(MonetTables tables, Map<MonetColumn, MonetConstant> values) {
+            super(tables, values);
         }
 
     }
@@ -290,12 +247,11 @@ public class MonetSchema {
     }
 
     public static MonetSchema fromConnection(Connection con, String databaseName) throws SQLException {
-        Exception ex = null;
         try {
             List<MonetTable> databaseTables = new ArrayList<>();
             try (Statement s = con.createStatement()) {
                 try (ResultSet rs = s.executeQuery(
-                    "select t.id as table_id, t.name as table_name, t.type as table_type, t.commit_action as table_commit_action from sys.tables t where t.system=false;")) {
+                    "select t.id as table_id, t.name as table_name, t.type as table_type, t.commit_action as table_commit_action from sys.tables t where t.system=false order by table_name;")) {
                     while (rs.next()) {
                         int tableID = rs.getInt("table_id");
                         String tableName = rs.getString("table_name");
@@ -317,12 +273,11 @@ public class MonetSchema {
             }
             return new MonetSchema(databaseTables, databaseName);
         } catch (SQLIntegrityConstraintViolationException e) {
-            ex = e;
+            throw new AssertionError(e);
         }
-        throw new AssertionError(ex);
     }
 
-    private static MonetTable.TableType getTableType(int tableCommitAction) throws AssertionError {
+    protected static MonetTable.TableType getTableType(int tableCommitAction) throws AssertionError {
         MonetTable.TableType tableType;
         if (tableCommitAction == 0) {
             tableType = TableType.STANDARD;
@@ -334,11 +289,11 @@ public class MonetSchema {
         return tableType;
     }
 
-    private static List<MonetIndex> getIndexes(Connection con, int tableID) throws SQLException {
+    protected static List<MonetIndex> getIndexes(Connection con, int tableID) throws SQLException {
         List<MonetIndex> indexes = new ArrayList<>();
         try (Statement s = con.createStatement()) {
             try (ResultSet rs = s
-                    .executeQuery(String.format("SELECT idxs.\"name\" as indexname FROM sys.idxs WHERE table_id='%d';", tableID))) {
+                    .executeQuery(String.format("SELECT idxs.\"name\" as indexname FROM sys.idxs WHERE table_id='%d' order by indexname;", tableID))) {
                 while (rs.next()) {
                     String indexName = rs.getString("indexname");
                     indexes.add(MonetIndex.create(indexName));
@@ -348,12 +303,12 @@ public class MonetSchema {
         return indexes;
     }
 
-    private static List<MonetColumn> getTableColumns(Connection con, int tableID) throws SQLException {
+    protected static List<MonetColumn> getTableColumns(Connection con, int tableID) throws SQLException {
         List<MonetColumn> columns = new ArrayList<>();
         try (Statement s = con.createStatement()) {
             try (ResultSet rs = s
                     .executeQuery("select columns.\"name\" as column_name, columns.\"type\" as data_type from sys.columns where table_id = '"
-                            + tableID + "'")) {
+                            + tableID + "' order by column_name")) {
                 while (rs.next()) {
                     String columnName = rs.getString("column_name");
                     String dataType = rs.getString("data_type");
@@ -366,47 +321,16 @@ public class MonetSchema {
     }
 
     public MonetSchema(List<MonetTable> databaseTables, String databaseName) {
-        this.databaseTables = Collections.unmodifiableList(databaseTables);
+        super(databaseTables);
         this.databaseName = databaseName;
     }
 
-    @Override
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        for (MonetTable t : getDatabaseTables()) {
-            sb.append(t);
-            sb.append("\n");
-        }
-        return sb.toString();
-    }
-
-    public MonetTable getRandomTable() {
-        return Randomly.fromList(getDatabaseTables());
-    }
-
     public MonetTables getRandomTableNonEmptyTables() {
-        return new MonetTables(Randomly.nonEmptySubset(databaseTables));
-    }
-
-    public List<MonetTable> getDatabaseTables() {
-        return databaseTables;
-    }
-
-    public List<MonetTable> getDatabaseTablesRandomSubsetNotEmpty() {
-        return Randomly.nonEmptySubset(databaseTables);
+        return new MonetTables(Randomly.nonEmptySubset(getDatabaseTables()));
     }
 
     public String getDatabaseName() {
         return databaseName;
-    }
-
-    public MonetTable getRandomTable(Function<MonetTable, Boolean> f) {
-        List<MonetTable> relevantTables = databaseTables.stream().filter(t -> f.apply(t))
-                .collect(Collectors.toList());
-        if (relevantTables.isEmpty()) {
-            throw new IgnoreMeException();
-        }
-        return Randomly.fromList(relevantTables);
     }
 
 }

@@ -8,8 +8,11 @@ import java.util.List;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 
-import sqlancer.CompositeTestOracle;
-import sqlancer.TestOracle;
+import sqlancer.DBMSSpecificOptions;
+import sqlancer.OracleFactory;
+import sqlancer.common.oracle.CompositeTestOracle;
+import sqlancer.common.oracle.TestOracle;
+import sqlancer.monet.MonetOptions.MonetOracleFactory;
 import sqlancer.monet.oracle.MonetNoRECOracle;
 import sqlancer.monet.oracle.MonetPivotedQuerySynthesisOracle;
 import sqlancer.monet.oracle.tlp.MonetTLPAggregateOracle;
@@ -17,15 +20,18 @@ import sqlancer.monet.oracle.tlp.MonetTLPHavingOracle;
 import sqlancer.monet.oracle.tlp.MonetTLPWhereOracle;
 
 @Parameters
-public class MonetOptions {
+public class MonetOptions implements DBMSSpecificOptions<MonetOracleFactory> {
 
-    @Parameter(names = "--bulk-insert")
+    @Parameter(names = "--bulk-insert", description = "Specifies whether INSERT statements should be issued in bulk", arity = 1)
     public boolean allowBulkInsert;
 
-    @Parameter(names = "--oracle")
-    public List<MonetOracle> oracle = Arrays.asList(MonetOracle.QUERY_PARTITIONING);
+    @Parameter(names = "--oracle", description = "Specifies which test oracle should be used for MonetQL")
+    public List<MonetOracleFactory> oracle = Arrays.asList(MonetOracleFactory.QUERY_PARTITIONING);
 
-    public enum MonetOracle {
+    @Parameter(names = "--connection-url", description = "Specifies the URL for connecting to the MonetQL server", arity = 1)
+    public String connectionURL = "mapi://localhost:5432/test";
+
+    public enum MonetOracleFactory implements OracleFactory<MonetGlobalState> {
         NOREC {
             @Override
             public TestOracle create(MonetGlobalState globalState) throws SQLException {
@@ -36,6 +42,11 @@ public class MonetOptions {
             @Override
             public TestOracle create(MonetGlobalState globalState) throws SQLException {
                 return new MonetPivotedQuerySynthesisOracle(globalState);
+            }
+
+            @Override
+            public boolean requiresAllTablesToContainRows() {
+                return true;
             }
         },
         HAVING {
@@ -57,8 +68,11 @@ public class MonetOptions {
             }
         };
 
-        public abstract TestOracle create(MonetGlobalState globalState) throws SQLException;
+    }
 
+    @Override
+    public List<MonetOracleFactory> getTestOracleFactory() {
+        return oracle;
     }
 
 }

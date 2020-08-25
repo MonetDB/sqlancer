@@ -1,13 +1,12 @@
 package sqlancer.monet.gen;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetColumn;
 import sqlancer.monet.MonetSchema.MonetTable;
@@ -21,7 +20,7 @@ public final class MonetInsertGenerator {
 
     public static Query insert(MonetGlobalState globalState) {
         MonetTable table = globalState.getSchema().getRandomTable(t -> t.isInsertable());
-        Set<String> errors = new HashSet<>();
+        ExpectedErrors errors = new ExpectedErrors();
         errors.add("cannot insert into column");
         MonetCommon.addCommonExpressionErrors(errors);
         MonetCommon.addCommonInsertUpdateErrors(errors);

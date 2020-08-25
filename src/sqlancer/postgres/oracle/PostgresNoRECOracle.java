@@ -9,12 +9,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import sqlancer.IgnoreMeException;
-import sqlancer.NoRECBase;
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
-import sqlancer.SQLancerResultSet;
-import sqlancer.TestOracle;
+import sqlancer.common.oracle.NoRECBase;
+import sqlancer.common.oracle.TestOracle;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLancerResultSet;
 import sqlancer.postgres.PostgresCompoundDataType;
 import sqlancer.postgres.PostgresGlobalState;
 import sqlancer.postgres.PostgresSchema;
@@ -89,7 +89,9 @@ public class PostgresNoRECOracle extends NoRECBase<PostgresGlobalState> implemen
         }
         // JOIN subqueries
         for (int i = 0; i < Randomly.smallNumber(); i++) {
-            PostgresSubquery subquery = PostgresTLPBase.createSubquery(globalState, String.format("sub%d", i));
+            PostgresTables subqueryTables = globalState.getSchema().getRandomTableNonEmptyTables();
+            PostgresSubquery subquery = PostgresTLPBase.createSubquery(globalState, String.format("sub%d", i),
+                    subqueryTables);
             PostgresExpression joinClause = gen.generateExpression(PostgresDataType.BOOLEAN);
             PostgresJoinType options = PostgresJoinType.getRandom();
             PostgresJoin j = new PostgresJoin(subquery, joinClause, options);

@@ -6,6 +6,8 @@ import java.util.Optional;
 import sqlancer.IgnoreMeException;
 import sqlancer.LikeImplementationHelper;
 import sqlancer.Randomly;
+import sqlancer.common.visitor.BinaryOperation;
+import sqlancer.common.visitor.UnaryOperation;
 import sqlancer.sqlite3.SQLite3CollateHelper;
 import sqlancer.sqlite3.SQLite3Provider;
 import sqlancer.sqlite3.ast.SQLite3Expression.BinaryComparisonOperation.BinaryComparisonOperator;
@@ -15,8 +17,6 @@ import sqlancer.sqlite3.schema.SQLite3DataType;
 import sqlancer.sqlite3.schema.SQLite3Schema.SQLite3Column;
 import sqlancer.sqlite3.schema.SQLite3Schema.SQLite3Column.SQLite3CollateSequence;
 import sqlancer.sqlite3.schema.SQLite3Schema.SQLite3Table;
-import sqlancer.visitor.BinaryOperation;
-import sqlancer.visitor.UnaryOperation;
 
 public abstract class SQLite3Expression {
 
@@ -92,17 +92,16 @@ public abstract class SQLite3Expression {
         }
     }
 
-    /**
+    /*
      * See https://www.sqlite.org/datatype3.html 3.2
      */
     public TypeAffinity getAffinity() {
         return TypeAffinity.NONE;
     }
 
-    /**
+    /*
      * See https://www.sqlite.org/datatype3.html#assigning_collating_sequences_from_sql 7.1
      *
-     * @return
      */
     public abstract SQLite3CollateSequence getExplicitCollateSequence();
 
@@ -137,7 +136,7 @@ public abstract class SQLite3Expression {
 
         private final SQLite3Table table;
         private SQLite3Expression onClause;
-        private final JoinType type;
+        private JoinType type;
 
         public Join(SQLite3Table table, SQLite3Expression onClause, JoinType type) {
             this.table = table;
@@ -173,6 +172,10 @@ public abstract class SQLite3Expression {
 
         public void setOnClause(SQLite3Expression onClause) {
             this.onClause = onClause;
+        }
+
+        public void setType(JoinType type) {
+            this.type = type;
         }
 
     }
@@ -1627,17 +1630,25 @@ public abstract class SQLite3Expression {
         if (leftAffinity.isNumeric() && (rightAffinity == TypeAffinity.TEXT || rightAffinity == TypeAffinity.BLOB
                 || rightAffinity == TypeAffinity.NONE)) {
             right = right.applyNumericAffinity();
+            assert right != null;
         } else if (rightAffinity.isNumeric() && (leftAffinity == TypeAffinity.TEXT || leftAffinity == TypeAffinity.BLOB
                 || leftAffinity == TypeAffinity.NONE)) {
             left = left.applyNumericAffinity();
+            assert left != null;
         }
 
         // If one operand has TEXT affinity and the other has no affinity, then TEXT
         // affinity is applied to the other operand.
         if (leftAffinity == TypeAffinity.TEXT && rightAffinity == TypeAffinity.NONE) {
             right = right.applyTextAffinity();
+            if (right == null) {
+                throw new IgnoreMeException();
+            }
         } else if (rightAffinity == TypeAffinity.TEXT && leftAffinity == TypeAffinity.NONE) {
             left = left.applyTextAffinity();
+            if (left == null) {
+                throw new IgnoreMeException();
+            }
         }
         return new ConstantTuple(left, right);
     }

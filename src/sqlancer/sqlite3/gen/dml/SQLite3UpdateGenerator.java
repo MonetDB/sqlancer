@@ -1,12 +1,12 @@
 package sqlancer.sqlite3.gen.dml;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.sqlite3.SQLite3Errors;
 import sqlancer.sqlite3.SQLite3Provider.SQLite3GlobalState;
 import sqlancer.sqlite3.SQLite3Visitor;
@@ -19,7 +19,7 @@ public class SQLite3UpdateGenerator {
 
     private final StringBuilder sb = new StringBuilder();
     private final Randomly r;
-    private final List<String> errors = new ArrayList<>();
+    private final ExpectedErrors errors = new ExpectedErrors();
     private final SQLite3GlobalState globalState;
 
     public SQLite3UpdateGenerator(SQLite3GlobalState globalState, Randomly r) {
@@ -29,7 +29,7 @@ public class SQLite3UpdateGenerator {
 
     public static Query updateRow(SQLite3GlobalState globalState) {
         SQLite3Table randomTableNoViewOrBailout = globalState.getSchema()
-                .getRandomTable(t -> !t.isView() && !t.isReadOnly());
+                .getRandomTableOrBailout(t -> !t.isView() && !t.isReadOnly());
         return updateRow(globalState, randomTableNoViewOrBailout);
     }
 

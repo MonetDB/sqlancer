@@ -2,12 +2,12 @@ package sqlancer.postgres.gen;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.postgres.PostgresGlobalState;
 import sqlancer.postgres.PostgresSchema.PostgresTable;
 
@@ -53,7 +53,7 @@ public final class PostgresVacuumGenerator {
                 }
             }
         }
-        List<String> errors = new ArrayList<>();
+        ExpectedErrors errors = new ExpectedErrors();
         errors.add("VACUUM cannot run inside a transaction block");
         errors.add("deadlock"); /*
                                  * "FULL" commented out due to https://www.postgresql.org/message-id/CA%2Bu7OA6pL%

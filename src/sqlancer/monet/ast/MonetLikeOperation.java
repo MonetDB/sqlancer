@@ -1,7 +1,7 @@
 package sqlancer.monet.ast;
 
 import sqlancer.LikeImplementationHelper;
-import sqlancer.ast.BinaryNode;
+import sqlancer.common.ast.BinaryNode;
 import sqlancer.monet.MonetSchema.MonetDataType;
 
 public class MonetLikeOperation extends BinaryNode<MonetExpression> implements MonetExpression {
@@ -24,6 +24,9 @@ public class MonetLikeOperation extends BinaryNode<MonetExpression> implements M
     public MonetConstant getExpectedValue() {
         MonetConstant leftVal = getLeft().getExpectedValue();
         MonetConstant rightVal = getRight().getExpectedValue();
+        if (leftVal == null || rightVal == null) {
+            return null;
+        }
         if (leftVal.isNull() || rightVal.isNull()) {
             return MonetConstant.createNullConstant();
         } else {

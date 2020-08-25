@@ -10,10 +10,10 @@ import org.postgresql.util.PSQLException;
 
 import sqlancer.ComparatorHelper;
 import sqlancer.IgnoreMeException;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
-import sqlancer.SQLancerResultSet;
-import sqlancer.TestOracle;
+import sqlancer.common.oracle.TestOracle;
+import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLancerResultSet;
 import sqlancer.postgres.PostgresGlobalState;
 import sqlancer.postgres.PostgresSchema.PostgresDataType;
 import sqlancer.postgres.PostgresVisitor;
@@ -44,6 +44,10 @@ public class PostgresTLPAggregateOracle extends PostgresTLPBase implements TestO
     @Override
     public void check() throws SQLException {
         super.check();
+        aggregateCheck();
+    }
+
+    protected void aggregateCheck() throws SQLException {
         PostgresAggregateFunction aggregateFunction = Randomly.fromOptions(PostgresAggregateFunction.MAX,
                 PostgresAggregateFunction.MIN, PostgresAggregateFunction.SUM, PostgresAggregateFunction.BIT_AND,
                 PostgresAggregateFunction.BIT_OR, PostgresAggregateFunction.BOOL_AND, PostgresAggregateFunction.BOOL_OR,
@@ -78,7 +82,6 @@ public class PostgresTLPAggregateOracle extends PostgresTLPBase implements TestO
                     secondQueryString);
             throw new AssertionError(assertionMessage);
         }
-
     }
 
     private String createMetamorphicUnionQuery(PostgresSelect select, PostgresAggregate aggregate,

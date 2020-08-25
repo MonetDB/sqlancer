@@ -1,14 +1,13 @@
 package sqlancer.mysql.gen;
 
 import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.mysql.MySQLGlobalState;
 import sqlancer.mysql.MySQLSchema.MySQLColumn;
 import sqlancer.mysql.MySQLSchema.MySQLTable;
@@ -19,7 +18,7 @@ public class MySQLInsertGenerator {
     private final MySQLTable table;
     private final StringBuilder sb = new StringBuilder();
     boolean canFail;
-    private final Set<String> errors = new HashSet<>();
+    private final ExpectedErrors errors = new ExpectedErrors();
     private final MySQLGlobalState globalState;
 
     public MySQLInsertGenerator(MySQLGlobalState globalState) {

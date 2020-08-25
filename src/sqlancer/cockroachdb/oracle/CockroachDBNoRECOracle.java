@@ -4,17 +4,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import sqlancer.GlobalState;
 import sqlancer.IgnoreMeException;
-import sqlancer.NoRECBase;
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
-import sqlancer.SQLancerResultSet;
-import sqlancer.TestOracle;
 import sqlancer.cockroachdb.CockroachDBCommon;
 import sqlancer.cockroachdb.CockroachDBErrors;
 import sqlancer.cockroachdb.CockroachDBProvider.CockroachDBGlobalState;
@@ -29,6 +23,12 @@ import sqlancer.cockroachdb.ast.CockroachDBJoin.OuterType;
 import sqlancer.cockroachdb.ast.CockroachDBSelect;
 import sqlancer.cockroachdb.ast.CockroachDBTableReference;
 import sqlancer.cockroachdb.gen.CockroachDBExpressionGenerator;
+import sqlancer.common.oracle.NoRECBase;
+import sqlancer.common.oracle.TestOracle;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLancerResultSet;
 
 public class CockroachDBNoRECOracle extends NoRECBase<CockroachDBGlobalState> implements TestOracle {
 
@@ -98,7 +98,7 @@ public class CockroachDBNoRECOracle extends NoRECBase<CockroachDBGlobalState> im
     }
 
     private int getOptimizedResult(CockroachDBExpression whereCondition, List<CockroachDBExpression> tableList,
-            Set<String> errors, List<CockroachDBExpression> joinExpressions) throws SQLException {
+            ExpectedErrors errors, List<CockroachDBExpression> joinExpressions) throws SQLException {
         CockroachDBSelect select = new CockroachDBSelect();
         CockroachDBColumn c = new CockroachDBColumn("COUNT(*)", null, false, false);
         select.setFetchColumns(Arrays.asList(new CockroachDBColumnReference(c)));
@@ -118,7 +118,7 @@ public class CockroachDBNoRECOracle extends NoRECBase<CockroachDBGlobalState> im
     }
 
     private int getNonOptimizedResult(CockroachDBExpression whereCondition, List<CockroachDBExpression> tableList,
-            Set<String> errors, List<CockroachDBExpression> joinList) throws SQLException {
+            ExpectedErrors errors, List<CockroachDBExpression> joinList) throws SQLException {
         String fromString = tableList.stream().map(t -> ((CockroachDBTableReference) t).getTable().getName())
                 .collect(Collectors.joining(", "));
         if (!tableList.isEmpty() && !joinList.isEmpty()) {

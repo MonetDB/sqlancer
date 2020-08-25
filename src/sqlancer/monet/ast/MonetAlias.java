@@ -1,6 +1,6 @@
 package sqlancer.monet.ast;
 
-import sqlancer.visitor.UnaryOperation;
+import sqlancer.common.visitor.UnaryOperation;
 
 public class MonetAlias implements UnaryOperation<MonetExpression>, MonetExpression {
 

@@ -1,7 +1,7 @@
 package sqlancer.monet.ast;
 
 import sqlancer.Randomly;
-import sqlancer.ast.BinaryOperatorNode.Operator;
+import sqlancer.common.ast.BinaryOperatorNode.Operator;
 import sqlancer.monet.MonetSchema.MonetDataType;
 
 public class MonetPostfixOperation implements MonetExpression {
@@ -106,7 +106,11 @@ public class MonetPostfixOperation implements MonetExpression {
 
     @Override
     public MonetConstant getExpectedValue() {
-        return op.apply(expr.getExpectedValue());
+        MonetConstant expectedValue = expr.getExpectedValue();
+        if (expectedValue == null) {
+            return null;
+        }
+        return op.apply(expectedValue);
     }
 
     public String getOperatorTextRepresentation() {

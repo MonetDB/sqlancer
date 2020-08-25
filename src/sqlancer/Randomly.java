@@ -9,38 +9,40 @@ import java.util.function.Supplier;
 
 public final class Randomly {
 
-    private static final boolean USE_CACHING = true;
-    private static final int CACHE_SIZE = 100;
+    private static StringGenerationStrategy stringGenerationStrategy = StringGenerationStrategy.SOPHISTICATED;
+    private static int maxStringLength = 10;
+    private static boolean useCaching = true;
+    private static int cacheSize = 100;
 
     private final List<Long> cachedLongs = new ArrayList<>();
     private final List<String> cachedStrings = new ArrayList<>();
     private final List<Double> cachedDoubles = new ArrayList<>();
     private final List<byte[]> cachedBytes = new ArrayList<>();
-    private static final String ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzöß!#<>/.,~-+'*()[]{} ^*?%_\t\n\r|&\\";
     private Supplier<String> provider;
 
     private static final ThreadLocal<Random> THREAD_RANDOM = new ThreadLocal<>();
+    private long seed;
 
     private void addToCache(long val) {
-        if (USE_CACHING && cachedLongs.size() < CACHE_SIZE && !cachedLongs.contains(val)) {
+        if (useCaching && cachedLongs.size() < cacheSize && !cachedLongs.contains(val)) {
             cachedLongs.add(val);
         }
     }
 
     private void addToCache(double val) {
-        if (USE_CACHING && cachedDoubles.size() < CACHE_SIZE && !cachedDoubles.contains(val)) {
+        if (useCaching && cachedDoubles.size() < cacheSize && !cachedDoubles.contains(val)) {
             cachedDoubles.add(val);
         }
     }
 
     private void addToCache(String val) {
-        if (USE_CACHING && cachedStrings.size() < CACHE_SIZE && !cachedStrings.contains(val)) {
+        if (useCaching && cachedStrings.size() < cacheSize && !cachedStrings.contains(val)) {
             cachedStrings.add(val);
         }
     }
 
     private Long getFromLongCache() {
-        if (!USE_CACHING || cachedLongs.isEmpty()) {
+        if (!useCaching || cachedLongs.isEmpty()) {
             return null;
         } else {
             return Randomly.fromList(cachedLongs);
@@ -48,7 +50,7 @@ public final class Randomly {
     }
 
     private Double getFromDoubleCache() {
-        if (!USE_CACHING) {
+        if (!useCaching) {
             return null;
         }
         if (Randomly.getBoolean() && !cachedLongs.isEmpty()) {
@@ -61,7 +63,7 @@ public final class Randomly {
     }
 
     private String getFromStringCache() {
-        if (!USE_CACHING) {
+        if (!useCaching) {
             return null;
         }
         if (Randomly.getBoolean() && !cachedLongs.isEmpty()) {
@@ -75,19 +77,7 @@ public final class Randomly {
             if (Randomly.getBoolean()) {
                 return randomString;
             } else {
-                if (Randomly.getBoolean()) {
-                    return randomString.toLowerCase();
-                } else if (Randomly.getBoolean()) {
-                    return randomString.toUpperCase();
-                } else {
-                    char[] chars = randomString.toCharArray();
-                    if (chars.length != 0) {
-                        for (int i = 0; i < Randomly.smallNumber(); i++) {
-                            chars[getInteger(0, chars.length)] = ALPHABET.charAt(getInteger(0, ALPHABET.length()));
-                        }
-                    }
-                    return new String(chars);
-                }
+                return stringGenerationStrategy.transformCachedString(this, randomString);
             }
         } else {
             return null;
@@ -95,7 +85,7 @@ public final class Randomly {
     }
 
     private static boolean cacheProbability() {
-        return USE_CACHING && getNextLong(0, 3) == 1;
+        return useCaching && getNextLong(0, 3) == 1;
     }
 
     // CACHING END
@@ -223,59 +213,139 @@ public final class Randomly {
         return getIntegerBoundedImp(min, max);
     }
 
-    public String getString() {
-        if (smallBiasProbability()) {
-            return Randomly.fromOptions("TRUE", "FALSE", "0.0", "-0.0", "1e500", "-1e500");
-        }
-        if (cacheProbability()) {
-            String s = getFromStringCache();
-            if (s != null) {
+    public enum StringGenerationStrategy {
+
+        NUMERIC {
+            @Override
+            public String getString(Randomly r) {
+                return getStringOfAlphabet(r, NUMERIC_ALPHABET);
+            }
+
+        },
+        ALPHANUMERIC {
+
+            @Override
+            public String getString(Randomly r) {
+                return getStringOfAlphabet(r, ALPHANUMERIC_ALPHABET);
+
+            }
+
+        },
+        ALPHANUMERIC_SPECIALCHAR {
+
+            @Override
+            public String getString(Randomly r) {
+                return getStringOfAlphabet(r, ALPHANUMERIC_SPECIALCHAR_ALPHABET);
+
+            }
+
+        },
+        SOPHISTICATED {
+
+            private static final String ALPHABET = ALPHANUMERIC_SPECIALCHAR_ALPHABET;
+
+            @Override
+            public String getString(Randomly r) {
+                if (smallBiasProbability()) {
+                    return Randomly.fromOptions("TRUE", "FALSE", "0.0", "-0.0", "1e500", "-1e500");
+                }
+                if (cacheProbability()) {
+                    String s = r.getFromStringCache();
+                    if (s != null) {
+                        return s;
+                    }
+                }
+
+                int n = ALPHABET.length();
+
+                StringBuilder sb = new StringBuilder();
+
+                int chars = getStringLength(r);
+                for (int i = 0; i < chars; i++) {
+                    if (Randomly.getBooleanWithRatherLowProbability()) {
+                        char val = (char) r.getInteger();
+                        if (val != 0) {
+                            sb.append(val);
+                        }
+                    } else {
+                        sb.append(ALPHABET.charAt(getNextInt(0, n)));
+                    }
+                }
+                while (Randomly.getBooleanWithSmallProbability()) {
+                    String[][] pairs = { { "{", "}" }, { "[", "]" }, { "(", ")" } };
+                    int idx = (int) Randomly.getNotCachedInteger(0, pairs.length);
+                    int left = (int) Randomly.getNotCachedInteger(0, sb.length() + 1);
+                    sb.insert(left, pairs[idx][0]);
+                    int right = (int) Randomly.getNotCachedInteger(left + 1, sb.length() + 1);
+                    sb.insert(right, pairs[idx][1]);
+                }
+                if (r.provider != null) {
+                    while (Randomly.getBooleanWithSmallProbability()) {
+                        if (sb.length() == 0) {
+                            sb.append(r.provider.get());
+                        } else {
+                            sb.insert((int) Randomly.getNotCachedInteger(0, sb.length()), r.provider.get());
+                        }
+                    }
+                }
+
+                String s = sb.toString();
+
+                r.addToCache(s);
                 return s;
             }
-        }
 
-        int n = ALPHABET.length();
-
-        StringBuilder sb = new StringBuilder();
-
-        int chars;
-        if (Randomly.getBoolean()) {
-            chars = Randomly.smallNumber();
-        } else {
-            chars = getInteger(0, 30);
-        }
-        for (int i = 0; i < chars; i++) {
-            if (Randomly.getBooleanWithRatherLowProbability()) {
-                char val = (char) getInteger();
-                if (val != 0) {
-                    sb.append(val);
-                }
-            } else {
-                sb.append(ALPHABET.charAt(getNextInt(0, n)));
-            }
-        }
-        while (Randomly.getBooleanWithSmallProbability()) {
-            String[][] pairs = { { "{", "}" }, { "[", "]" }, { "(", ")" } };
-            int idx = (int) Randomly.getNotCachedInteger(0, pairs.length);
-            int left = (int) Randomly.getNotCachedInteger(0, sb.length() + 1);
-            sb.insert(left, pairs[idx][0]);
-            int right = (int) Randomly.getNotCachedInteger(left + 1, sb.length() + 1);
-            sb.insert(right, pairs[idx][1]);
-        }
-        if (provider != null) {
-            while (Randomly.getBooleanWithSmallProbability()) {
-                if (sb.length() == 0) {
-                    sb.append(provider.get());
+            public String transformCachedString(Randomly r, String randomString) {
+                if (Randomly.getBoolean()) {
+                    return randomString.toLowerCase();
+                } else if (Randomly.getBoolean()) {
+                    return randomString.toUpperCase();
                 } else {
-                    sb.insert((int) Randomly.getNotCachedInteger(0, sb.length()), provider.get());
+                    char[] chars = randomString.toCharArray();
+                    if (chars.length != 0) {
+                        for (int i = 0; i < Randomly.smallNumber(); i++) {
+                            chars[r.getInteger(0, chars.length)] = ALPHABET.charAt(r.getInteger(0, ALPHABET.length()));
+                        }
+                    }
+                    return new String(chars);
                 }
             }
+
+        };
+
+        private static final String ALPHANUMERIC_SPECIALCHAR_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzöß!#<>/.,~-+'*()[]{} ^*?%_\t\n\r|&\\";
+        private static final String ALPHANUMERIC_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        private static final String NUMERIC_ALPHABET = "0123456789";
+
+        private static int getStringLength(Randomly r) {
+            int chars;
+            if (Randomly.getBoolean()) {
+                chars = Randomly.smallNumber();
+            } else {
+                chars = r.getInteger(0, maxStringLength);
+            }
+            return chars;
         }
 
-        String s = sb.toString();
+        private static String getStringOfAlphabet(Randomly r, String alphabet) {
+            int chars = getStringLength(r);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < chars; i++) {
+                sb.append(alphabet.charAt(getNextInt(0, alphabet.length())));
+            }
+            return sb.toString();
+        }
 
-        addToCache(s);
-        return s;
+        public abstract String getString(Randomly r);
+
+        public String transformCachedString(Randomly r, String s) {
+            return s;
+        }
+
+    }
+
+    public String getString() {
+        return stringGenerationStrategy.getString(this);
     }
 
     public byte[] getBytes() {
@@ -407,11 +477,12 @@ public final class Randomly {
     }
 
     public Randomly() {
-        getThreadRandom().set(new Random());
+        THREAD_RANDOM.set(new Random());
     }
 
     public Randomly(long seed) {
-        getThreadRandom().set(new Random(seed));
+        this.seed = seed;
+        THREAD_RANDOM.set(new Random(seed));
     }
 
     public static double getUncachedDouble() {
@@ -423,6 +494,15 @@ public final class Randomly {
             String s = getString();
             if (!s.isEmpty()) {
                 return s.substring(0, 1);
+            }
+        }
+    }
+
+    public String getAlphabeticChar() {
+        while (true) {
+            String s = getChar();
+            if (Character.isAlphabetic(s.charAt(0))) {
+                return s;
             }
         }
     }
@@ -442,6 +522,17 @@ public final class Randomly {
 
     private static int getNextInt(int lower, int upper) {
         return (int) getNextLong(lower, upper);
+    }
+
+    public long getSeed() {
+        return seed;
+    }
+
+    public static void initialize(MainOptions options) {
+        stringGenerationStrategy = options.getRandomStringGenerationStrategy();
+        maxStringLength = options.getMaxStringConstantLength();
+        useCaching = options.useConstantCaching();
+        cacheSize = options.getConstantCacheSize();
     }
 
 }

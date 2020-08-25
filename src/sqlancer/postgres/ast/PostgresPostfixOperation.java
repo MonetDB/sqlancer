@@ -1,7 +1,7 @@
 package sqlancer.postgres.ast;
 
 import sqlancer.Randomly;
-import sqlancer.ast.BinaryOperatorNode.Operator;
+import sqlancer.common.ast.BinaryOperatorNode.Operator;
 import sqlancer.postgres.PostgresSchema.PostgresDataType;
 
 public class PostgresPostfixOperation implements PostgresExpression {
@@ -129,7 +129,11 @@ public class PostgresPostfixOperation implements PostgresExpression {
 
     @Override
     public PostgresConstant getExpectedValue() {
-        return op.apply(expr.getExpectedValue());
+        PostgresConstant expectedValue = expr.getExpectedValue();
+        if (expectedValue == null) {
+            return null;
+        }
+        return op.apply(expectedValue);
     }
 
     public String getOperatorTextRepresentation() {

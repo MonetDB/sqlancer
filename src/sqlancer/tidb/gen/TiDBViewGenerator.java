@@ -1,11 +1,10 @@
 package sqlancer.tidb.gen;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
+import sqlancer.IgnoreMeException;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.tidb.TiDBErrors;
 import sqlancer.tidb.TiDBProvider.TiDBGlobalState;
 
@@ -37,16 +36,14 @@ public final class TiDBViewGenerator {
         }
         sb.append(") AS ");
         sb.append(TiDBRandomQuerySynthesizer.generate(globalState, nrColumns).getQueryString());
-        Set<String> errors = new HashSet<>();
+        ExpectedErrors errors = new ExpectedErrors();
         TiDBErrors.addExpressionErrors(errors);
         errors.add(
                 "references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them");
         errors.add("Unknown column ");
-        if (Randomly.getBoolean()) {
-            sb.append(" WITH ");
-            sb.append(Randomly.fromOptions("CASCADED", "LOCAL"));
-            sb.append(" ");
-            sb.append(" CHECK OPTION");
+        if (sb.toString().contains("\\\\")) {
+            // TODO: CREATE VIEW v0(c0) AS SELECT '\\' FROM t0; causes an unexpected failure
+            throw new IgnoreMeException();
         }
         return new QueryAdapter(sb.toString(), errors, true);
     }

@@ -1,29 +1,19 @@
 package sqlancer.monet;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import sqlancer.AbstractAction;
-import sqlancer.CompositeTestOracle;
 import sqlancer.IgnoreMeException;
 import sqlancer.ProviderAdapter;
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
-import sqlancer.QueryProvider;
 import sqlancer.Randomly;
-import sqlancer.StateToReproduce;
-import sqlancer.StateToReproduce.MonetStateToReproduce;
 import sqlancer.StatementExecutor;
-import sqlancer.TestOracle;
-import sqlancer.monet.MonetSchema.MonetColumn;
-import sqlancer.monet.MonetSchema.MonetTable;
-import sqlancer.monet.ast.MonetExpression;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.QueryProvider;
+import sqlancer.common.query.SQLancerResultSet;
 import sqlancer.monet.gen.MonetAlterTableGenerator;
 import sqlancer.monet.gen.MonetAnalyzeGenerator;
 import sqlancer.monet.gen.MonetCommentGenerator;
@@ -40,7 +30,7 @@ import sqlancer.monet.gen.MonetVacuumGenerator;
 import sqlancer.monet.gen.MonetViewGenerator;
 import sqlancer.sqlite3.gen.SQLite3Common;
 
-public final class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOptions> {
+public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOptions> {
 
     public static boolean generateOnlyKnown;
 
@@ -50,6 +40,10 @@ public final class MonetProvider extends ProviderAdapter<MonetGlobalState, Monet
         super(MonetGlobalState.class, MonetOptions.class);
     }
 
+    protected MonetProvider(Class<MonetGlobalState> globalClass, Class<MonetOptions> optionClass) {
+        super(globalClass, optionClass);
+    }
+
     public enum Action implements AbstractAction<MonetGlobalState> {
         ANALYZE(MonetAnalyzeGenerator::create), //
         ALTER_TABLE(g -> MonetAlterTableGenerator.create(g.getSchema().getRandomTable(t -> !t.isView()), g,
@@ -57,7 +51,7 @@ public final class MonetProvider extends ProviderAdapter<MonetGlobalState, Monet
         COMMIT(g -> {
             Query query;
             if (Randomly.getBoolean()) {
-                query = new QueryAdapter("COMMIT", Arrays.asList("not allowed in auto commit mode"), true);
+                query = new QueryAdapter("COMMIT", ExpectedErrors.from("not allowed in auto commit mode"), true);
             } else if (Randomly.getBoolean()) {
                 query = MonetTransactionGenerator.executeBegin();
             } else {
@@ -142,37 +136,9 @@ public final class MonetProvider extends ProviderAdapter<MonetGlobalState, Monet
 
     @Override
     public void generateDatabase(MonetGlobalState globalState) throws SQLException {
-        while (globalState.getSchema().getDatabaseTables().size() < Randomly.fromOptions(1, 2)) {
-            try {
-                String tableName = SQLite3Common.createTableName(globalState.getSchema().getDatabaseTables().size());
-                Query createTable = MonetTableGenerator.generate(tableName, globalState.getSchema(),
-                        generateOnlyKnown, globalState);
-                globalState.executeStatement(createTable);
-            } catch (IgnoreMeException e) {
-
-            }
-        }
-
-        StatementExecutor<MonetGlobalState, Action> se = new StatementExecutor<>(globalState, Action.values(),
-                MonetProvider::mapActions, (q) -> {
-                    if (globalState.getSchema().getDatabaseTables().isEmpty()) {
-                        throw new IgnoreMeException();
-                    }
-                });
-        se.executeStatements();
-        globalState.executeStatement(new QueryAdapter("CALL sys.setquerytimeout(5000);\n"));
-    }
-
-    @Override
-    protected TestOracle getTestOracle(MonetGlobalState globalState) throws SQLException {
-        List<TestOracle> oracles = globalState.getDmbsSpecificOptions().oracle.stream().map(o -> {
-            try {
-                return o.create(globalState);
-            } catch (SQLException e1) {
-                throw new AssertionError(e1);
-            }
-        }).collect(Collectors.toList());
-        return new CompositeTestOracle(oracles, globalState);
+        //readFunctions(globalState);
+        createTables(globalState, Randomly.fromOptions(4, 5, 6));
+        prepareTables(globalState);
     }
 
     @Override
@@ -184,48 +150,43 @@ public final class MonetProvider extends ProviderAdapter<MonetGlobalState, Monet
         return con;
     }
 
+    /*protected void readFunctions(MonetGlobalState globalState) throws SQLException {
+        QueryAdapter query = new QueryAdapter("SELECT proname, provolatile FROM pg_proc;");
+        SQLancerResultSet rs = query.executeAndGet(globalState);
+        while (rs.next()) {
+            String functionName = rs.getString(1);
+            Character functionType = rs.getString(2).charAt(0);
+            globalState.addFunctionAndType(functionName, functionType);
+        }
+    }*/
+
+    protected void createTables(MonetGlobalState globalState, int numTables) throws SQLException {
+        while (globalState.getSchema().getDatabaseTables().size() < numTables) {
+            try {
+                String tableName = SQLite3Common.createTableName(globalState.getSchema().getDatabaseTables().size());
+                Query createTable = MonetTableGenerator.generate(tableName, globalState.getSchema(),
+                        generateOnlyKnown, globalState);
+                globalState.executeStatement(createTable);
+            } catch (IgnoreMeException e) {
+
+            }
+        }
+    }
+
+    protected void prepareTables(MonetGlobalState globalState) throws SQLException {
+        StatementExecutor<MonetGlobalState, Action> se = new StatementExecutor<>(globalState, Action.values(),
+                MonetProvider::mapActions, (q) -> {
+                    if (globalState.getSchema().getDatabaseTables().isEmpty()) {
+                        throw new IgnoreMeException();
+                    }
+                });
+        se.executeStatements();
+        globalState.executeStatement(new QueryAdapter("CALL sys.setquerytimeout(5000);\n"));
+    }
+
     @Override
     public String getDBMSName() {
         return "monetdb";
     }
 
-    @Override
-    public void printDatabaseSpecificState(FileWriter writer, StateToReproduce state) {
-        StringBuilder sb = new StringBuilder();
-        MonetStateToReproduce specificState = (MonetStateToReproduce) state;
-        if (specificState.getRandomRowValues() != null) {
-            List<MonetColumn> columnList = specificState.getRandomRowValues().keySet().stream()
-                    .collect(Collectors.toList());
-            List<MonetTable> tableList = columnList.stream().map(c -> c.getTable()).distinct().sorted()
-                    .collect(Collectors.toList());
-            for (MonetTable t : tableList) {
-                sb.append("-- " + t.getName() + "\n");
-                List<MonetColumn> columnsForTable = columnList.stream().filter(c -> c.getTable().equals(t))
-                        .collect(Collectors.toList());
-                for (MonetColumn c : columnsForTable) {
-                    sb.append("--\t");
-                    sb.append(c);
-                    sb.append("=");
-                    sb.append(specificState.getRandomRowValues().get(c));
-                    sb.append("\n");
-                }
-            }
-            sb.append("expected values: \n");
-            MonetExpression whereClause = ((MonetStateToReproduce) state).getWhereClause();
-            if (whereClause != null) {
-                sb.append(MonetVisitor.asExpectedValues(whereClause).replace("\n", "\n-- "));
-            }
-        }
-        try {
-            writer.write(sb.toString());
-            writer.flush();
-        } catch (IOException e) {
-            throw new AssertionError();
-        }
-    }
-
-    @Override
-    public StateToReproduce getStateToReproduce(String databaseName) {
-        return new MonetStateToReproduce(databaseName);
-    }
 }

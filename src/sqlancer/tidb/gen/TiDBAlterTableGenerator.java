@@ -1,13 +1,12 @@
 package sqlancer.tidb.gen;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import sqlancer.IgnoreMeException;
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.tidb.TiDBBugs;
 import sqlancer.tidb.TiDBProvider.TiDBGlobalState;
 import sqlancer.tidb.TiDBSchema.TiDBColumn;
@@ -24,7 +23,7 @@ public final class TiDBAlterTableGenerator {
     }
 
     public static Query getQuery(TiDBGlobalState globalState) {
-        Set<String> errors = new HashSet<>();
+        ExpectedErrors errors = new ExpectedErrors();
         StringBuilder sb = new StringBuilder("ALTER TABLE ");
         TiDBTable table = globalState.getSchema().getRandomTable(t -> !t.isView());
         TiDBColumn column = table.getRandomColumn();

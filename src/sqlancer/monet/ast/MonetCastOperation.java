@@ -23,7 +23,11 @@ public class MonetCastOperation implements MonetExpression {
 
     @Override
     public MonetConstant getExpectedValue() {
-        return expression.getExpectedValue().cast(type.getDataType());
+        MonetConstant expectedValue = expression.getExpectedValue();
+        if (expectedValue == null) {
+            return null;
+        }
+        return expectedValue.cast(type.getDataType());
     }
 
     public MonetExpression getExpression() {

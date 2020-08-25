@@ -1,6 +1,5 @@
 package sqlancer.monet.oracle;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -11,79 +10,56 @@ import java.util.stream.Collectors;
 import sqlancer.Main.StateLogger;
 import sqlancer.MainOptions;
 import sqlancer.Randomly;
-import sqlancer.StateToReproduce.MonetStateToReproduce;
-import sqlancer.TestOracle;
+import sqlancer.common.oracle.PivotedQuerySynthesisBase;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.monet.MonetGlobalState;
-import sqlancer.monet.MonetSchema;
 import sqlancer.monet.MonetSchema.MonetColumn;
 import sqlancer.monet.MonetSchema.MonetRowValue;
 import sqlancer.monet.MonetSchema.MonetTables;
 import sqlancer.monet.MonetToStringVisitor;
+import sqlancer.monet.MonetVisitor;
 import sqlancer.monet.ast.MonetColumnValue;
 import sqlancer.monet.ast.MonetConstant;
 import sqlancer.monet.ast.MonetExpression;
 import sqlancer.monet.ast.MonetSelect;
 import sqlancer.monet.ast.MonetSelect.MonetFromTable;
+import sqlancer.monet.gen.MonetCommon;
 import sqlancer.monet.gen.MonetExpressionGenerator;
 
-public class MonetPivotedQuerySynthesisOracle implements TestOracle {
+public class MonetPivotedQuerySynthesisOracle
+        extends PivotedQuerySynthesisBase<MonetGlobalState, MonetRowValue, MonetExpression> {
 
-    private MonetStateToReproduce state;
-    private MonetRowValue rw;
-    private final Connection database;
     private List<MonetColumn> fetchColumns;
-    private final MonetSchema s;
     private final MainOptions options;
     private final StateLogger logger;
-    private final MonetGlobalState globalState;
 
     public MonetPivotedQuerySynthesisOracle(MonetGlobalState globalState) throws SQLException {
-        this.globalState = globalState;
-        this.database = globalState.getConnection();
-        this.s = globalState.getSchema();
+        super(globalState);
         options = globalState.getOptions();
         logger = globalState.getLogger();
-        this.state = (MonetStateToReproduce) globalState.getState();
+        MonetCommon.addCommonExpressionErrors(errors);
+        MonetCommon.addCommonFetchErrors(errors);
     }
 
     @Override
-    public void check() throws SQLException {
-        String queryString = getQueryThatContainsAtLeastOneRow(state);
-        state.getLocalState().log(queryString);
-        if (options.logEachSelect()) {
-            logger.writeCurrent(queryString);
-        }
-
-        boolean isContainedIn = isContainedIn(queryString, options, logger);
-        if (!isContainedIn) {
-            String assertionMessage = String.format("the query doesn't contain at least 1 row!\n-- %s;", queryString);
-            throw new AssertionError(assertionMessage);
-        }
-
-    }
-
-    public String getQueryThatContainsAtLeastOneRow(MonetStateToReproduce state) throws SQLException {
-        this.state = state;
-        MonetTables randomFromTables = s.getRandomTableNonEmptyTables();
-
-        state.queryTargetedTablesString = randomFromTables.tableNamesAsString();
+    public Query getQueryThatContainsAtLeastOneRow() throws SQLException {
+        MonetTables randomFromTables = globalState.getSchema().getRandomTableNonEmptyTables();
 
         MonetSelect selectStatement = new MonetSelect();
         selectStatement.setSelectType(Randomly.fromOptions(MonetSelect.SelectType.values()));
         List<MonetColumn> columns = randomFromTables.getColumns();
-        rw = randomFromTables.getRandomRowValue(database, state);
+        pivotRow = randomFromTables.getRandomRowValue(globalState.getConnection());
 
         fetchColumns = columns;
         selectStatement.setFromList(randomFromTables.getTables().stream().map(t -> new MonetFromTable(t, false))
                 .collect(Collectors.toList()));
         selectStatement.setFetchColumns(fetchColumns.stream()
-                .map(c -> new MonetColumnValue(c, rw.getValues().get(c))).collect(Collectors.toList()));
-        state.queryTargetedColumnsString = fetchColumns.stream().map(c -> c.getFullQualifiedName())
-                .collect(Collectors.joining(", "));
-        MonetExpression whereClause = generateWhereClauseThatContainsRowValue(columns, rw);
+                .map(c -> new MonetColumnValue(getFetchValueAliasedColumn(c), pivotRow.getValues().get(c)))
+                .collect(Collectors.toList()));
+        MonetExpression whereClause = generateWhereClauseThatContainsRowValue(columns, pivotRow);
         selectStatement.setWhereClause(whereClause);
-        state.whereClause = selectStatement;
-        List<MonetExpression> groupByClause = generateGroupByClause(columns, rw);
+        List<MonetExpression> groupByClause = generateGroupByClause(columns, pivotRow);
         selectStatement.setGroupByExpressions(groupByClause);
         MonetExpression limitClause = generateLimit();
         selectStatement.setLimitClause(limitClause);
@@ -105,11 +81,11 @@ public class MonetPivotedQuerySynthesisOracle implements TestOracle {
                 sb2.append(" AND ");
             }
             sb2.append(c.getFullQualifiedName());
-            if (rw.getValues().get(c).isNull()) {
+            if (pivotRow.getValues().get(c).isNull()) {
                 sb2.append(" IS NULL");
             } else {
                 sb2.append(" = ");
-                sb2.append(rw.getValues().get(c).getTextRepresentation());
+                sb2.append(pivotRow.getValues().get(c).getTextRepresentation());
             }
         }
         sb2.append(") as result(");
@@ -121,11 +97,20 @@ public class MonetPivotedQuerySynthesisOracle implements TestOracle {
             sb2.append(c.getFullQualifiedName());
         }
         sb2.append(");");
-        state.queryThatSelectsRow = sb2.toString();
 
         MonetToStringVisitor visitor = new MonetToStringVisitor();
         visitor.visit(selectStatement);
-        return visitor.get();
+        return new QueryAdapter(visitor.get());
+    }
+
+    /*
+     * Prevent name collisions by aliasing the column.
+     */
+    private MonetColumn getFetchValueAliasedColumn(MonetColumn c) {
+        MonetColumn aliasedColumn = new MonetColumn(c.getName() + " AS " + c.getTable().getName() + c.getName(),
+                c.getType());
+        aliasedColumn.setTable(c.getTable());
+        return aliasedColumn;
     }
 
     private List<MonetExpression> generateGroupByClause(List<MonetColumn> columns, MonetRowValue rw) {
@@ -159,13 +144,18 @@ public class MonetPivotedQuerySynthesisOracle implements TestOracle {
         return MonetExpressionGenerator.generateTrueCondition(columns, rw, globalState);
     }
 
-    private boolean isContainedIn(String queryString, MainOptions options, StateLogger logger) throws SQLException {
+    @Override
+    protected boolean isContainedIn(Query query) throws SQLException {
         Statement createStatement;
-        createStatement = database.createStatement();
+        createStatement = globalState.getConnection().createStatement();
 
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT * FROM ("); // ANOTHER SELECT TO USE ORDER BY without restrictions
-        sb.append(queryString);
+        if (query.getQueryString().endsWith(";")) {
+            sb.append(query.getQueryString().substring(0, query.getQueryString().length() - 1));
+        } else {
+            sb.append(query.getQueryString());
+        }
         sb.append(") as result(");
         int i = 0;
         for (MonetColumn c : fetchColumns) {
@@ -184,34 +174,36 @@ public class MonetPivotedQuerySynthesisOracle implements TestOracle {
             sb.append("result.");
             sb.append(c.getTable().getName());
             sb.append(c.getName());
-            if (rw.getValues().get(c).isNull()) {
+            if (pivotRow.getValues().get(c).isNull()) {
                 sb.append(" IS NULL");
             } else {
                 sb.append(" = ");
-                sb.append(rw.getValues().get(c).getTextRepresentation());
+                sb.append(pivotRow.getValues().get(c).getTextRepresentation());
             }
         }
         String resultingQueryString = sb.toString();
         // log both SELECT queries at the bottom of the error log file
-        state.getLocalState().log(String.format("-- %s;\n-- %s;", queryString, resultingQueryString));
         if (options.logEachSelect()) {
             logger.writeCurrent(resultingQueryString);
         }
+        globalState.getState().getLocalState().log(resultingQueryString);
+        QueryAdapter finalQuery = new QueryAdapter(resultingQueryString, errors);
         try (ResultSet result = createStatement.executeQuery(resultingQueryString)) {
             boolean isContainedIn = result.next();
             createStatement.close();
             return isContainedIn;
         } catch (SQLException e) {
-            if (e.getMessage().contains("out of range") || e.getMessage().contains("cannot cast")
-                    || e.getMessage().contains("invalid input syntax for ") || e.getMessage().contains("conversion of ") || e.getMessage().contains("must be type")
-                    || e.getMessage().contains("operator does not exist")
-                    || e.getMessage().contains("division by zero")
-                    || e.getMessage().contains("canceling statement due to statement timeout")) {
+            if (finalQuery.getExpectedErrors().errorIsExpected(e.getMessage())) {
                 return true;
             } else {
                 throw e;
             }
         }
+    }
+
+    @Override
+    protected String asString(MonetExpression expr) {
+        return MonetVisitor.asString(expr);
     }
 
 }

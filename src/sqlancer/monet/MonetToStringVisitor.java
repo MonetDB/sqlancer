@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import sqlancer.Randomly;
+import sqlancer.common.visitor.ToStringVisitor;
 import sqlancer.monet.ast.MonetAggregate;
 import sqlancer.monet.ast.MonetBetweenOperation;
 import sqlancer.monet.ast.MonetCaseOperation;
@@ -25,8 +26,6 @@ import sqlancer.monet.ast.MonetAggregate.MonetAggregateFunction;
 import sqlancer.monet.ast.MonetSelect.MonetFromTable;
 import sqlancer.monet.ast.MonetSelect.MonetSubquery;
 import sqlancer.monet.MonetSchema.MonetDataType;
-import sqlancer.visitor.ToStringVisitor;
-
 
 public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression> implements MonetVisitor {
 

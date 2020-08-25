@@ -1,11 +1,9 @@
 package sqlancer.monet.gen;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 
 public final class MonetSequenceGenerator {
@@ -14,7 +12,7 @@ public final class MonetSequenceGenerator {
     }
 
     public static Query createSequence(MonetGlobalState globalState) {
-        List<String> errors = new ArrayList<>();
+        ExpectedErrors errors = new ExpectedErrors();
         StringBuilder sb = new StringBuilder("CREATE");
         /*if (Randomly.getBoolean()) {
             sb.append(" ");

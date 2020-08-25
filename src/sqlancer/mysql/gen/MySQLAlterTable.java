@@ -5,9 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.mysql.MySQLBugs;
 import sqlancer.mysql.MySQLGlobalState;
 import sqlancer.mysql.MySQLSchema;
@@ -61,9 +62,8 @@ public class MySQLAlterTable {
     }
 
     private Query create() {
-        List<String> errors = new ArrayList<>(
-                Arrays.asList("does not support the create option", "doesn't have this option",
-                        "is not supported for this operation", "Data truncation", "Specified key was too long"));
+        ExpectedErrors errors = ExpectedErrors.from("does not support the create option", "doesn't have this option",
+                "is not supported for this operation", "Data truncation", "Specified key was too long");
         errors.add("Data truncated for functional index ");
         sb.append("ALTER TABLE ");
         MySQLTable table = schema.getRandomTable();

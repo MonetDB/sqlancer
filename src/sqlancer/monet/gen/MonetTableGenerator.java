@@ -1,13 +1,12 @@
 package sqlancer.monet.gen;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema;
 import sqlancer.monet.MonetSchema.MonetColumn;
@@ -25,7 +24,7 @@ public class MonetTableGenerator {
     private boolean isTemporaryTable;
     private final MonetSchema newSchema;
     private final List<MonetColumn> columnsToBeAdded = new ArrayList<>();
-    private final Set<String> errors = new HashSet<>();
+    protected final ExpectedErrors errors = new ExpectedErrors();
     private final MonetTable table;
     private final boolean generateOnlyKnown;
     private final MonetGlobalState globalState;

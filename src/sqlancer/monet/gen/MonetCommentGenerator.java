@@ -1,11 +1,10 @@
 package sqlancer.monet.gen;
 
-import java.util.Arrays;
-
 import sqlancer.IgnoreMeException;
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetTable;
 
@@ -57,7 +56,7 @@ public final class MonetCommentGenerator {
             sb.append(globalState.getRandomly().getString().replace("'", "''"));
             sb.append("'");
         }
-        return new QueryAdapter(sb.toString(), Arrays.asList("no such table", "no such column", "no such index", "COMMENT ON tmp object not allowed"));
+        return new QueryAdapter(sb.toString(), ExpectedErrors.from("no such table", "no such column", "no such index", "COMMENT ON tmp object not allowed"));
     }
 
 }

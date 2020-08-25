@@ -7,9 +7,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import sqlancer.Randomly;
-import sqlancer.TernaryLogicPartitioningOracleBase;
-import sqlancer.TestOracle;
-import sqlancer.gen.ExpressionGenerator;
+import sqlancer.common.gen.ExpressionGenerator;
+import sqlancer.common.oracle.TernaryLogicPartitioningOracleBase;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema;
 import sqlancer.monet.MonetSchema.MonetColumn;
@@ -26,13 +25,12 @@ import sqlancer.monet.gen.MonetCommon;
 import sqlancer.monet.gen.MonetExpressionGenerator;
 import sqlancer.monet.oracle.MonetNoRECOracle;
 
-public class MonetTLPBase extends TernaryLogicPartitioningOracleBase<MonetExpression, MonetGlobalState>
-        implements TestOracle {
+public class MonetTLPBase extends TernaryLogicPartitioningOracleBase<MonetExpression, MonetGlobalState> {
 
-    MonetSchema s;
-    MonetTables targetTables;
-    MonetExpressionGenerator gen;
-    MonetSelect select;
+    protected MonetSchema s;
+    protected MonetTables targetTables;
+    protected MonetExpressionGenerator gen;
+    protected MonetSelect select;
 
     public MonetTLPBase(MonetGlobalState state) {
         super(state);
@@ -44,15 +42,24 @@ public class MonetTLPBase extends TernaryLogicPartitioningOracleBase<MonetExpres
     public void check() throws SQLException {
         s = state.getSchema();
         targetTables = s.getRandomTableNonEmptyTables();
+        List<MonetTable> tables = targetTables.getTables();
+        List<MonetJoin> joins = getJoinStatements(state, targetTables.getColumns(), tables);
+        generateSelectBase(tables, joins);
+    }
+
+    protected List<MonetJoin> getJoinStatements(MonetGlobalState globalState, List<MonetColumn> columns,
+            List<MonetTable> tables) {
+        return MonetNoRECOracle.getJoinStatements(state, columns, tables);
+        // TODO joins
+    }
+
+    protected void generateSelectBase(List<MonetTable> tables, List<MonetJoin> joins) {
+        List<MonetExpression> tableList = tables.stream().map(t -> new MonetFromTable(t, Randomly.getBoolean()))
+                .collect(Collectors.toList());
         gen = new MonetExpressionGenerator(state).setColumns(targetTables.getColumns());
         initializeTernaryPredicateVariants();
         select = new MonetSelect();
         select.setFetchColumns(generateFetchColumns());
-        List<MonetTable> tables = targetTables.getTables();
-        List<MonetJoin> joins = MonetNoRECOracle.getJoinStatements(state, targetTables.getColumns(), tables);
-        List<MonetExpression> tableList = tables.stream().map(t -> new MonetFromTable(t, Randomly.getBoolean()))
-                .collect(Collectors.toList());
-        // TODO joins
         select.setFromList(tableList);
         select.setWhereClause(null);
         select.setJoinClauses(joins);
@@ -75,9 +82,8 @@ public class MonetTLPBase extends TernaryLogicPartitioningOracleBase<MonetExpres
         return gen;
     }
 
-    public static MonetSubquery createSubquery(MonetGlobalState globalState, String name) {
+    public static MonetSubquery createSubquery(MonetGlobalState globalState, String name, MonetTables tables) {
         List<MonetExpression> columns = new ArrayList<>();
-        MonetTables tables = globalState.getSchema().getRandomTableNonEmptyTables();
         MonetExpressionGenerator gen = new MonetExpressionGenerator(globalState).setColumns(tables.getColumns());
         for (int i = 0; i < Randomly.smallNumber() + 1; i++) {
             columns.add(gen.generateExpression(0));

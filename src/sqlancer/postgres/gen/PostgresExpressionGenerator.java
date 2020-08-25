@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import sqlancer.IgnoreMeException;
 import sqlancer.Randomly;
-import sqlancer.gen.ExpressionGenerator;
+import sqlancer.common.gen.ExpressionGenerator;
 import sqlancer.postgres.PostgresCompoundDataType;
 import sqlancer.postgres.PostgresGlobalState;
 import sqlancer.postgres.PostgresProvider;
@@ -66,10 +67,16 @@ public class PostgresExpressionGenerator implements ExpressionGenerator<Postgres
 
     private boolean allowAggregateFunctions;
 
+    private final Map<String, Character> functionsAndTypes;
+
+    private final List<Character> allowedFunctionTypes;
+
     public PostgresExpressionGenerator(PostgresGlobalState globalState) {
         this.r = globalState.getRandomly();
         this.maxDepth = globalState.getOptions().getMaxExpressionDepth();
         this.globalState = globalState;
+        this.functionsAndTypes = globalState.getFunctionsAndTypes();
+        this.allowedFunctionTypes = globalState.getAllowedFunctionTypes();
     }
 
     public PostgresExpressionGenerator setColumns(List<PostgresColumn> columns) {
@@ -112,6 +119,10 @@ public class PostgresExpressionGenerator implements ExpressionGenerator<Postgres
     private PostgresExpression generateFunctionWithUnknownResult(int depth, PostgresDataType type) {
         List<PostgresFunctionWithUnknownResult> supportedFunctions = PostgresFunctionWithUnknownResult
                 .getSupportedFunctions(type);
+        // filters functions by allowed type (STABLE 's', IMMUTABLE 'i', VOLATILE 'v')
+        supportedFunctions = supportedFunctions.stream()
+                .filter(f -> allowedFunctionTypes.contains(functionsAndTypes.get(f.getName())))
+                .collect(Collectors.toList());
         if (supportedFunctions.isEmpty()) {
             throw new IgnoreMeException();
         }
@@ -122,6 +133,9 @@ public class PostgresExpressionGenerator implements ExpressionGenerator<Postgres
     private PostgresExpression generateFunctionWithKnownResult(int depth, PostgresDataType type) {
         List<PostgresFunctionWithResult> functions = Stream.of(PostgresFunction.PostgresFunctionWithResult.values())
                 .filter(f -> f.supportsReturnType(type)).collect(Collectors.toList());
+        // filters functions by allowed type (STABLE 's', IMMUTABLE 'i', VOLATILE 'v')
+        functions = functions.stream().filter(f -> allowedFunctionTypes.contains(functionsAndTypes.get(f.getName())))
+                .collect(Collectors.toList());
         if (functions.isEmpty()) {
             throw new IgnoreMeException();
         }
@@ -448,12 +462,23 @@ public class PostgresExpressionGenerator implements ExpressionGenerator<Postgres
     public static PostgresExpression generateTrueCondition(List<PostgresColumn> columns, PostgresRowValue rw,
             PostgresGlobalState globalState) {
         PostgresExpression expr = new PostgresExpressionGenerator(globalState).setColumns(columns).setRowValue(rw)
-                .expectedResult().generateExpression(0, PostgresDataType.BOOLEAN);
+                .generateExpressionWithExpectedResult(PostgresDataType.BOOLEAN);
         if (expr.getExpectedValue().isNull()) {
             return PostgresPostfixOperation.create(expr, PostfixOperator.IS_NULL);
         }
         return PostgresPostfixOperation.create(expr, expr.getExpectedValue().cast(PostgresDataType.BOOLEAN).asBoolean()
                 ? PostfixOperator.IS_TRUE : PostfixOperator.IS_FALSE);
+    }
+
+    private PostgresExpression generateExpressionWithExpectedResult(PostgresDataType type) {
+        this.expectedResult = true;
+        PostgresExpressionGenerator gen = new PostgresExpressionGenerator(globalState).setColumns(columns)
+                .setRowValue(rw);
+        PostgresExpression expr;
+        do {
+            expr = gen.generateExpression(type);
+        } while (expr.getExpectedValue() == null);
+        return expr;
     }
 
     public static PostgresExpression generateConstant(Randomly r, PostgresDataType type) {

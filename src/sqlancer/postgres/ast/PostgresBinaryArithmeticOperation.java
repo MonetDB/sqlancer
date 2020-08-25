@@ -3,8 +3,8 @@ package sqlancer.postgres.ast;
 import java.util.function.BinaryOperator;
 
 import sqlancer.Randomly;
-import sqlancer.ast.BinaryOperatorNode;
-import sqlancer.ast.BinaryOperatorNode.Operator;
+import sqlancer.common.ast.BinaryOperatorNode;
+import sqlancer.common.ast.BinaryOperatorNode.Operator;
 import sqlancer.postgres.PostgresSchema.PostgresDataType;
 import sqlancer.postgres.ast.PostgresBinaryArithmeticOperation.PostgresBinaryOperator;
 
@@ -48,12 +48,10 @@ public class PostgresBinaryArithmeticOperation extends BinaryOperatorNode<Postgr
 
             }
         },
-        // TODO no implementation
         EXPONENTIATION("^") {
             @Override
             public PostgresConstant apply(PostgresConstant left, PostgresConstant right) {
-                // return applyBitOperation(left, right, (l, r) -> (long) Math.pow(l, r));
-                throw new AssertionError();
+                return null;
             }
         };
 
@@ -97,6 +95,9 @@ public class PostgresBinaryArithmeticOperation extends BinaryOperatorNode<Postgr
     public PostgresConstant getExpectedValue() {
         PostgresConstant leftExpected = getLeft().getExpectedValue();
         PostgresConstant rightExpected = getRight().getExpectedValue();
+        if (leftExpected == null || rightExpected == null) {
+            return null;
+        }
         return getOp().apply(leftExpected, rightExpected);
     }
 

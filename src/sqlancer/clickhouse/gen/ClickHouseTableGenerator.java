@@ -1,19 +1,18 @@
 package sqlancer.clickhouse.gen;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import ru.yandex.clickhouse.domain.ClickHouseDataType;
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
 import sqlancer.clickhouse.ClickHouseErrors;
 import sqlancer.clickhouse.ClickHouseProvider;
 import sqlancer.clickhouse.ClickHouseSchema;
 import sqlancer.clickhouse.ClickHouseToStringVisitor;
 import sqlancer.clickhouse.ast.ClickHouseExpression;
+import sqlancer.common.query.ExpectedErrors;
+import sqlancer.common.query.Query;
+import sqlancer.common.query.QueryAdapter;
 
 public class ClickHouseTableGenerator {
 
@@ -37,7 +36,7 @@ public class ClickHouseTableGenerator {
     public static Query createTableStatement(String tableName, ClickHouseProvider.ClickHouseGlobalState globalState) {
         ClickHouseTableGenerator chTableGenerator = new ClickHouseTableGenerator(tableName, globalState);
         chTableGenerator.start();
-        Set<String> errors = new HashSet<>();
+        ExpectedErrors errors = new ExpectedErrors();
         ClickHouseErrors.addTableManipulationErrors(errors);
         return new QueryAdapter(chTableGenerator.sb.toString(), errors, true);
     }
@@ -104,9 +103,7 @@ public class ClickHouseTableGenerator {
 
     private void addColumnsConstraint(ClickHouseExpressionGenerator gen) {
         for (int i = 0; i < Randomly.smallNumber() + 1; i++) {
-            if (i != 0) {
-                sb.append(", ");
-            }
+            sb.append(",");
             sb.append(" CONSTRAINT ");
             sb.append(ClickHouseCommon.createConstraintName(i));
             sb.append(" CHECK ");
