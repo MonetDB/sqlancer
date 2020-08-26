@@ -27,7 +27,7 @@ public final class MonetTruncateGenerator {
             sb.append(" ");
             sb.append(Randomly.fromOptions("CASCADE", "RESTRICT"));
         }
-        ExpectedErrors errors = ExpectedErrors.from("cannot truncate a table referenced in a foreign key constraint", "is not a table", "cannot truncate view");
+        ExpectedErrors errors = ExpectedErrors.from("cannot truncate a table referenced in a foreign key constraint", "is not a table", "cannot truncate view", "FOREIGN KEY");
         MonetCommon.addCommonInsertUpdateErrors(errors);
         return new QueryAdapter(sb.toString(), errors);
     }

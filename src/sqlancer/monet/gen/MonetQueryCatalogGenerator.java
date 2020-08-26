@@ -109,7 +109,6 @@ public final class MonetQueryCatalogGenerator {
                 "storagemodel",
                 "tablestoragemodel",
                 "statistics",
-                "compinfo",
                 "systemfunctions"));
         return new QueryAdapter(sb.toString()) {
             @Override
