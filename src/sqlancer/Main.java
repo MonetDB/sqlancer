@@ -230,11 +230,7 @@ public final class Main {
             sb.append("-- Database version: " + state.getDatabaseVersion() + "\n");
             sb.append("-- seed value: " + state.getSeedValue() + "\n");
             for (Query s : state.getStatements()) {
-                if (s.getQueryString().endsWith(";")) {
-                    sb.append(s.getQueryString());
-                } else {
-                    sb.append(s.getQueryString() + ";");
-                }
+                sb.append(s.getQueryString());
                 sb.append('\n');
             }
             try {
@@ -454,7 +450,7 @@ public final class Main {
         ExecutorService execService = Executors.newFixedThreadPool(options.getNumberConcurrentThreads());
         DBMSExecutorFactory<?, ?> executorFactory = nameToProvider.get(jc.getParsedCommand());
         for (int i = 0; i < options.getTotalNumberTries(); i++) {
-            final String databaseName = "database" + i;
+            final String databaseName = options.getDatabasePrefix() + i;
             final long seed;
             if (options.getRandomSeed() == -1) {
                 seed = System.currentTimeMillis() + i;

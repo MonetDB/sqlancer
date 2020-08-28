@@ -70,7 +70,8 @@ public final class Randomly {
             return String.valueOf(Randomly.fromList(cachedLongs));
         } else if (Randomly.getBoolean() && !cachedDoubles.isEmpty()) {
             return String.valueOf(Randomly.fromList(cachedDoubles));
-        } else if (Randomly.getBoolean() && !cachedBytes.isEmpty()) {
+        } else if (Randomly.getBoolean() && !cachedBytes.isEmpty()
+                && stringGenerationStrategy == StringGenerationStrategy.SOPHISTICATED) {
             return new String(Randomly.fromList(cachedBytes));
         } else if (!cachedStrings.isEmpty()) {
             String randomString = Randomly.fromList(cachedStrings);
@@ -313,7 +314,7 @@ public final class Randomly {
 
         };
 
-        private static final String ALPHANUMERIC_SPECIALCHAR_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzöß!#<>/.,~-+'*()[]{} ^*?%_\t\n\r|&\\";
+        private static final String ALPHANUMERIC_SPECIALCHAR_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#<>/.,~-+'*()[]{} ^*?%_\t\n\r|&\\";
         private static final String ALPHANUMERIC_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         private static final String NUMERIC_ALPHABET = "0123456789";
 
