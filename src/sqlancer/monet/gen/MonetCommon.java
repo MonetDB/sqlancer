@@ -62,6 +62,8 @@ public final class MonetCommon {
         errors.add("Date ");
         errors.add("Daytime ");
         errors.add("Time ");
+        errors.add("common column name");
+        errors.add("ambiguous");
     }
 
     public static void addCommonInsertUpdateErrors(ExpectedErrors errors) {

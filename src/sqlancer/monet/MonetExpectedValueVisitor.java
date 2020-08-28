@@ -2,6 +2,8 @@ package sqlancer.monet;
 
 import sqlancer.monet.ast.MonetAggregate;
 import sqlancer.monet.ast.MonetBetweenOperation;
+import sqlancer.monet.ast.MonetBinaryComparisonOperation;
+import sqlancer.monet.ast.MonetBinaryLogicalOperation;
 import sqlancer.monet.ast.MonetCaseOperation;
 import sqlancer.monet.ast.MonetCastOperation;
 import sqlancer.monet.ast.MonetCoalesceOperation;
@@ -10,6 +12,7 @@ import sqlancer.monet.ast.MonetConstant;
 import sqlancer.monet.ast.MonetExpression;
 import sqlancer.monet.ast.MonetFunction;
 import sqlancer.monet.ast.MonetInOperation;
+import sqlancer.monet.ast.MonetLikeOperation;
 import sqlancer.monet.ast.MonetOrderByTerm;
 import sqlancer.monet.ast.MonetPostfixOperation;
 import sqlancer.monet.ast.MonetPostfixText;
@@ -147,4 +150,24 @@ public final class MonetExpectedValueVisitor implements MonetVisitor {
         print(subquery);
     }
 
+    @Override
+    public void visit(MonetBinaryLogicalOperation op) {
+        print(op);
+        visit(op.getLeft());
+        visit(op.getRight());
+    }
+
+    @Override
+    public void visit(MonetBinaryComparisonOperation op) {
+        print(op);
+        visit(op.getLeft());
+        visit(op.getRight());
+    }
+
+    @Override
+    public void visit(MonetLikeOperation op) {
+        print(op);
+        visit(op.getLeft());
+        visit(op.getRight());
+    }
 }

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import sqlancer.IgnoreMeException;
 import sqlancer.Randomly;
 import sqlancer.common.schema.AbstractRowValue;
 import sqlancer.common.schema.AbstractSchema;
@@ -118,13 +119,15 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
                             constant = MonetConstant.createSecondIntervalConstant(randomRowValues.getBigDecimal(columnIndex).longValue());
                             break;
                          default:
-                            throw new AssertionError(column.getType());
+                            throw new IgnoreMeException();
                         }
                     }
                     values.put(column, constant);
                 }
                 assert (!randomRowValues.next());
                 return new MonetRowValue(this, values);
+            } catch (SQLException e) {
+                throw new IgnoreMeException();
             }
         }
 

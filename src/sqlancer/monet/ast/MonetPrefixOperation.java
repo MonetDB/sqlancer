@@ -51,6 +51,9 @@ public class MonetPrefixOperation implements MonetExpression {
                     // TODO
                     throw new IgnoreMeException();
                 }
+                if (expectedValue.isInt() && expectedValue.asInt() == Long.MIN_VALUE) {
+                    throw new IgnoreMeException();
+                }
                 try {
                     return MonetConstant.createIntConstant(-expectedValue.asInt());
                 } catch (UnsupportedOperationException e) {

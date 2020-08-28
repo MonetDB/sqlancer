@@ -380,24 +380,22 @@ public abstract class MonetConstant implements MonetExpression {
 
         @Override
         public String getUnquotedTextRepresentation() {
-            throw new AssertionError();
+            return null;
         }
 
         @Override
         public MonetConstant isEquals(MonetConstant rightVal) {
-            throw new AssertionError();
+            return null;
         }
 
         @Override
         protected MonetConstant isLessThan(MonetConstant rightVal) {
-            throw new AssertionError();
-
+            return null;
         }
 
         @Override
         public MonetConstant cast(MonetDataType type) {
             return null;
-
         }
     }
 

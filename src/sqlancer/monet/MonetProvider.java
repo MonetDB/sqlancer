@@ -13,6 +13,7 @@ import sqlancer.common.query.ExpectedErrors;
 import sqlancer.common.query.Query;
 import sqlancer.common.query.QueryAdapter;
 import sqlancer.common.query.QueryProvider;
+import sqlancer.monet.MonetOptions.MonetOracleFactory;
 import sqlancer.monet.gen.MonetAlterTableGenerator;
 import sqlancer.monet.gen.MonetAnalyzeGenerator;
 import sqlancer.monet.gen.MonetCommentGenerator;
@@ -31,6 +32,9 @@ import sqlancer.sqlite3.gen.SQLite3Common;
 
 public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOptions> {
 
+    /**
+     * Generate only data types and expressions that are understood by PQS.
+     */
     public static boolean generateOnlyKnown;
 
     //private MonetGlobalState globalState;
@@ -142,6 +146,10 @@ public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOption
 
     @Override
     public Connection createDatabase(MonetGlobalState globalState) throws SQLException {
+        if (globalState.getDmbsSpecificOptions().getTestOracleFactory().stream()
+                .anyMatch((o) -> o == MonetOracleFactory.PQS)) {
+            generateOnlyKnown = true;
+        }
         String url = "jdbc:monetdb://localhost:50000/:inmemory";
         Connection con = DriverManager.getConnection(url, "monetdb", "monetdb");
 

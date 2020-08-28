@@ -454,18 +454,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         return generateConstant(r, Randomly.fromOptions(MonetDataType.values()));
     }
 
-    public static MonetExpression generateTrueCondition(List<MonetColumn> columns, MonetRowValue rw,
-            MonetGlobalState globalState) {
-        MonetExpression expr = new MonetExpressionGenerator(globalState).setColumns(columns).setRowValue(rw)
-            .generateExpressionWithExpectedResult(MonetDataType.BOOLEAN);
-        if (expr.getExpectedValue().isNull()) {
-            return MonetPostfixOperation.create(expr, PostfixOperator.IS_NULL);
-        }
-        return MonetPostfixOperation.create(expr, expr.getExpectedValue().cast(MonetDataType.BOOLEAN).asBoolean()
-                ? PostfixOperator.IS_TRUE : PostfixOperator.IS_FALSE);
-    }
-
-    private MonetExpression generateExpressionWithExpectedResult(MonetDataType type) {
+    public MonetExpression generateExpressionWithExpectedResult(MonetDataType type) {
         //this.expectedResult = true;
         MonetExpressionGenerator gen = new MonetExpressionGenerator(globalState).setColumns(columns)
                 .setRowValue(rw);
@@ -492,7 +481,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
                 return MonetConstant.createIntConstant(val);
             }
         case BOOLEAN:
-            if (Randomly.getBooleanWithSmallProbability()) {
+            if (Randomly.getBooleanWithSmallProbability() && !MonetProvider.generateOnlyKnown) {
                 return MonetConstant
                         .createTextConstant(Randomly.fromOptions("TRUE", "FALSE", "0", "1"));
             } else {
