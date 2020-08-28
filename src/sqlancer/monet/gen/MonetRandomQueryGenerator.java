@@ -19,7 +19,7 @@ public final class MonetRandomQueryGenerator {
     private MonetRandomQueryGenerator() {
     }
 
-    public static MonetSelect createRandomQuery(int nrColumns, MonetGlobalState globalState) {
+    public static MonetSelect createRandomQuery(int nrColumns, MonetGlobalState globalState, boolean generateLimit) {
         List<MonetExpression> columns = new ArrayList<>();
         MonetTables tables = globalState.getSchema().getRandomTableNonEmptyTables();
         MonetExpressionGenerator gen = new MonetExpressionGenerator(globalState).setColumns(tables.getColumns());
@@ -46,7 +46,7 @@ public final class MonetRandomQueryGenerator {
         if (Randomly.getBooleanWithRatherLowProbability()) {
             select.setOrderByExpressions(gen.generateOrderBy());
         }
-        if (Randomly.getBoolean()) {
+        if (generateLimit && Randomly.getBoolean()) {
             select.setLimitClause(MonetConstant.createIntConstant(Randomly.getPositiveOrZeroNonCachedInteger()));
             if (Randomly.getBoolean()) {
                 select.setOffsetClause(
