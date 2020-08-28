@@ -136,7 +136,7 @@ public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOption
     @Override
     public void generateDatabase(MonetGlobalState globalState) throws SQLException {
         //readFunctions(globalState);
-        createTables(globalState, Randomly.fromOptions(4, 5, 6));
+        createTables(globalState, 3); //Randomly.fromOptions(4, 5, 6));
         prepareTables(globalState);
     }
 
