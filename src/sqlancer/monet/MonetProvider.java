@@ -96,33 +96,24 @@ public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOption
         Randomly r = globalState.getRandomly();
         int nrPerformed;
         switch (a) {
-        case VACUUM:
-        case CREATE_INDEX:
-        case DROP_INDEX:
-            nrPerformed = r.getInteger(0, 1);
-            break;
         case COMMIT:
             nrPerformed = r.getInteger(0, 0);
-            break;
-        case ALTER_TABLE:
-            nrPerformed = r.getInteger(0, 3);
-            break;
-        case DELETE:
-        //case SET:
-        case QUERY_CATALOG:
-            nrPerformed = r.getInteger(0, 3);
-            break;
-        case ANALYZE:
-            nrPerformed = r.getInteger(0, 3);
             break;
         //case SET_CONSTRAINTS:
         case COMMENT_ON:
         //case CREATE_SEQUENCE:
         case TRUNCATE:
+        case QUERY_CATALOG:
+        case CREATE_VIEW:
+        case CREATE_INDEX:
+        case DROP_INDEX:
             nrPerformed = r.getInteger(0, 2);
             break;
-        case CREATE_VIEW:
-            nrPerformed = r.getInteger(0, 2);
+        case ALTER_TABLE:
+        case DELETE:
+        case VACUUM:
+        case ANALYZE:
+            nrPerformed = r.getInteger(0, 3);
             break;
         case UPDATE:
             nrPerformed = r.getInteger(0, 10);
