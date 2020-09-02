@@ -122,13 +122,6 @@ public interface MonetVisitor {
         return v.get();
     }
 
-    static String getExpressionAsString(MonetGlobalState globalState, MonetDataType type) {
-        MonetExpression expression = MonetExpressionGenerator.generateExpression(globalState, type);
-        MonetToStringVisitor visitor = new MonetToStringVisitor();
-        visitor.visit(expression);
-        return visitor.get();
-    }
-
     static String getExpressionAsString(MonetGlobalState globalState, MonetDataType type,
             List<MonetColumn> columns) {
         MonetExpression expression = MonetExpressionGenerator.generateExpression(globalState, columns, type);

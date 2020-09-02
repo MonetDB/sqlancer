@@ -1,6 +1,5 @@
 package sqlancer.monet.ast;
 
-import sqlancer.Randomly;
 import sqlancer.monet.MonetSchema.MonetDataType;
 
 public class MonetFunction implements MonetExpression {
@@ -136,24 +135,10 @@ public class MonetFunction implements MonetExpression {
             return types;
         }
 
-        public MonetDataType[] getType(int nr, MonetDataType type) {
-            MonetDataType[] types = new MonetDataType[nr];
-            for (int i = 0; i < types.length; i++) {
-                types[i] = type;
-            }
-            return types;
-        }
-
         MonetFunctionWithResult(int nrArgs, String functionName) {
             this.nrArgs = nrArgs;
             this.functionName = functionName;
             this.variadic = false;
-        }
-
-        MonetFunctionWithResult(int nrArgs, String functionName, boolean variadic) {
-            this.nrArgs = nrArgs;
-            this.functionName = functionName;
-            this.variadic = variadic;
         }
 
         /**
@@ -167,10 +152,6 @@ public class MonetFunction implements MonetExpression {
         }
 
         public abstract MonetConstant apply(MonetConstant[] evaluatedArgs, MonetExpression... args);
-
-        public static MonetFunctionWithResult getRandomFunction() {
-            return Randomly.fromOptions(values());
-        }
 
         @Override
         public String toString() {

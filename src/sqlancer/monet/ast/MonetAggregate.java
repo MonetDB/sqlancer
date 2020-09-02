@@ -48,14 +48,6 @@ public class MonetAggregate extends FunctionNode<MonetAggregateFunction, MonetEx
             this.name = name;
         }
 
-        public static MonetAggregateFunction getRandom() {
-            return Randomly.fromOptions(values());
-        }
-
-        public static MonetAggregateFunction getRandom(MonetDataType type) {
-            return Randomly.fromOptions(values());
-        }
-
         public List<MonetDataType> getTypes(MonetDataType returnType) {
             return Arrays.asList(returnType);
         }

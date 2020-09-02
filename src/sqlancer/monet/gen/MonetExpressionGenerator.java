@@ -85,15 +85,6 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         return this;
     }
 
-    public MonetExpressionGenerator expectedResult() {
-        //this.expectedResult = true;
-        return this;
-    }
-
-    public static MonetExpression generateExpression(MonetGlobalState globalState) {
-        return new MonetExpressionGenerator(globalState).generateExpression(0);
-    }
-
     public MonetExpression generateExpression(int depth) {
         return generateExpression(depth, MonetDataType.getRandomType());
     }
@@ -450,10 +441,6 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         }
     }
 
-    public static MonetExpression generateConstant(Randomly r) {
-        return generateConstant(r, Randomly.fromOptions(MonetDataType.values()));
-    }
-
     public MonetExpression generateExpressionWithExpectedResult(MonetDataType type) {
         //this.expectedResult = true;
         MonetExpressionGenerator gen = new MonetExpressionGenerator(globalState).setColumns(columns)
@@ -513,12 +500,6 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     public static MonetExpression generateExpression(MonetGlobalState globalState, List<MonetColumn> columns,
             MonetDataType type) {
         return new MonetExpressionGenerator(globalState).setColumns(columns).generateExpression(0, type);
-    }
-
-    public static MonetExpression generateExpression(MonetGlobalState globalState, List<MonetColumn> columns,
-            MonetDataType type, MonetRowValue rw) {
-        return new MonetExpressionGenerator(globalState).setColumns(columns).setRowValue(rw).generateExpression(0,
-                type);
     }
 
     public static MonetExpression generateExpression(MonetGlobalState globalState, List<MonetColumn> columns) {

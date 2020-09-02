@@ -23,10 +23,6 @@ public class MonetColumnValue implements MonetExpression {
         return expectedValue;
     }
 
-    public static MonetColumnValue create(MonetColumn c) {
-        return new MonetColumnValue(c, null);
-    }
-
     public static MonetColumnValue create(MonetColumn c, MonetConstant expected) {
         return new MonetColumnValue(c, expected);
     }

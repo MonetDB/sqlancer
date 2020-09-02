@@ -38,8 +38,6 @@ public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOption
      */
     public static boolean generateOnlyKnown;
 
-    //private MonetGlobalState globalState;
-
     public MonetProvider() {
         super(MonetGlobalState.class, MonetOptions.class);
     }
