@@ -19,6 +19,7 @@ import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.MonetSchema.MonetRowValue;
 import sqlancer.monet.ast.MonetAggregate;
 import sqlancer.monet.ast.MonetAggregate.MonetAggregateFunction;
+import sqlancer.monet.ast.MonetAnyAllOperation;
 import sqlancer.monet.ast.MonetBetweenOperation;
 import sqlancer.monet.ast.MonetBinaryArithmeticOperation;
 import sqlancer.monet.ast.MonetBinaryArithmeticOperation.MonetBinaryOperator;
@@ -117,7 +118,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     }
 
     private enum BooleanExpression {
-        POSTFIX_OPERATOR, NOT, BINARY_LOGICAL_OPERATOR, BINARY_COMPARISON, FUNCTION, CAST, LIKE, BETWEEN, IN_OPERATION, EXISTS, CASE, COALESCE;
+        POSTFIX_OPERATOR, NOT, BINARY_LOGICAL_OPERATOR, BINARY_COMPARISON, FUNCTION, CAST, LIKE, BETWEEN, IN_OPERATION, EXISTS, ANYALL, CASE, COALESCE;
     }
 
     private MonetExpression generateFunctionWithUnknownResult(int depth, MonetDataType type) {
@@ -197,8 +198,12 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
             MonetDataType type = getMeaningfulType();
             return new MonetBetweenOperation(generateExpression(depth + 1, type),
                     generateExpression(depth + 1, type), generateExpression(depth + 1, type), Randomly.getBoolean(), Randomly.getBoolean());
+        case ANYALL:
+            MonetDataType t = getMeaningfulType();
+            MonetSelect sel = MonetRandomQueryGenerator.createRandomQuery(1, globalState, false, false);
+            return new MonetAnyAllOperation(generateExpression(depth + 1, t), MonetBinaryComparisonOperation.MonetBinaryComparisonOperator.getRandom(), Randomly.getBoolean(), sel);
         case EXISTS:
-            MonetSelect select = MonetRandomQueryGenerator.createRandomQuery(Randomly.smallNumber() + 1, globalState, false, false);
+            MonetSelect select = MonetRandomQueryGenerator.createRandomQuery(1, globalState, false, false);
             return new MonetExistsOperation(select, Randomly.getBoolean());
         case CASE:
             MonetDataType tp = Randomly.fromOptions(MonetDataType.values());

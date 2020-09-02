@@ -5,6 +5,7 @@ import java.util.List;
 import sqlancer.monet.MonetSchema.MonetColumn;
 import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.ast.MonetAggregate;
+import sqlancer.monet.ast.MonetAnyAllOperation;
 import sqlancer.monet.ast.MonetBetweenOperation;
 import sqlancer.monet.ast.MonetBinaryLogicalOperation;
 import sqlancer.monet.ast.MonetBinaryComparisonOperation;
@@ -69,6 +70,8 @@ public interface MonetVisitor {
 
     void visit(MonetExistsOperation op);
 
+    void visit(MonetAnyAllOperation op);
+
     default void visit(MonetExpression expression) {
         if (expression instanceof MonetConstant) {
             visit((MonetConstant) expression);
@@ -110,6 +113,8 @@ public interface MonetVisitor {
             visit((MonetLikeOperation) expression);
         } else if (expression instanceof MonetExistsOperation) {
             visit((MonetExistsOperation) expression);
+        } else if (expression instanceof MonetAnyAllOperation) {
+            visit((MonetAnyAllOperation) expression);
         } else {
             throw new AssertionError(expression);
         }

@@ -1,6 +1,7 @@
 package sqlancer.monet;
 
 import sqlancer.monet.ast.MonetAggregate;
+import sqlancer.monet.ast.MonetAnyAllOperation;
 import sqlancer.monet.ast.MonetBetweenOperation;
 import sqlancer.monet.ast.MonetBinaryComparisonOperation;
 import sqlancer.monet.ast.MonetBinaryLogicalOperation;
@@ -104,6 +105,13 @@ public final class MonetExpectedValueVisitor implements MonetVisitor {
         for (MonetExpression right : op.getListElements()) {
             visit(right);
         }
+    }
+
+    @Override
+    public void visit(MonetAnyAllOperation op) {
+        print(op);
+        visit(op.getExpr());
+        visit(op.getSelect());
     }
 
     @Override

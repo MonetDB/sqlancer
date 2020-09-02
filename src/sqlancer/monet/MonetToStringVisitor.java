@@ -7,6 +7,7 @@ import sqlancer.Randomly;
 import sqlancer.common.visitor.BinaryOperation;
 import sqlancer.common.visitor.ToStringVisitor;
 import sqlancer.monet.ast.MonetAggregate;
+import sqlancer.monet.ast.MonetAnyAllOperation;
 import sqlancer.monet.ast.MonetBetweenOperation;
 import sqlancer.monet.ast.MonetBinaryComparisonOperation;
 import sqlancer.monet.ast.MonetBinaryLogicalOperation;
@@ -281,6 +282,20 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
         }
         sb.append(" IN (");
         visit(op.getListElements());
+        sb.append(")");
+    }
+
+    @Override
+    public void visit(MonetAnyAllOperation op) {
+        visit(op.getExpr());
+        sb.append(" ");
+        sb.append(op.getComparison().getTextRepresentation());
+        if (op.isAny()) {
+            sb.append(" ANY(");
+        } else {
+            sb.append(" ALL(");
+        }
+        visit(op.getSelect());
         sb.append(")");
     }
 
