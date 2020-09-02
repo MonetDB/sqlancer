@@ -14,6 +14,7 @@ import sqlancer.monet.ast.MonetCoalesceOperation;
 import sqlancer.monet.ast.MonetColumnValue;
 import sqlancer.monet.ast.MonetConstant;
 import sqlancer.monet.ast.MonetExpression;
+import sqlancer.monet.ast.MonetExistsOperation;
 import sqlancer.monet.ast.MonetFunction;
 import sqlancer.monet.ast.MonetInOperation;
 import sqlancer.monet.ast.MonetLikeOperation;
@@ -66,6 +67,8 @@ public interface MonetVisitor {
 
     void visit(MonetLikeOperation op);
 
+    void visit(MonetExistsOperation op);
+
     default void visit(MonetExpression expression) {
         if (expression instanceof MonetConstant) {
             visit((MonetConstant) expression);
@@ -105,6 +108,8 @@ public interface MonetVisitor {
             visit((MonetBinaryLogicalOperation) expression);
         } else if (expression instanceof MonetLikeOperation) {
             visit((MonetLikeOperation) expression);
+        } else if (expression instanceof MonetExistsOperation) {
+            visit((MonetExistsOperation) expression);
         } else {
             throw new AssertionError(expression);
         }

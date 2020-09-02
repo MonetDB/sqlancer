@@ -9,6 +9,7 @@ import sqlancer.monet.ast.MonetCastOperation;
 import sqlancer.monet.ast.MonetCoalesceOperation;
 import sqlancer.monet.ast.MonetColumnValue;
 import sqlancer.monet.ast.MonetConstant;
+import sqlancer.monet.ast.MonetExistsOperation;
 import sqlancer.monet.ast.MonetExpression;
 import sqlancer.monet.ast.MonetFunction;
 import sqlancer.monet.ast.MonetInOperation;
@@ -103,6 +104,12 @@ public final class MonetExpectedValueVisitor implements MonetVisitor {
         for (MonetExpression right : op.getListElements()) {
             visit(right);
         }
+    }
+
+    @Override
+    public void visit(MonetExistsOperation op) {
+        print(op);
+        visit(op.getSelect());
     }
 
     @Override

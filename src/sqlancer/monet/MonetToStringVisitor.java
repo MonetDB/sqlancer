@@ -15,6 +15,7 @@ import sqlancer.monet.ast.MonetCoalesceOperation;
 import sqlancer.monet.ast.MonetCastOperation;
 import sqlancer.monet.ast.MonetColumnValue;
 import sqlancer.monet.ast.MonetConstant;
+import sqlancer.monet.ast.MonetExistsOperation;
 import sqlancer.monet.ast.MonetExpression;
 import sqlancer.monet.ast.MonetFunction;
 import sqlancer.monet.ast.MonetInOperation;
@@ -255,7 +256,7 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
         visit(op.getExpr());
         sb.append(")");
         if (op.isNot()) {
-            sb.append(" NOT ");
+            sb.append(" NOT");
         }
         sb.append(" BETWEEN ");
         if (op.isSymmetric()) {
@@ -280,6 +281,16 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
         }
         sb.append(" IN (");
         visit(op.getListElements());
+        sb.append(")");
+    }
+
+    @Override
+    public void visit(MonetExistsOperation op) {
+        if (!op.isExists()) {
+            sb.append("NOT ");
+        }
+        sb.append("EXISTS (");
+        visit(op.getSelect());
         sb.append(")");
     }
 

@@ -13,15 +13,7 @@ public final class MonetSequenceGenerator {
 
     public static Query createSequence(MonetGlobalState globalState) {
         ExpectedErrors errors = new ExpectedErrors();
-        StringBuilder sb = new StringBuilder("CREATE");
-        /*if (Randomly.getBoolean()) {
-            sb.append(" ");
-            sb.append(Randomly.fromOptions("TEMPORARY", "TEMP"));
-        }*/
-        sb.append(" SEQUENCE ");
-        // TODO keep track of sequences
-        //sb.append(" IF NOT EXISTS");
-        // TODO generate sequence names
+        StringBuilder sb = new StringBuilder("CREATE SEQUENCE ");
         sb.append(" seq");
         if (Randomly.getBoolean()) {
             sb.append(" AS ");

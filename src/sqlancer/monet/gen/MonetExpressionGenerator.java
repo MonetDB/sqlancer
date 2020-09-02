@@ -33,6 +33,7 @@ import sqlancer.monet.ast.MonetCastOperation;
 import sqlancer.monet.ast.MonetColumnValue;
 import sqlancer.monet.ast.MonetConcatOperation;
 import sqlancer.monet.ast.MonetConstant;
+import sqlancer.monet.ast.MonetExistsOperation;
 import sqlancer.monet.ast.MonetExpression;
 import sqlancer.monet.ast.MonetFunction;
 import sqlancer.monet.ast.MonetFunction.MonetFunctionWithResult;
@@ -46,6 +47,7 @@ import sqlancer.monet.ast.MonetPostfixOperation;
 import sqlancer.monet.ast.MonetPostfixOperation.PostfixOperator;
 import sqlancer.monet.ast.MonetPrefixOperation;
 import sqlancer.monet.ast.MonetPrefixOperation.PrefixOperator;
+import sqlancer.monet.ast.MonetSelect;
 
 public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpression> {
 
@@ -115,7 +117,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     }
 
     private enum BooleanExpression {
-        POSTFIX_OPERATOR, NOT, BINARY_LOGICAL_OPERATOR, BINARY_COMPARISON, FUNCTION, CAST, LIKE, BETWEEN, IN_OPERATION, CASE, COALESCE;
+        POSTFIX_OPERATOR, NOT, BINARY_LOGICAL_OPERATOR, BINARY_COMPARISON, FUNCTION, CAST, LIKE, BETWEEN, IN_OPERATION, EXISTS, CASE, COALESCE;
     }
 
     private MonetExpression generateFunctionWithUnknownResult(int depth, MonetDataType type) {
@@ -195,6 +197,9 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
             MonetDataType type = getMeaningfulType();
             return new MonetBetweenOperation(generateExpression(depth + 1, type),
                     generateExpression(depth + 1, type), generateExpression(depth + 1, type), Randomly.getBoolean(), Randomly.getBoolean());
+        case EXISTS:
+            MonetSelect select = MonetRandomQueryGenerator.createRandomQuery(Randomly.smallNumber() + 1, globalState, false, false);
+            return new MonetExistsOperation(select, Randomly.getBoolean());
         case CASE:
             MonetDataType tp = Randomly.fromOptions(MonetDataType.values());
             int noptions = Randomly.smallNumber() + 1;
