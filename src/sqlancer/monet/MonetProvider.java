@@ -21,6 +21,7 @@ import sqlancer.monet.gen.MonetDeleteGenerator;
 import sqlancer.monet.gen.MonetDropIndexGenerator;
 import sqlancer.monet.gen.MonetIndexGenerator;
 import sqlancer.monet.gen.MonetInsertGenerator;
+import sqlancer.monet.gen.MonetMergeGenerator;
 import sqlancer.monet.gen.MonetQueryCatalogGenerator;
 import sqlancer.monet.gen.MonetTableGenerator;
 import sqlancer.monet.gen.MonetTransactionGenerator;
@@ -67,6 +68,7 @@ public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOption
         INSERT(MonetInsertGenerator::insert), //
         UPDATE(MonetUpdateGenerator::create), //
         TRUNCATE(MonetTruncateGenerator::create), //
+        MERGE(MonetMergeGenerator::create), //
         VACUUM(MonetVacuumGenerator::create), //
         CREATE_INDEX(MonetIndexGenerator::generate), //
         /*SET_CONSTRAINTS((g) -> {
@@ -107,6 +109,7 @@ public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOption
         case CREATE_VIEW:
         case CREATE_INDEX:
         case DROP_INDEX:
+        case MERGE:
             nrPerformed = r.getInteger(0, 2);
             break;
         case ALTER_TABLE:

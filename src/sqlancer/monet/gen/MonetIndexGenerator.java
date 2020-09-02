@@ -45,6 +45,7 @@ public final class MonetIndexGenerator {
         errors.add("out of range");
         errors.add("conversion of");
         errors.add("already in use");
+        errors.add("unsupported type");
         MonetCommon.addCommonExpressionErrors(errors);
         return new QueryAdapter(sb.toString(), errors);
     }

@@ -18,7 +18,7 @@ public final class MonetVacuumGenerator {
         sb.append(globalState.getSchema().getRandomTable().getName());
         sb.append("')");
 
-        return new QueryAdapter(sb.toString(), ExpectedErrors.from("vacuum not allowed on tables with indices", "reuse not allowed on tables with indices", "shrink not allowed on tables with indices"));
+        return new QueryAdapter(sb.toString(), ExpectedErrors.from("not allowed on tables with indices", "is not persistent"));
     }
 
 }

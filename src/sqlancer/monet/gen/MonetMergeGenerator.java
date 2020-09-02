@@ -8,6 +8,7 @@ import sqlancer.Randomly;
 import sqlancer.common.query.ExpectedErrors;
 import sqlancer.common.query.Query;
 import sqlancer.common.query.QueryAdapter;
+import sqlancer.monet.ast.MonetExpression;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetColumn;
 import sqlancer.monet.MonetSchema.MonetDataType;
@@ -25,7 +26,25 @@ public final class MonetMergeGenerator {
         sb.append("(");
         sb.append(columns.stream().map(c -> c.getName()).collect(Collectors.joining(", ")));
         sb.append(")");
-        sb.append(" VALUES");
+        sb.append(" VALUES (");
+        for (int i = 0; i < columns.size(); i++) {
+            MonetColumn column = columns.get(i);
+            if (i != 0) {
+                sb.append(", ");
+            }
+            if (!Randomly.getBooleanWithSmallProbability()) {
+                MonetExpression generateConstant;
+                if (Randomly.getBoolean()) {
+                    generateConstant = MonetExpressionGenerator.generateConstant(globalState.getRandomly(), column.getType());
+                } else {
+                    generateConstant = gen.generateExpression(column.getType());
+                }
+                sb.append(MonetVisitor.asString(generateConstant));
+            } else {
+                sb.append("DEFAULT");
+            }
+        }
+        sb.append(")");
     }
 
     private static void generateUpdate(MonetGlobalState globalState, MonetExpressionGenerator gen, 
@@ -60,13 +79,14 @@ public final class MonetMergeGenerator {
         sb.append(" USING (");
         sb.append("SELECT * FROM ");
         sb.append(joined.getName());
-        sb.append(") ON ");
+        sb.append(") AS ");
+        sb.append(joined.getName());
+        sb.append(" ON ");
         MonetExpressionGenerator gen = new MonetExpressionGenerator(globalState);
         List<MonetColumn> array3 = new ArrayList<MonetColumn>(table.getColumns().size() + joined.getColumns().size());
         array3.addAll(table.getColumns());
         array3.addAll(joined.getColumns());
         sb.append(MonetVisitor.asString(gen.generateExpression(MonetDataType.BOOLEAN)));
-        sb.append(" ");
         switch (Randomly.fromOptions(1, 2, 3)) {
             case 1:
                 sb.append(" WHEN MATCHED THEN ");
@@ -77,7 +97,8 @@ public final class MonetMergeGenerator {
                 }
                 break;
             case 2:
-                sb.append("WHEN NOT MATCHED THEN INSERT ");
+                sb.append(" WHEN NOT MATCHED THEN INSERT ");
+                generateInsert(globalState, gen, sb, table);
                 break;
             case 3:
                 sb.append(" WHEN MATCHED THEN ");
@@ -87,11 +108,14 @@ public final class MonetMergeGenerator {
                     sb.append("DELETE");
                 }
                 sb.append(" WHEN NOT MATCHED THEN INSERT ");
+                generateInsert(globalState, gen, sb, table);
                 break;
             default:
                 throw new AssertionError();
         }
         MonetCommon.addCommonExpressionErrors(errors);
+        errors.add("Multiple rows in the input relation");
+        errors.add("on both sides of the joining condition");
         return new QueryAdapter(sb.toString(), errors);
     }
 
