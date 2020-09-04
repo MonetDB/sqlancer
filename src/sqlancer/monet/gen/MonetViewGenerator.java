@@ -38,7 +38,7 @@ public final class MonetViewGenerator {
         }
         sb.append(")");
         sb.append(" AS (");
-        MonetSelect select = MonetRandomQueryGenerator.createRandomQuery(nrColumns, globalState, true, false);
+        MonetSelect select = MonetRandomQueryGenerator.createRandomQuery(0, nrColumns, globalState, true, false);
         sb.append(MonetVisitor.asString(select));
         sb.append(")");
         if (Randomly.getBoolean()) {
