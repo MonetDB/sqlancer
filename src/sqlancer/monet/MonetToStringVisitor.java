@@ -84,8 +84,11 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
     public void visit(MonetSubquery subquery) {
         sb.append("(");
         visit(subquery.getSelect());
-        sb.append(") AS ");
-        sb.append(subquery.getName());
+        sb.append(")");
+        if (subquery.getName() != null) {
+            sb.append(" AS ");
+            sb.append(subquery.getName());
+        }
     }
 
     @Override
