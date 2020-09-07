@@ -130,6 +130,9 @@ public final class MonetCommon {
         case SECOND_INTERVAL:
             sb.append("INTERVAL SECOND");
             break;
+        case BLOB:
+            sb.append("INTERVAL SECOND");
+            break;
         default:
             throw new AssertionError(type);
         }

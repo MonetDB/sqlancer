@@ -14,9 +14,11 @@ public enum MonetFunctionWithUnknownResult {
     /* These functions are dangerous if the input amount is large
     //SPACE("space", MonetDataType.STRING, MonetDataType.INT),*/
 
-    LENGTH("\"length\"", MonetDataType.INT, MonetDataType.STRING),
+    LENGTH1("\"length\"", MonetDataType.INT, MonetDataType.BLOB),
+    LENGTH2("\"length\"", MonetDataType.INT, MonetDataType.STRING),
     CHAR_LENGTH("char_length", MonetDataType.INT, MonetDataType.STRING),
-    OCTET_LENGTH("octet_length", MonetDataType.INT, MonetDataType.STRING),
+    OCTET_LENGTH1("octet_length", MonetDataType.INT, MonetDataType.BLOB),
+    OCTET_LENGTH2("octet_length", MonetDataType.INT, MonetDataType.STRING),
 
     REPLACE("replace", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.STRING, MonetDataType.STRING), 
     REVERSE("reverse", MonetDataType.STRING, MonetDataType.STRING),
@@ -103,6 +105,7 @@ public enum MonetFunctionWithUnknownResult {
     SQLMIN8("sql_min", MonetDataType.DATE, MonetDataType.DATE, MonetDataType.DATE),
     SQLMIN9("sql_min", MonetDataType.MONTH_INTERVAL, MonetDataType.MONTH_INTERVAL, MonetDataType.MONTH_INTERVAL),
     SQLMIN10("sql_min", MonetDataType.SECOND_INTERVAL, MonetDataType.SECOND_INTERVAL, MonetDataType.SECOND_INTERVAL),
+    SQLMIN11("sql_min", MonetDataType.BLOB, MonetDataType.BLOB, MonetDataType.BLOB),
 
     SQLMAX1("sql_max", MonetDataType.INT, MonetDataType.INT, MonetDataType.INT),
     SQLMAX2("sql_max", MonetDataType.REAL, MonetDataType.REAL, MonetDataType.REAL),
@@ -114,6 +117,7 @@ public enum MonetFunctionWithUnknownResult {
     SQLMAX8("sql_max", MonetDataType.DATE, MonetDataType.DATE, MonetDataType.DATE),
     SQLMAX9("sql_max", MonetDataType.MONTH_INTERVAL, MonetDataType.MONTH_INTERVAL, MonetDataType.MONTH_INTERVAL),
     SQLMAX10("sql_max", MonetDataType.SECOND_INTERVAL, MonetDataType.SECOND_INTERVAL, MonetDataType.SECOND_INTERVAL),
+    SQLMAX11("sql_max", MonetDataType.BLOB, MonetDataType.BLOB, MonetDataType.BLOB),
 
     LEAST1("least", MonetDataType.INT, MonetDataType.INT, MonetDataType.INT),
     LEAST2("least", MonetDataType.REAL, MonetDataType.REAL, MonetDataType.REAL),
@@ -125,6 +129,7 @@ public enum MonetFunctionWithUnknownResult {
     LEAST8("least", MonetDataType.DATE, MonetDataType.DATE, MonetDataType.DATE),
     LEAST9("least", MonetDataType.MONTH_INTERVAL, MonetDataType.MONTH_INTERVAL, MonetDataType.MONTH_INTERVAL),
     LEAST10("least", MonetDataType.SECOND_INTERVAL, MonetDataType.SECOND_INTERVAL, MonetDataType.SECOND_INTERVAL),
+    LEAST11("least", MonetDataType.BLOB, MonetDataType.BLOB, MonetDataType.BLOB),
 
     GREATEST1("greatest", MonetDataType.INT, MonetDataType.INT, MonetDataType.INT),
     GREATEST2("greatest", MonetDataType.REAL, MonetDataType.REAL, MonetDataType.REAL),
@@ -136,6 +141,7 @@ public enum MonetFunctionWithUnknownResult {
     GREATEST8("greatest", MonetDataType.DATE, MonetDataType.DATE, MonetDataType.DATE),
     GREATEST9("greatest", MonetDataType.MONTH_INTERVAL, MonetDataType.MONTH_INTERVAL, MonetDataType.MONTH_INTERVAL),
     GREATEST10("greatest", MonetDataType.SECOND_INTERVAL, MonetDataType.SECOND_INTERVAL, MonetDataType.SECOND_INTERVAL),
+    GREATEST11("greatest", MonetDataType.BLOB, MonetDataType.BLOB, MonetDataType.BLOB),
 
     NULLIF1("nullif", MonetDataType.INT, MonetDataType.INT, MonetDataType.INT),
     NULLIF2("nullif", MonetDataType.REAL, MonetDataType.REAL, MonetDataType.REAL),
@@ -147,6 +153,7 @@ public enum MonetFunctionWithUnknownResult {
     NULLIF8("nullif", MonetDataType.DATE, MonetDataType.DATE, MonetDataType.DATE),
     NULLIF9("nullif", MonetDataType.MONTH_INTERVAL, MonetDataType.MONTH_INTERVAL, MonetDataType.MONTH_INTERVAL),
     NULLIF10("nullif", MonetDataType.SECOND_INTERVAL, MonetDataType.SECOND_INTERVAL, MonetDataType.SECOND_INTERVAL),
+    NULLIF11("nullif", MonetDataType.BLOB, MonetDataType.BLOB, MonetDataType.BLOB),
 
     /*IFTHENELSE1("ifthenelse", MonetDataType.INT, MonetDataType.BOOLEAN, MonetDataType.INT, MonetDataType.INT),
     IFTHENELSE2("ifthenelse", MonetDataType.REAL, MonetDataType.BOOLEAN, MonetDataType.REAL, MonetDataType.REAL),

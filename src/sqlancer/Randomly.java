@@ -241,6 +241,15 @@ public final class Randomly {
             }
 
         },
+        HEX {
+
+            @Override
+            public String getString(Randomly r) {
+                return getStringOfAlphabet(r, HEX_ALPHABET);
+
+            }
+
+        },
         SOPHISTICATED {
 
             private static final String ALPHABET = ALPHANUMERIC_SPECIALCHAR_ALPHABET;
@@ -317,6 +326,7 @@ public final class Randomly {
         private static final String ALPHANUMERIC_SPECIALCHAR_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#<>/.,~-+'*()[]{} ^*?%_\t\n\r|&\\";
         private static final String ALPHANUMERIC_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         private static final String NUMERIC_ALPHABET = "0123456789";
+        private static final String HEX_ALPHABET = "0123456789ABCDEFabcdef";
 
         private static int getStringLength(Randomly r) {
             int chars;
@@ -347,6 +357,10 @@ public final class Randomly {
 
     public String getString() {
         return stringGenerationStrategy.getString(this);
+    }
+
+    public String getString(StringGenerationStrategy strategy) {
+        return strategy.getString(this);
     }
 
     public byte[] getBytes() {

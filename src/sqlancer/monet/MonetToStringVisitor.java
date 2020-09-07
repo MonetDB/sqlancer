@@ -242,6 +242,9 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
         case SECOND_INTERVAL:
             sb.append("INTERVAL SECOND");
             break;
+        case BLOB:
+            sb.append("BLOB");
+            break;
         default:
             throw new AssertionError(cast.getType());
         }
