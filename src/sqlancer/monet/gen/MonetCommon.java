@@ -57,6 +57,7 @@ public final class MonetCommon {
         errors.add("on both sides of the JOIN expression");
         errors.add("specified more than once");
         errors.add("more than one match");
+        errors.add("Cardinality violation, scalar value expected");
         /* TODO the following errors should be removed */
         errors.add("Decimal ");
         errors.add("Timestamp ");
