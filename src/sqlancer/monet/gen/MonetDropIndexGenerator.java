@@ -23,7 +23,7 @@ public final class MonetDropIndexGenerator {
         } else {
             sb.append(Randomly.fromList(indexes).getIndexName());
         }
-        return new QueryAdapter(sb.toString(), ExpectedErrors.from("no such index"), true);
+        return new QueryAdapter(sb.toString(), ExpectedErrors.from("no such index", "because the constraint"), true);
     }
 
 }

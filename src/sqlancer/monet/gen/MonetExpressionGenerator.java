@@ -118,7 +118,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     }
 
     private enum BooleanExpression {
-        POSTFIX_OPERATOR, NOT, BINARY_LOGICAL_OPERATOR, BINARY_COMPARISON, FUNCTION, CAST, LIKE, BETWEEN, IN_OPERATION, EXISTS, ANYALL, SUBQUERY, CASE, COALESCE;
+        POSTFIX_OPERATOR, NOT, BINARY_LOGICAL_OPERATOR, BINARY_COMPARISON, FUNCTION, CAST, LIKE, BETWEEN, IN_OPERATION, EXISTS, ANYALL, CASE, COALESCE, SUBQUERY
     }
 
     private MonetExpression generateFunctionWithUnknownResult(int depth, MonetDataType type) {
@@ -353,7 +353,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     }
 
     private enum AnyTypeExpression {
-        CAST, FUNCTION, CONSTANT, CASE, SUBQUERY, COALESCE
+        CAST, FUNCTION, CONSTANT, CASE, COALESCE, SUBQUERY
     }
 
     private MonetExpression generateAnyTypeExpression(int depth, Randomly r, MonetDataType type) {
@@ -411,7 +411,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     }
 
     private enum IntExpression {
-        UNARY_OPERATION, FUNCTION, CAST, BINARY_ARITHMETIC_EXPRESSION, SUBQUERY, CASE, COALESCE
+        UNARY_OPERATION, FUNCTION, CAST, BINARY_ARITHMETIC_EXPRESSION, CASE, COALESCE, SUBQUERY
     }
 
     private MonetExpression generateIntExpression(int depth) {
