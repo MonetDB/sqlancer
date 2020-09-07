@@ -17,7 +17,7 @@ public final class MonetSequenceGenerator {
         sb.append(" seq");
         if (Randomly.getBoolean()) {
             sb.append(" AS ");
-            sb.append(Randomly.fromOptions("smallint", "integer", "bigint"));
+            sb.append(Randomly.fromOptions("integer", "bigint"));
         }
         if (Randomly.getBoolean()) {
             sb.append(" INCREMENT BY ");

@@ -88,12 +88,12 @@ public final class MonetCommon {
                 serial = true;
                 sb.append(Randomly.fromOptions("serial", "bigserial"));
             } else {
-                sb.append(Randomly.fromOptions("smallint", "integer", "bigint"));
+                sb.append(Randomly.fromOptions("tinyint", "smallint", "integer", "bigint", "hugeint"));
             }
             break;
         case STRING:
             if (Randomly.getBoolean()) {
-                sb.append("STRING");
+                sb.append(Randomly.fromOptions("STRING", "CLOB"));
             } else {
                 // TODO: support CHAR (without VAR)
                 if (MonetProvider.generateOnlyKnown || Randomly.getBoolean()) {
@@ -109,16 +109,16 @@ public final class MonetCommon {
             sb.append("DECIMAL");
             break;
         case DOUBLE:
-            sb.append("DOUBLE");
+            sb.append(Randomly.fromOptions("DOUBLE", "DOUBLE PRECISION"));
             break;
         case REAL:
-            sb.append("FLOAT");
+            sb.append(Randomly.fromOptions("FLOAT", "REAL"));
             break;
         case TIME:
-            sb.append("TIME");
+            sb.append(Randomly.fromOptions("TIME", "TIME WITH TIME ZONE"));
             break;
         case TIMESTAMP:
-            sb.append("TIMESTAMP");
+            sb.append(Randomly.fromOptions("TIMESTAMP", "TIMESTAMP WITH TIME ZONE"));
             break;
         case DATE:
             sb.append("DATE");
