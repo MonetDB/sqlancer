@@ -120,7 +120,8 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
                             constant = MonetConstant.createSecondIntervalConstant(randomRowValues.getBigDecimal(columnIndex).longValue());
                             break;
                         case BLOB:
-                            /* TODO */
+                            /*TODO constant = MonetConstant.createBlobConstant(randomRowValues.getBlob(columnIndex) ... );
+                            break;*/
                          default:
                             throw new IgnoreMeException();
                         }

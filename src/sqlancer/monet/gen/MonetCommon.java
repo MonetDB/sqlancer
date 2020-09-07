@@ -116,10 +116,10 @@ public final class MonetCommon {
             sb.append(Randomly.fromOptions("FLOAT", "REAL"));
             break;
         case TIME:
-            sb.append(Randomly.fromOptions("TIME", "TIME WITH TIME ZONE"));
+            sb.append("TIME");
             break;
         case TIMESTAMP:
-            sb.append(Randomly.fromOptions("TIMESTAMP", "TIMESTAMP WITH TIME ZONE"));
+            sb.append("TIMESTAMP");
             break;
         case DATE:
             sb.append("DATE");
@@ -131,7 +131,7 @@ public final class MonetCommon {
             sb.append("INTERVAL SECOND");
             break;
         case BLOB:
-            sb.append("INTERVAL SECOND");
+            sb.append("BLOB");
             break;
         default:
             throw new AssertionError(type);
