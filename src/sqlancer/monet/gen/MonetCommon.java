@@ -43,6 +43,7 @@ public final class MonetCommon {
         errors.add("number of characters for insert function must be non negative");
         errors.add("many digits");
         errors.add("conversion of");
+        errors.add("Conversion of");
         errors.add("value too long for type");
         errors.add("Numerical argument out of domain");
         errors.add("value too large or not a number in");

@@ -633,4 +633,32 @@ public abstract class MonetConstant implements MonetExpression {
         return new BlobConstant(val);
     }
 
+    public static class MonetParameterConstant extends MonetConstantBase {
+
+        @Override
+        public String getTextRepresentation() {
+            return "?";
+        }
+
+        @Override
+        public MonetDataType getExpressionType() {
+            return null;
+        }
+
+        @Override
+        public boolean isNull() {
+            return true;
+        }
+
+        @Override
+        public String getUnquotedTextRepresentation() {
+            return getTextRepresentation();
+        }
+
+    }
+
+    public static MonetConstant createParameterConstant() {
+        return new MonetParameterConstant();
+    }
+
 }
