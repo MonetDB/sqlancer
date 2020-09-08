@@ -22,10 +22,10 @@ public class MonetPreparedStatementGenerator {
 
         MonetCommon.addGroupingErrors(errors);
         MonetCommon.addCommonExpressionErrors(errors);
-        errors.add("no such table");
-        errors.add("Result type missing");
-        errors.add("Condition type missing");
+        errors.add("type missing");
         errors.add("Could not determine type for argument number");
+        errors.add("parameter not allowed on");
+        errors.add("Cannot have a parameter");
         return new QueryAdapter(sb.toString(), errors, true);
     }
 }
