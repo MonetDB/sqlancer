@@ -69,7 +69,7 @@ public final class MonetSequenceGenerator {
             }
             sb.append(" CYCLE");
         }
-        return new QueryAdapter(sb.toString(), errors);
+        return new QueryAdapter(sb.toString(), errors, true);
     }
 
 }

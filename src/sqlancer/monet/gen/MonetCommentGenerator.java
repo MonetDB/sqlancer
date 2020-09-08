@@ -55,7 +55,7 @@ public final class MonetCommentGenerator {
         } else {
             sb.append(MonetConstant.createTextConstant(globalState.getRandomly().getString()).getTextRepresentation());
         }
-        return new QueryAdapter(sb.toString(), ExpectedErrors.from("no such table", "no such column", "no such index", "COMMENT ON tmp object not allowed"));
+        return new QueryAdapter(sb.toString(), ExpectedErrors.from("no such table", "no such column", "no such index", "COMMENT ON tmp object not allowed"), true);
     }
 
 }

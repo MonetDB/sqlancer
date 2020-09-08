@@ -68,7 +68,7 @@ public final class MonetUpdateGenerator {
             sb.append(MonetVisitor.asString(where));
         }
 
-        return new QueryAdapter(sb.toString(), errors, true);
+        return new QueryAdapter(sb.toString(), errors);
     }
 
 }

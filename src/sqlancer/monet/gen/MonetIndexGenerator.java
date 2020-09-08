@@ -47,7 +47,7 @@ public final class MonetIndexGenerator {
         errors.add("already in use");
         errors.add("unsupported type");
         MonetCommon.addCommonExpressionErrors(errors);
-        return new QueryAdapter(sb.toString(), errors);
+        return new QueryAdapter(sb.toString(), errors, true);
     }
 
     private static String getNewIndexName(MonetTable randomTable) {
