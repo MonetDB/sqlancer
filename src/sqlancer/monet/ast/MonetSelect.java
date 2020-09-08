@@ -11,7 +11,6 @@ public class MonetSelect extends MonetQuery {
 
     private SelectType selectOption = SelectType.ALL;
     private List<MonetJoin> joinClauses = Collections.emptyList();
-    private MonetExpression distinctOnClause;
 
     public static class MonetFromTable implements MonetExpression {
         private final MonetTable t;
@@ -48,13 +47,6 @@ public class MonetSelect extends MonetQuery {
         this.setSelectOption(fromOptions);
     }
 
-    public void setDistinctOnClause(MonetExpression distinctOnClause) {
-        if (selectOption != SelectType.DISTINCT) {
-            throw new IllegalArgumentException();
-        }
-        this.distinctOnClause = distinctOnClause;
-    }
-
     public SelectType getSelectOption() {
         return selectOption;
     }
@@ -77,7 +69,4 @@ public class MonetSelect extends MonetQuery {
         return joinClauses;
     }
 
-    public MonetExpression getDistinctOnClause() {
-        return distinctOnClause;
-    }
 }
