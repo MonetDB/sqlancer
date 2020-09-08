@@ -4,11 +4,10 @@ import java.util.Collections;
 import java.util.List;
 
 import sqlancer.Randomly;
-import sqlancer.common.ast.SelectBase;
 import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.MonetSchema.MonetTable;
 
-public class MonetSelect extends SelectBase<MonetExpression> implements MonetExpression {
+public class MonetSelect extends MonetQuery {
 
     private SelectType selectOption = SelectType.ALL;
     private List<MonetJoin> joinClauses = Collections.emptyList();
@@ -29,29 +28,6 @@ public class MonetSelect extends SelectBase<MonetExpression> implements MonetExp
 
         public boolean isOnly() {
             return only;
-        }
-
-        @Override
-        public MonetDataType getExpressionType() {
-            return null;
-        }
-    }
-
-    public static class MonetSubquery implements MonetExpression {
-        private final MonetSelect s;
-        private final String name;
-
-        public MonetSubquery(MonetSelect s, String name) {
-            this.s = s;
-            this.name = name;
-        }
-
-        public MonetSelect getSelect() {
-            return s;
-        }
-
-        public String getName() {
-            return name;
         }
 
         @Override

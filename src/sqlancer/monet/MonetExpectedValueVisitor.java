@@ -19,9 +19,10 @@ import sqlancer.monet.ast.MonetOrderByTerm;
 import sqlancer.monet.ast.MonetPostfixOperation;
 import sqlancer.monet.ast.MonetPostfixText;
 import sqlancer.monet.ast.MonetPrefixOperation;
+import sqlancer.monet.ast.MonetQuery.MonetSubquery;
 import sqlancer.monet.ast.MonetSelect;
 import sqlancer.monet.ast.MonetSelect.MonetFromTable;
-import sqlancer.monet.ast.MonetSelect.MonetSubquery;
+import sqlancer.monet.ast.MonetSet;
 
 public final class MonetExpectedValueVisitor implements MonetVisitor {
 
@@ -69,6 +70,12 @@ public final class MonetExpectedValueVisitor implements MonetVisitor {
     @Override
     public void visit(MonetSelect op) {
         visit(op.getWhereClause());
+    }
+
+    @Override
+    public void visit(MonetSet op) {
+        visit(op.getLeft());
+        visit(op.getRight());
     }
 
     @Override

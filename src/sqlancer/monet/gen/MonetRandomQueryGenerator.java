@@ -1,6 +1,7 @@
 package sqlancer.monet.gen;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,13 +14,17 @@ import sqlancer.monet.ast.MonetExpression;
 import sqlancer.monet.ast.MonetSelect;
 import sqlancer.monet.ast.MonetSelect.MonetFromTable;
 import sqlancer.monet.ast.MonetSelect.SelectType;
+import sqlancer.monet.ast.MonetSet;
+import sqlancer.monet.ast.MonetSet.SetDistictOrAll;
+import sqlancer.monet.ast.MonetSet.SetType;
+import sqlancer.monet.ast.MonetQuery;
 
 public final class MonetRandomQueryGenerator {
 
     private MonetRandomQueryGenerator() {
     }
 
-    private static MonetSelect createRandomQueryInternal(MonetExpressionGenerator gen, MonetGlobalState globalState, MonetTables tables, List<MonetExpression> columns, boolean generateOrderBy, boolean generateLimit) {
+    private static MonetQuery createSimpleSelect(MonetExpressionGenerator gen, MonetGlobalState globalState, MonetTables tables, List<MonetExpression> columns, boolean generateOrderBy, boolean generateLimit) {
         MonetSelect select = new MonetSelect();
         select.setSelectType(SelectType.getRandom());
         if (select.getSelectOption() == SelectType.DISTINCT && Randomly.getBoolean()) {
@@ -50,7 +55,21 @@ public final class MonetRandomQueryGenerator {
         return select;
     }
 
-    public static MonetSelect createRandomQuery(int depth, int nrColumns, MonetGlobalState globalState, boolean generateOrderBy, boolean generateLimit, boolean allowParameters) {
+    private static MonetQuery createSet(MonetExpressionGenerator gen, MonetGlobalState globalState, MonetTables tables, List<MonetExpression> columns) {
+        MonetQuery left = createSimpleSelect(gen, globalState, tables, columns, false, false);
+        MonetQuery right = createSimpleSelect(gen, globalState, tables, columns, false, false);
+        return new MonetSet(Randomly.fromList(Arrays.asList(SetType.values())), Randomly.fromList(Arrays.asList(SetDistictOrAll.values())), left, right);
+    }
+
+    private static MonetQuery createRandomQueryInternal(MonetExpressionGenerator gen, MonetGlobalState globalState, MonetTables tables, List<MonetExpression> columns, boolean generateOrderBy, boolean generateLimit) {
+        if (Randomly.getBoolean()) {
+            return createSimpleSelect(gen, globalState, tables, columns, generateOrderBy, generateLimit);
+        } else {
+            return createSet(gen, globalState, tables, columns);
+        }
+    }
+
+    public static MonetQuery createRandomQuery(int depth, int nrColumns, MonetGlobalState globalState, boolean generateOrderBy, boolean generateLimit, boolean allowParameters) {
         List<MonetExpression> columns = new ArrayList<>();
         MonetTables tables = globalState.getSchema().getRandomTableNonEmptyTables();
         MonetExpressionGenerator gen = new MonetExpressionGenerator(globalState).setColumns(tables.getColumns());
@@ -61,7 +80,7 @@ public final class MonetRandomQueryGenerator {
         return createRandomQueryInternal(gen, globalState, tables, columns, generateOrderBy, generateLimit);
     }
 
-    public static MonetSelect createRandomSingleColumnQuery(int depth, MonetDataType tp, MonetGlobalState globalState, boolean generateOrderBy, boolean generateLimit, boolean allowParameters) {
+    public static MonetQuery createRandomSingleColumnQuery(int depth, MonetDataType tp, MonetGlobalState globalState, boolean generateOrderBy, boolean generateLimit, boolean allowParameters) {
         List<MonetExpression> columns = new ArrayList<>();
         MonetTables tables = globalState.getSchema().getRandomTableNonEmptyTables();
         MonetExpressionGenerator gen = new MonetExpressionGenerator(globalState).setColumns(tables.getColumns());

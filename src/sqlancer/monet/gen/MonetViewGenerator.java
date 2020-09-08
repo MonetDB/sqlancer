@@ -6,7 +6,7 @@ import sqlancer.common.query.Query;
 import sqlancer.common.query.QueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetVisitor;
-import sqlancer.monet.ast.MonetSelect;
+import sqlancer.monet.ast.MonetQuery;
 import sqlancer.sqlite3.gen.SQLite3Common;
 
 public final class MonetViewGenerator {
@@ -38,7 +38,7 @@ public final class MonetViewGenerator {
         }
         sb.append(")");
         sb.append(" AS (");
-        MonetSelect select = MonetRandomQueryGenerator.createRandomQuery(0, nrColumns, globalState, true, false, false);
+        MonetQuery select = MonetRandomQueryGenerator.createRandomQuery(0, nrColumns, globalState, true, false, false);
         sb.append(MonetVisitor.asString(select));
         sb.append(")");
         if (Randomly.getBoolean()) {

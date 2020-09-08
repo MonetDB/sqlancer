@@ -4,15 +4,15 @@ import sqlancer.monet.MonetSchema.MonetDataType;
 
 public class MonetExistsOperation implements MonetExpression {
 
-    private final MonetSelect select;
+    private final MonetQuery select;
     private final boolean isExists;
 
-    public MonetExistsOperation(MonetSelect select, boolean isExists) {
+    public MonetExistsOperation(MonetQuery select, boolean isExists) {
         this.select = select;
         this.isExists = isExists; /* NOT EXISTS vs EXISTS */
     }
 
-    public MonetSelect getSelect() {
+    public MonetQuery getSelect() {
         return select;
     }
 

@@ -6,7 +6,7 @@ import sqlancer.common.query.Query;
 import sqlancer.common.query.QueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetVisitor;
-import sqlancer.monet.ast.MonetSelect;
+import sqlancer.monet.ast.MonetQuery;
 
 public class MonetPreparedStatementGenerator {
 
@@ -17,7 +17,7 @@ public class MonetPreparedStatementGenerator {
         ExpectedErrors errors = new ExpectedErrors();
 
         StringBuilder sb = new StringBuilder("PREPARE ");
-        MonetSelect select = MonetRandomQueryGenerator.createRandomQuery(0, Randomly.smallNumber() + 1, globalState, true, true, true);
+        MonetQuery select = MonetRandomQueryGenerator.createRandomQuery(0, Randomly.smallNumber() + 1, globalState, true, true, true);
         sb.append(MonetVisitor.asString(select));
 
         MonetCommon.addGroupingErrors(errors);

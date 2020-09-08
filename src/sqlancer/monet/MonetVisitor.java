@@ -23,9 +23,10 @@ import sqlancer.monet.ast.MonetOrderByTerm;
 import sqlancer.monet.ast.MonetPostfixOperation;
 import sqlancer.monet.ast.MonetPostfixText;
 import sqlancer.monet.ast.MonetPrefixOperation;
+import sqlancer.monet.ast.MonetQuery.MonetSubquery;
 import sqlancer.monet.ast.MonetSelect;
 import sqlancer.monet.ast.MonetSelect.MonetFromTable;
-import sqlancer.monet.ast.MonetSelect.MonetSubquery;
+import sqlancer.monet.ast.MonetSet;
 import sqlancer.monet.gen.MonetExpressionGenerator;
 
 public interface MonetVisitor {
@@ -39,6 +40,8 @@ public interface MonetVisitor {
     void visit(MonetPrefixOperation op);
 
     void visit(MonetSelect op);
+
+    void visit(MonetSet op);
 
     void visit(MonetOrderByTerm op);
 
@@ -83,6 +86,8 @@ public interface MonetVisitor {
             visit((MonetPrefixOperation) expression);
         } else if (expression instanceof MonetSelect) {
             visit((MonetSelect) expression);
+        } else if (expression instanceof MonetSet) {
+            visit((MonetSet) expression);
         } else if (expression instanceof MonetOrderByTerm) {
             visit((MonetOrderByTerm) expression);
         } else if (expression instanceof MonetFunction) {

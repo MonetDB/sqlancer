@@ -7,6 +7,7 @@ import sqlancer.Randomly;
 import sqlancer.common.visitor.BinaryOperation;
 import sqlancer.common.visitor.ToStringVisitor;
 import sqlancer.monet.ast.MonetAggregate;
+import sqlancer.monet.ast.MonetAggregate.MonetAggregateFunction;
 import sqlancer.monet.ast.MonetAnyAllOperation;
 import sqlancer.monet.ast.MonetBetweenOperation;
 import sqlancer.monet.ast.MonetBinaryComparisonOperation;
@@ -27,10 +28,10 @@ import sqlancer.monet.ast.MonetOrderByTerm;
 import sqlancer.monet.ast.MonetPostfixOperation;
 import sqlancer.monet.ast.MonetPostfixText;
 import sqlancer.monet.ast.MonetPrefixOperation;
+import sqlancer.monet.ast.MonetQuery.MonetSubquery;
 import sqlancer.monet.ast.MonetSelect;
-import sqlancer.monet.ast.MonetAggregate.MonetAggregateFunction;
 import sqlancer.monet.ast.MonetSelect.MonetFromTable;
-import sqlancer.monet.ast.MonetSelect.MonetSubquery;
+import sqlancer.monet.ast.MonetSet;
 import sqlancer.monet.MonetSchema.MonetDataType;
 
 public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression> implements MonetVisitor {
@@ -171,6 +172,39 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
             sb.append(" OFFSET ");
             visit(s.getOffsetClause());
         }
+    }
+
+    @Override
+    public void visit(MonetSet query) {
+        sb.append("(");
+        visit(query.getLeft());
+        sb.append(")");
+        switch (query.fetSetType()) {
+        case INTERSECT:
+            sb.append(" INTERSECT ");
+            break;
+        case EXCEPT:
+            sb.append(" EXCEPT ");
+            break;
+        case UNION:
+            sb.append(" UNION ");
+            break;
+        default:
+            throw new AssertionError();
+        }
+        switch (query.fetSetDistictOrAll()) {
+        case DISTINCT:
+            sb.append("DISTINCT ");
+            break;
+        case ALL:
+            sb.append(Randomly.fromOptions("ALL ", ""));
+            break;
+        default:
+            throw new AssertionError();
+        }
+        sb.append("(");
+        visit(query.getRight());
+        sb.append(")");
     }
 
     @Override
