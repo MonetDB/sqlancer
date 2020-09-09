@@ -58,15 +58,17 @@ public final class MonetCommon {
         errors.add("on both sides of the JOIN expression");
         errors.add("specified more than once");
         errors.add("more than one match");
-        errors.add("Cardinality violation, scalar value expected");
+        errors.add("scalar value expected");
+        errors.add("scalar expression expected");
+        errors.add("on both sides of the");
+        errors.add("common column name");
+        errors.add("ambiguous");
         /* TODO the following errors should be removed */
         errors.add("Decimal ");
         errors.add("Timestamp ");
         errors.add("Date ");
         errors.add("Daytime ");
         errors.add("Time ");
-        errors.add("common column name");
-        errors.add("ambiguous");
     }
 
     public static void addCommonInsertUpdateErrors(ExpectedErrors errors) {

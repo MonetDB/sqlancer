@@ -8,9 +8,12 @@ import java.util.stream.Collectors;
 import sqlancer.Randomly;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetDataType;
+import sqlancer.monet.MonetSchema.MonetTable;
 import sqlancer.monet.MonetSchema.MonetTables;
 import sqlancer.monet.ast.MonetConstant;
 import sqlancer.monet.ast.MonetExpression;
+import sqlancer.monet.ast.MonetJoin;
+import sqlancer.monet.ast.MonetJoin.MonetJoinType;
 import sqlancer.monet.ast.MonetSelect;
 import sqlancer.monet.ast.MonetSelect.MonetFromTable;
 import sqlancer.monet.ast.MonetSelect.SelectType;
@@ -18,8 +21,11 @@ import sqlancer.monet.ast.MonetSet;
 import sqlancer.monet.ast.MonetSet.SetDistictOrAll;
 import sqlancer.monet.ast.MonetSet.SetType;
 import sqlancer.monet.ast.MonetQuery;
+import sqlancer.monet.ast.MonetQuery.MonetSubquery;
 
 public final class MonetRandomQueryGenerator {
+
+    private static final int MAX_SUBQUERY_DEPTH = 3;
 
     private MonetRandomQueryGenerator() {
     }
@@ -29,7 +35,26 @@ public final class MonetRandomQueryGenerator {
         select.setFromList(tables.getTables().stream().map(t -> new MonetFromTable(t, Randomly.getBoolean())).collect(Collectors.toList()));
         select.setFetchColumns(columns);
         if (Randomly.getBoolean()) {
-            select.setWhereClause(gen.generateExpression(depth, MonetDataType.BOOLEAN));
+            select.setWhereClause(gen.generateExpression(depth + 1, MonetDataType.BOOLEAN));
+        }
+        if (Randomly.getBoolean()) {
+            List<MonetJoin> joinStatements = new ArrayList<>();
+            List<MonetTable> tablesToJoin = new ArrayList<>(tables.getTables());
+
+            for (int i = 0; i < Randomly.smallNumber() && i < tablesToJoin.size(); i++) {
+                MonetTable table = Randomly.fromList(tablesToJoin);
+                tablesToJoin.remove(table);
+                joinStatements.add(new MonetJoin(new MonetFromTable(table, Randomly.getBoolean()), gen.generateExpression(depth + 1, MonetDataType.BOOLEAN), MonetJoinType.getRandom()));
+            }
+            // JOIN subqueries
+            if (depth < MAX_SUBQUERY_DEPTH) { /* Protect against infinite recursion */
+                for (int i = 0; i < Randomly.smallNumber() + 1; i++) {
+                    MonetQuery q = createRandomQuery(depth + 1, Randomly.smallNumber() + 1, globalState, false, false, false);
+                    MonetSubquery subquery = new MonetSubquery(q, String.format("sub%d", i));
+                    joinStatements.add(new MonetJoin(subquery, gen.generateExpression(depth + 1, MonetDataType.BOOLEAN), MonetJoinType.getRandom()));
+                }
+            }
+            select.setJoinClauses(joinStatements);
         }
         if (Randomly.getBooleanWithRatherLowProbability()) {
             select.setGroupByExpressions(gen.generateExpressions(Randomly.smallNumber() + 1));
