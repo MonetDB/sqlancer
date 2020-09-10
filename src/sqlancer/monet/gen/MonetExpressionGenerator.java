@@ -406,9 +406,12 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     }
 
     private MonetExpression generateIntExpression(int depth, MonetDataType int_tp) {
-        IntExpression option;
-        option = Randomly.fromOptions(IntExpression.values());
-        switch (option) {
+        List<IntExpression> options = new ArrayList<>(Arrays.asList(IntExpression.values()));
+
+        if (int_tp == MonetDataType.REAL || int_tp == MonetDataType.DOUBLE) {
+            options.remove(IntExpression.BINARY_OPERATION);
+        }
+        switch (Randomly.fromList(options)) {
         case CAST:
             return new MonetCastOperation(generateExpression(depth + 1), getCompoundDataType(int_tp));
         case CONSTANT:
@@ -432,8 +435,8 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
                 generateExpressions(depth + 1, noptions, tp), generateExpressions(depth + 1, noptions, int_tp),
                 Randomly.getBoolean() ? generateExpression(depth + 1, int_tp) : null);
         case COALESCE:
-            int options = Randomly.smallNumber() + 2;
-            return new MonetCoalesceOperation(generateExpressions(depth + 1, options, int_tp));
+            int noptions2 = Randomly.smallNumber() + 2;
+            return new MonetCoalesceOperation(generateExpressions(depth + 1, noptions2, int_tp));
         default:
             throw new AssertionError();
         }
