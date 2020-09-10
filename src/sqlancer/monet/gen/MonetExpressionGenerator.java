@@ -125,7 +125,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     }
 
     private enum BooleanExpression {
-        POSTFIX_OPERATOR, NOT, BINARY_LOGICAL_OPERATOR, BINARY_COMPARISON, FUNCTION, CAST, LIKE, BETWEEN, IN_OPERATION, EXISTS, ANYALL, CASE, COALESCE, SUBQUERY
+        POSTFIX_OPERATOR, NOT, BINARY_LOGICAL_OPERATOR, BINARY_COMPARISON, CONSTANT, FUNCTION, CAST, LIKE, BETWEEN, IN_OPERATION, EXISTS, ANYALL, CASE, COALESCE, SUBQUERY
     }
 
     private MonetExpression generateFunctionWithUnknownResult(int depth, MonetDataType type) {
@@ -180,8 +180,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         case IN_OPERATION:
             return inOperation(depth + 1);
         case NOT:
-            return new MonetPrefixOperation(generateExpression(depth + 1, MonetDataType.BOOLEAN),
-                    PrefixOperator.NOT);
+            return new MonetPrefixOperation(generateExpression(depth + 1, MonetDataType.BOOLEAN), PrefixOperator.NOT);
         case BINARY_LOGICAL_OPERATOR:
             MonetExpression first = generateExpression(depth + 1, MonetDataType.BOOLEAN);
             int nr = Randomly.smallNumber() + 1;
@@ -193,9 +192,10 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         case BINARY_COMPARISON:
             MonetDataType dataType = getMeaningfulType();
             return generateComparison(depth, dataType);
+        case CONSTANT:
+            return generateConstant(r, MonetDataType.BOOLEAN);
         case CAST:
-            return new MonetCastOperation(generateExpression(depth + 1),
-                    getCompoundDataType(MonetDataType.BOOLEAN));
+            return new MonetCastOperation(generateExpression(depth + 1), getCompoundDataType(MonetDataType.BOOLEAN));
         case FUNCTION:
             return generateFunction(depth + 1, MonetDataType.BOOLEAN);
         case LIKE:
@@ -316,15 +316,11 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
             case BOOLEAN:
                 return generateBooleanExpression(depth);
             case INT:
-                if (Randomly.getBooleanWithRatherLowProbability()) {
-                    return generateBitExpression(depth);
-                } else {
-                    return generateIntExpression(depth);
-                }
-            case STRING:
             case DECIMAL:
             case REAL:
             case DOUBLE:
+                return generateIntExpression(depth, dataType);
+            case STRING:
             case TIME:
             case TIMESTAMP:
             case DATE:
@@ -405,54 +401,39 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         return new MonetConcatOperation(left, right);
     }
 
-    private enum BitExpression {
-        BINARY_OPERATION
-    };
-
-    private MonetExpression generateBitExpression(int depth) {
-        BitExpression option;
-        option = Randomly.fromOptions(BitExpression.values());
-        switch (option) {
-        case BINARY_OPERATION:
-            return new MonetBinaryBitOperation(MonetBinaryBitOperator.getRandom(),
-                    generateExpression(depth + 1, MonetDataType.INT),
-                    generateExpression(depth + 1, MonetDataType.INT));
-        default:
-            throw new AssertionError();
-        }
-    }
-
     private enum IntExpression {
-        UNARY_OPERATION, FUNCTION, CAST, BINARY_ARITHMETIC_EXPRESSION, CASE, COALESCE, SUBQUERY
+        UNARY_OPERATION, FUNCTION, CAST, CONSTANT, BINARY_OPERATION, BINARY_ARITHMETIC_EXPRESSION, CASE, COALESCE, SUBQUERY
     }
 
-    private MonetExpression generateIntExpression(int depth) {
+    private MonetExpression generateIntExpression(int depth, MonetDataType int_tp) {
         IntExpression option;
         option = Randomly.fromOptions(IntExpression.values());
         switch (option) {
         case CAST:
-            return new MonetCastOperation(generateExpression(depth + 1), getCompoundDataType(MonetDataType.INT));
+            return new MonetCastOperation(generateExpression(depth + 1), getCompoundDataType(int_tp));
+        case CONSTANT:
+            return generateConstant(r, int_tp);
         case UNARY_OPERATION:
-            MonetExpression intExpression = generateExpression(depth + 1, MonetDataType.INT);
-            return new MonetPrefixOperation(intExpression,
-                    Randomly.getBoolean() ? PrefixOperator.UNARY_PLUS : PrefixOperator.UNARY_MINUS);
+            MonetExpression intExpression = generateExpression(depth + 1, int_tp);
+            return new MonetPrefixOperation(intExpression, Randomly.getBoolean() ? PrefixOperator.UNARY_PLUS : PrefixOperator.UNARY_MINUS);
         case FUNCTION:
-            return generateFunction(depth + 1, MonetDataType.INT);
+            return generateFunction(depth + 1, int_tp);
+        case BINARY_OPERATION:
+            return new MonetBinaryBitOperation(MonetBinaryBitOperator.getRandom(), generateExpression(depth + 1, int_tp), generateExpression(depth + 1, int_tp));
         case BINARY_ARITHMETIC_EXPRESSION:
-            return new MonetBinaryArithmeticOperation(generateExpression(depth + 1, MonetDataType.INT),
-                    generateExpression(depth + 1, MonetDataType.INT), MonetBinaryOperator.getRandom());
+            return new MonetBinaryArithmeticOperation(generateExpression(depth + 1, int_tp), generateExpression(depth + 1, int_tp), MonetBinaryOperator.getRandom());
         case SUBQUERY:
-            MonetQuery select = MonetRandomQueryGenerator.createRandomSingleColumnQuery(depth + 1, MonetDataType.INT, globalState, false, false, this.allowParameters);
+            MonetQuery select = MonetRandomQueryGenerator.createRandomSingleColumnQuery(depth + 1, int_tp, globalState, false, false, this.allowParameters);
             return new MonetQuery.MonetSubquery(select, null);
         case CASE:
             MonetDataType tp = Randomly.fromOptions(MonetDataType.values());
             int noptions = Randomly.smallNumber() + 1;
             return new MonetCaseOperation(Randomly.getBoolean() ? generateExpression(depth + 1, tp) : null,
-                generateExpressions(depth + 1, noptions, tp), generateExpressions(depth + 1, noptions, MonetDataType.INT),
-                Randomly.getBoolean() ? generateExpression(depth + 1, MonetDataType.INT) : null);
+                generateExpressions(depth + 1, noptions, tp), generateExpressions(depth + 1, noptions, int_tp),
+                Randomly.getBoolean() ? generateExpression(depth + 1, int_tp) : null);
         case COALESCE:
             int options = Randomly.smallNumber() + 2;
-            return new MonetCoalesceOperation(generateExpressions(depth + 1, options, MonetDataType.INT));
+            return new MonetCoalesceOperation(generateExpressions(depth + 1, options, int_tp));
         default:
             throw new AssertionError();
         }
@@ -501,8 +482,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
             }
         case BOOLEAN:
             if (Randomly.getBooleanWithSmallProbability() && !MonetProvider.generateOnlyKnown) {
-                return MonetConstant
-                        .createTextConstant(Randomly.fromOptions("TRUE", "FALSE", "0", "1"));
+                return MonetConstant.createTextConstant(Randomly.fromOptions("TRUE", "FALSE", "0", "1"));
             } else {
                 return MonetConstant.createBooleanConstant(Randomly.getBoolean());
             }
