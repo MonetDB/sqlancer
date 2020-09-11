@@ -26,6 +26,7 @@ public class MonetPreparedStatementGenerator {
         errors.add("Could not determine type for argument number");
         errors.add("parameter not allowed on");
         errors.add("Cannot have a parameter");
+        errors.add("parameters not allowed");
         return new QueryAdapter(sb.toString(), errors);
     }
 }

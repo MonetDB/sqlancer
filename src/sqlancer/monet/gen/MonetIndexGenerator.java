@@ -30,8 +30,9 @@ public final class MonetIndexGenerator {
         IndexType method = Randomly.fromOptions(IndexType.values());
         if (method != IndexType.HASH) {
             sb.append(method.toString());
+            sb.append(" ");
         }
-        sb.append(" INDEX ");
+        sb.append("INDEX ");
         MonetTable randomTable = globalState.getSchema().getRandomTable(t -> !t.isView());
         String indexName = getNewIndexName(randomTable);
         sb.append(indexName);

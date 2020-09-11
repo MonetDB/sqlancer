@@ -108,15 +108,15 @@ public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOption
         case VACUUM:
         case ANALYZE:
         case QUERY_CATALOG:
-        case CREATE_VIEW:
         case CREATE_INDEX:
         case DROP_INDEX:
-        case MERGE:
             nrPerformed = r.getInteger(0, 2);
             break;
         case ALTER_TABLE:
         case DELETE:
         case CREATE_PREPARE:
+        case MERGE:
+        case CREATE_VIEW:
             nrPerformed = r.getInteger(0, 3);
             break;
         case UPDATE:
