@@ -9,11 +9,11 @@ import sqlancer.common.visitor.ToStringVisitor;
 import sqlancer.monet.ast.MonetAggregate;
 import sqlancer.monet.ast.MonetAggregate.MonetAggregateFunction;
 import sqlancer.monet.ast.MonetAnyAllOperation;
+import sqlancer.monet.ast.MonetAnyTypeOperation;
 import sqlancer.monet.ast.MonetBetweenOperation;
 import sqlancer.monet.ast.MonetBinaryComparisonOperation;
 import sqlancer.monet.ast.MonetBinaryLogicalOperation;
 import sqlancer.monet.ast.MonetCaseOperation;
-import sqlancer.monet.ast.MonetCoalesceOperation;
 import sqlancer.monet.ast.MonetCastOperation;
 import sqlancer.monet.ast.MonetColumnValue;
 import sqlancer.monet.ast.MonetConstant;
@@ -370,10 +370,11 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
     }
 
     @Override
-    public void visit(MonetCoalesceOperation op) {
-        sb.append("COALESCE(");
+    public void visit(MonetAnyTypeOperation op) {
+        sb.append(op.getFunction().getName());
+        sb.append("(");
         int i = 0;
-        for (MonetExpression arg : op.getConditions()) {
+        for (MonetExpression arg : op.getArguments()) {
             if (i++ != 0) {
                 sb.append(", ");
             }
