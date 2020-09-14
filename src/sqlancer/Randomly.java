@@ -126,6 +126,17 @@ public final class Randomly {
         return arr;
     }
 
+    public static <T> List<T> nonEmptySubsetPotentialDuplicates(List<T> columns, int nr) {
+        List<T> arr = new ArrayList<>();
+        if (nr > columns.size()) {
+            throw new AssertionError(columns + " " + nr);
+        }
+        for (int i = 0; i < nr; i++) {
+            arr.add(Randomly.fromList(columns));
+        }
+        return arr;
+    }
+
     public static <T> List<T> subset(List<T> columns) {
         int nr = getNextInt(0, columns.size() + 1);
         return extractNrRandomColumns(columns, nr);

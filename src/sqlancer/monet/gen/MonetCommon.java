@@ -63,6 +63,7 @@ public final class MonetCommon {
         errors.add("on both sides of the");
         errors.add("common column name");
         errors.add("ambiguous");
+        errors.add(" overflows type");
         /* TODO the following errors should be removed */
         errors.add("Decimal ");
         errors.add("Timestamp ");

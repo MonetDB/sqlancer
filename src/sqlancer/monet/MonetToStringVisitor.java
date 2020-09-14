@@ -1,6 +1,7 @@
 package sqlancer.monet;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import sqlancer.Randomly;
@@ -32,6 +33,7 @@ import sqlancer.monet.ast.MonetQuery.MonetSubquery;
 import sqlancer.monet.ast.MonetSelect;
 import sqlancer.monet.ast.MonetSelect.MonetFromTable;
 import sqlancer.monet.ast.MonetSet;
+import sqlancer.monet.ast.MonetValues;
 import sqlancer.monet.MonetSchema.MonetDataType;
 
 public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression> implements MonetVisitor {
@@ -204,6 +206,27 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
         }
         sb.append("(");
         visit(query.getRight());
+        sb.append(")");
+    }
+
+    @Override
+    public void visit(MonetValues query) {
+        sb.append("VALUES(");
+        int i = 0;
+        for (List<MonetExpression> rowValues : query.getRowValues()) {
+            if (i++ != 0) {
+                sb.append(", ");
+            }
+            int j = 0;
+            sb.append("(");
+            for (MonetExpression nextColumn : rowValues) {
+                if (j++ != 0) {
+                    sb.append(", ");
+                }
+                visit(nextColumn);
+            }
+            sb.append(")");
+        }
         sb.append(")");
     }
 

@@ -1,5 +1,7 @@
 package sqlancer.monet;
 
+import java.util.List;
+
 import sqlancer.monet.ast.MonetAggregate;
 import sqlancer.monet.ast.MonetAnyAllOperation;
 import sqlancer.monet.ast.MonetAnyTypeOperation;
@@ -23,6 +25,7 @@ import sqlancer.monet.ast.MonetQuery.MonetSubquery;
 import sqlancer.monet.ast.MonetSelect;
 import sqlancer.monet.ast.MonetSelect.MonetFromTable;
 import sqlancer.monet.ast.MonetSet;
+import sqlancer.monet.ast.MonetValues;
 
 public final class MonetExpectedValueVisitor implements MonetVisitor {
 
@@ -76,6 +79,15 @@ public final class MonetExpectedValueVisitor implements MonetVisitor {
     public void visit(MonetSet op) {
         visit(op.getLeft());
         visit(op.getRight());
+    }
+
+    @Override
+    public void visit(MonetValues op) {
+        for (List<MonetExpression> rowValues : op.getRowValues()) {
+            for (MonetExpression nextColumn : rowValues) {
+                visit(nextColumn);
+            }
+        }
     }
 
     @Override
