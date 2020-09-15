@@ -211,7 +211,7 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
 
     @Override
     public void visit(MonetValues query) {
-        sb.append("VALUES(");
+        sb.append("VALUES ");
         int i = 0;
         for (List<MonetExpression> rowValues : query.getRowValues()) {
             if (i++ != 0) {
@@ -227,7 +227,6 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
             }
             sb.append(")");
         }
-        sb.append(")");
     }
 
     @Override
