@@ -40,7 +40,7 @@ public final class MonetAnyTypeOperation implements MonetExpression {
     public MonetAnyTypeOperation(MonetAnyTypeOperationType function, List<MonetExpression> arguments) {
         this.function = function;
         this.arguments = arguments;
-        if ((function.getNargs() == 0 && arguments.size() < 3) || (function.getNargs() > 0 && arguments.size() != function.getNargs()))
+        if ((function.getNargs() == 0 && arguments.size() < 2) || (function.getNargs() > 0 && arguments.size() != function.getNargs()))
             throw new AssertionError(this);
     }
 

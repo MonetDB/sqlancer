@@ -119,7 +119,7 @@ public final class MonetRandomQueryGenerator {
             List<MonetExpression> columns = new ArrayList<>(nrColumns);
 
             for (int j = 0; j < nrColumns; j++) {
-                columns.add(gen.generateExpression(depth, types.get(i)));
+                columns.add(gen.generateExpression(depth, types.get(j)));
             }
             rows.add(columns);
         }
