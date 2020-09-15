@@ -114,13 +114,17 @@ public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOption
             break;
         case ALTER_TABLE:
         case DELETE:
-        case CREATE_PREPARE:
         case MERGE:
-        case CREATE_VIEW:
             nrPerformed = r.getInteger(0, 3);
+            break;
+        case CREATE_VIEW:
+            nrPerformed = r.getInteger(0, 5);
             break;
         case UPDATE:
             nrPerformed = r.getInteger(0, 10);
+            break;
+        case CREATE_PREPARE:
+            nrPerformed = r.getInteger(0, 20);
             break;
         case INSERT:
             nrPerformed = r.getInteger(0, globalState.getOptions().getMaxNumberInserts());
