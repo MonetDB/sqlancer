@@ -12,17 +12,18 @@ import sqlancer.common.oracle.TernaryLogicPartitioningOracleBase;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema;
 import sqlancer.monet.MonetSchema.MonetColumn;
-import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.MonetSchema.MonetTable;
 import sqlancer.monet.MonetSchema.MonetTables;
 import sqlancer.monet.ast.MonetColumnValue;
 import sqlancer.monet.ast.MonetExpression;
 import sqlancer.monet.ast.MonetJoin;
+import sqlancer.monet.ast.MonetQuery;
 import sqlancer.monet.ast.MonetQuery.MonetSubquery;
 import sqlancer.monet.ast.MonetSelect;
 import sqlancer.monet.ast.MonetSelect.MonetFromTable;
 import sqlancer.monet.gen.MonetCommon;
 import sqlancer.monet.gen.MonetExpressionGenerator;
+import sqlancer.monet.gen.MonetRandomQueryGenerator;
 import sqlancer.monet.oracle.MonetNoRECOracle;
 
 public class MonetTLPBase extends TernaryLogicPartitioningOracleBase<MonetExpression, MonetGlobalState> {
@@ -63,6 +64,12 @@ public class MonetTLPBase extends TernaryLogicPartitioningOracleBase<MonetExpres
         select.setFromList(tableList);
         select.setWhereClause(null);
         select.setJoinClauses(joins);
+        if (Randomly.getBooleanWithRatherLowProbability()) {
+            select.setGroupByExpressions(gen.generateExpressions(Randomly.smallNumber() + 1));
+            if (Randomly.getBoolean()) {
+                select.setHavingClause(gen.generateHavingClause());
+            }
+        }
     }
 
     List<MonetExpression> generateFetchColumns() {
@@ -83,29 +90,7 @@ public class MonetTLPBase extends TernaryLogicPartitioningOracleBase<MonetExpres
     }
 
     public static MonetSubquery createSubquery(MonetGlobalState globalState, String name, MonetTables tables) {
-        List<MonetExpression> columns = new ArrayList<>();
-        MonetExpressionGenerator gen = new MonetExpressionGenerator(globalState).setColumns(tables.getColumns());
-        for (int i = 0; i < Randomly.smallNumber() + 1; i++) {
-            columns.add(gen.generateExpression(0));
-        }
-        MonetSelect select = new MonetSelect();
-        select.setFromList(tables.getTables().stream().map(t -> new MonetFromTable(t, Randomly.getBoolean()))
-                .collect(Collectors.toList()));
-        select.setFetchColumns(columns);
-        if (Randomly.getBoolean()) {
-            select.setWhereClause(gen.generateExpression(0, MonetDataType.BOOLEAN));
-        }
-        /*We don't support order by and limit on subqueries on purpose
-        if (Randomly.getBooleanWithRatherLowProbability()) {
-            select.setOrderByExpressions(gen.generateOrderBy());
-        }
-        if (Randomly.getBoolean()) {
-            select.setLimitClause(MonetConstant.createIntConstant(Randomly.getPositiveOrZeroNonCachedInteger()));
-            if (Randomly.getBoolean()) {
-                select.setOffsetClause(
-                        MonetConstant.createIntConstant(Randomly.getPositiveOrZeroNonCachedInteger()));
-            }
-        }*/
+        MonetQuery select = MonetRandomQueryGenerator.createRandomQuery(0, Randomly.smallNumber() + 1, globalState, tables, false, false, false);
         return new MonetSubquery(select, name);
     }
 
