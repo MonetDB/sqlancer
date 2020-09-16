@@ -10,6 +10,7 @@ public class SelectBase<T> {
     List<T> orderByExpressions = Collections.emptyList();
     List<T> joinList = Collections.emptyList();
     List<T> fromList;
+    List<T> ctes = Collections.emptyList();
     T whereClause;
     T havingClause;
     T limitClause;
@@ -41,6 +42,17 @@ public class SelectBase<T> {
             throw new IllegalStateException();
         }
         return fromList;
+    }
+
+    public void setCTEs(List<T> ctes) {
+        if (ctes == null) {
+            throw new IllegalArgumentException();
+        }
+        this.ctes = ctes;
+    }
+
+    public List<T> getCTEs() {
+        return this.ctes;
     }
 
     public void setGroupByExpressions(List<T> groupByExpressions) {

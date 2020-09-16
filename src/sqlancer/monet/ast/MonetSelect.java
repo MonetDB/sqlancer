@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import sqlancer.Randomly;
+import sqlancer.monet.MonetSchema.MonetColumn;
 import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.MonetSchema.MonetTable;
 
@@ -27,6 +28,42 @@ public class MonetSelect extends MonetQuery {
 
         public boolean isOnly() {
             return only;
+        }
+
+        @Override
+        public MonetDataType getExpressionType() {
+            return null;
+        }
+    }
+
+    public static class MonetCTE extends MonetTable {
+        private final MonetQuery query;
+
+        public MonetCTE(String tableName, List<MonetColumn> columns, MonetQuery query) {
+            super(tableName, columns, Collections.emptyList(), TableType.TEMPORARY, Collections.emptyList(), false, false);
+            this.query = query;
+        }
+
+        public MonetQuery getQuery() {
+            return query;
+        }
+    }
+
+    public static class MonetQueryCTE implements MonetExpression {
+        private final MonetCTE cte;
+        private final String name;
+
+        public MonetQueryCTE(MonetCTE cte, String name) {
+            this.cte = cte;
+            this.name = name;
+        }
+
+        public MonetCTE getCTE() {
+            return cte;
+        }
+
+        public String getName() {
+            return name;
         }
 
         @Override

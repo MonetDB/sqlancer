@@ -97,7 +97,7 @@ public abstract class MonetConstant implements MonetExpression {
 
         @Override
         public MonetDataType getExpressionType() {
-            return null;
+            return MonetDataType.STRING; /* be safe from NULL pointers! */
         }
 
         @Override
@@ -642,12 +642,12 @@ public abstract class MonetConstant implements MonetExpression {
 
         @Override
         public MonetDataType getExpressionType() {
-            return null;
+            return MonetDataType.STRING; /* be safe from NULL pointers! */
         }
 
         @Override
         public boolean isNull() {
-            return true;
+            return false;
         }
 
         @Override

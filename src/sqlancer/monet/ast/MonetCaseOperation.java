@@ -10,13 +10,15 @@ public final class MonetCaseOperation implements MonetExpression {
     private final List<MonetExpression> expressions;
     private final MonetExpression elseExpr;
     private final MonetExpression switchCondition;
+    private final MonetDataType type;
 
     public MonetCaseOperation(MonetExpression switchCondition, List<MonetExpression> conditions, List<MonetExpression> expressions,
-            MonetExpression elseExpr) {
+            MonetExpression elseExpr, MonetDataType type) {
         this.switchCondition = switchCondition;
         this.conditions = conditions;
         this.expressions = expressions;
         this.elseExpr = elseExpr;
+        this.type = type;
         if (conditions.size() != expressions.size()) {
             throw new IllegalArgumentException();
         }
@@ -45,7 +47,7 @@ public final class MonetCaseOperation implements MonetExpression {
 
     @Override
     public MonetDataType getExpressionType() {
-        return null;
+        return type;
     }
 
 }

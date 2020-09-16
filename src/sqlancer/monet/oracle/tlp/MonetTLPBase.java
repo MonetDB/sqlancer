@@ -91,7 +91,7 @@ public class MonetTLPBase extends TernaryLogicPartitioningOracleBase<MonetExpres
 
     public static MonetSubquery createSubquery(MonetGlobalState globalState, String name, MonetTables tables) {
         MonetQuery select = MonetRandomQueryGenerator.createRandomQuery(0, Randomly.smallNumber() + 1, globalState, tables, false, false, false);
-        return new MonetSubquery(select, name);
+        return new MonetSubquery(select, name, null);
     }
 
 }

@@ -29,11 +29,14 @@ import sqlancer.monet.ast.MonetOrderByTerm;
 import sqlancer.monet.ast.MonetPostfixOperation;
 import sqlancer.monet.ast.MonetPostfixText;
 import sqlancer.monet.ast.MonetPrefixOperation;
+import sqlancer.monet.ast.MonetQuery;
 import sqlancer.monet.ast.MonetQuery.MonetSubquery;
 import sqlancer.monet.ast.MonetSelect;
+import sqlancer.monet.ast.MonetSelect.MonetQueryCTE;
 import sqlancer.monet.ast.MonetSelect.MonetFromTable;
 import sqlancer.monet.ast.MonetSet;
 import sqlancer.monet.ast.MonetValues;
+import sqlancer.monet.MonetSchema.MonetColumn;
 import sqlancer.monet.MonetSchema.MonetDataType;
 
 public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression> implements MonetVisitor {
@@ -76,11 +79,26 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
     }
 
     @Override
+    public void visit(MonetQueryCTE cte) {
+        MonetQuery q = cte.getCTE().getQuery();
+
+        sb.append(cte.getName());
+        int i = 0;
+        sb.append("(");
+        for (MonetColumn column : cte.getCTE().getColumns()) {
+            if (i++ != 0) {
+                sb.append(",");
+            }
+            sb.append(column.getName());
+        }
+        sb.append(") AS (");
+        visit(q);
+        sb.append(")");
+    }
+
+    @Override
     public void visit(MonetFromTable from) {
         sb.append(from.getTable().getName());
-        /*if (!from.isOnly() && Randomly.getBoolean()) {
-            sb.append(".*");
-        }*/
     }
 
     @Override
@@ -96,6 +114,11 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
 
     @Override
     public void visit(MonetSelect s) {
+        if (!s.getCTEs().isEmpty()) {
+            sb.append("WITH ");
+            visit(s.getCTEs());
+            sb.append(" ");
+        }
         sb.append("SELECT ");
         switch (s.getSelectOption()) {
         case DISTINCT:

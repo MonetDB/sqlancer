@@ -338,6 +338,10 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
         return new MonetTables(Randomly.nonEmptySubset(getDatabaseTables()));
     }
 
+    public List<MonetTable> getRandomTableNonEmptyTablesAsList() {
+        return Randomly.nonEmptySubset(getDatabaseTables());
+    }
+
     public String getDatabaseName() {
         return databaseName;
     }

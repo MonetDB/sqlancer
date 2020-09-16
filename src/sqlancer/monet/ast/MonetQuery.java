@@ -8,10 +8,12 @@ public abstract class MonetQuery extends SelectBase<MonetExpression> implements 
     public static class MonetSubquery implements MonetExpression {
         private final MonetQuery s;
         private final String name;
+        private final MonetDataType type;
 
-        public MonetSubquery(MonetQuery s, String name) {
+        public MonetSubquery(MonetQuery s, String name, MonetDataType type) {
             this.s = s;
             this.name = name;
+            this.type = type;
         }
 
         public MonetQuery getSelect() {
@@ -24,7 +26,7 @@ public abstract class MonetQuery extends SelectBase<MonetExpression> implements 
 
         @Override
         public MonetDataType getExpressionType() {
-            return null;
+            return type;
         }
     }
 

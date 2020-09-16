@@ -23,6 +23,7 @@ import sqlancer.monet.ast.MonetPostfixText;
 import sqlancer.monet.ast.MonetPrefixOperation;
 import sqlancer.monet.ast.MonetQuery.MonetSubquery;
 import sqlancer.monet.ast.MonetSelect;
+import sqlancer.monet.ast.MonetSelect.MonetQueryCTE;
 import sqlancer.monet.ast.MonetSelect.MonetFromTable;
 import sqlancer.monet.ast.MonetSet;
 import sqlancer.monet.ast.MonetValues;
@@ -172,6 +173,11 @@ public final class MonetExpectedValueVisitor implements MonetVisitor {
         for (MonetExpression expr : op.getArgs()) {
             visit(expr);
         }
+    }
+
+    @Override
+    public void visit(MonetQueryCTE cte) {
+        print(cte);
     }
 
     @Override
