@@ -135,9 +135,10 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
         } else {
             visit(s.getFetchColumns());
         }
-        sb.append(" FROM ");
-        visit(s.getFromList());
-
+        if (!s.getFromList().isEmpty()) {
+            sb.append(" FROM ");
+            visit(s.getFromList());
+        }
         for (MonetJoin j : s.getJoinClauses()) {
             sb.append(" ");
             switch (j.getType()) {

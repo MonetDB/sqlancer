@@ -119,8 +119,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     public List<MonetExpression> generateOrderBy() {
         List<MonetExpression> orderBys = new ArrayList<>();
         for (int i = 0; i < Randomly.smallNumber(); i++) {
-            orderBys.add(new MonetOrderByTerm(MonetColumnValue.create(Randomly.fromList(columns), null),
-                    MonetOrder.getRandomOrder(), MonetNullsFirstOrLast.getRandomNullsOrder()));
+            orderBys.add(new MonetOrderByTerm(generateExpression(0, Randomly.fromOptions(MonetDataType.values())), MonetOrder.getRandomOrder(), MonetNullsFirstOrLast.getRandomNullsOrder()));
         }
         return orderBys;
     }
@@ -292,13 +291,12 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         return new MonetExpressionGenerator(globalState).generateExpression(0, type);
     }
 
+    private static final List<MonetDataType> NUMERIC_TYPES = Arrays.asList(new MonetDataType[]{MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL}); 
+
     public MonetExpression generateExpression(int depth, MonetDataType originalType) {
         MonetDataType dataType = originalType;
-        if (dataType == MonetDataType.DOUBLE && Randomly.getBoolean()) {
-            dataType = Randomly.fromOptions(MonetDataType.INT, MonetDataType.DOUBLE);
-        }
-        if (dataType == MonetDataType.REAL && Randomly.getBoolean()) {
-            dataType = MonetDataType.INT;
+        if (NUMERIC_TYPES.contains(dataType) && Randomly.getBoolean()) {
+            dataType = Randomly.fromList(NUMERIC_TYPES);
         }
         if (!filterColumns(dataType).isEmpty() && Randomly.getBoolean()) {
             return createColumnOfType(dataType);

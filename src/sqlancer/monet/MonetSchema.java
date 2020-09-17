@@ -7,6 +7,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -335,11 +336,21 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
     }
 
     public MonetTables getRandomTableNonEmptyTables() {
-        return new MonetTables(Randomly.nonEmptySubset(getDatabaseTables()));
+        List<MonetTable> tables = getDatabaseTables();
+        if (tables.isEmpty()) {
+            return new MonetTables(Collections.emptyList());
+        } else {
+            return new MonetTables(Randomly.nonEmptySubset(getDatabaseTables()));
+        }
     }
 
     public List<MonetTable> getRandomTableNonEmptyTablesAsList() {
-        return Randomly.nonEmptySubset(getDatabaseTables());
+        List<MonetTable> tables = getDatabaseTables();
+        if (tables.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            return Randomly.nonEmptySubset(getDatabaseTables());
+        }
     }
 
     public String getDatabaseName() {

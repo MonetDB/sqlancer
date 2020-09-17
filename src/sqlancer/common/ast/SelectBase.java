@@ -9,7 +9,7 @@ public class SelectBase<T> {
     List<T> groupByExpressions = Collections.emptyList();
     List<T> orderByExpressions = Collections.emptyList();
     List<T> joinList = Collections.emptyList();
-    List<T> fromList;
+    List<T> fromList = Collections.emptyList();
     List<T> ctes = Collections.emptyList();
     T whereClause;
     T havingClause;
