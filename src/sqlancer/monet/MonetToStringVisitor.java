@@ -135,9 +135,21 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
         } else {
             visit(s.getFetchColumns());
         }
-        if (!s.getFromList().isEmpty()) {
+        if (!s.getFromList().isEmpty() || !s.getCTEs().isEmpty()) {
             sb.append(" FROM ");
+        }
+        if (!s.getFromList().isEmpty()) {
             visit(s.getFromList());
+        }
+        if (!s.getCTEs().isEmpty()) {
+            int i = s.getFromList().isEmpty() ? 0 : 1;
+            for (MonetExpression ex : s.getCTEs()) {
+                MonetQueryCTE cte = (MonetQueryCTE) ex;
+                if (i++ != 0) {
+                    sb.append(",");
+                }
+                sb.append(cte.getName());
+            }
         }
         for (MonetJoin j : s.getJoinClauses()) {
             sb.append(" ");
