@@ -20,7 +20,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.5</version>
+        <version>0.8.6</version>
         <executions>
           <execution>
             <goals>
@@ -55,7 +55,7 @@
           <dependency>
             <groupId>org.eclipse.jdt</groupId>
             <artifactId>ecj</artifactId>
-            <version>3.22.0</version>
+            <version>3.23.0</version>
           </dependency>
         </dependencies>
       </plugin>
