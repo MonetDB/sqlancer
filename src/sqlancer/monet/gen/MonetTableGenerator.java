@@ -44,6 +44,7 @@ public class MonetTableGenerator {
 
         errors.add("conversion of");
         errors.add("SQL feature not yet available for expressions and default values");
+        errors.add("not implemented as");
         MonetCommon.addCommonExpressionErrors(errors);
         MonetCommon.addCommonTableErrors(errors);
     }

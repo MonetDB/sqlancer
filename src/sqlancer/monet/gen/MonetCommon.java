@@ -74,6 +74,7 @@ public final class MonetCommon {
     public static void addCommonInsertUpdateErrors(ExpectedErrors errors) {
         errors.add("NOT NULL constraint violated for column");
         errors.add("SQL feature not yet available for expressions and default values");
+        errors.add("not implemented as");
         errors.add("value too large or not a number in");
         errors.add("PRIMARY KEY constraint");
         errors.add("UNIQUE constraint");
