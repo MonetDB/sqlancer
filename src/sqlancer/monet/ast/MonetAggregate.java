@@ -19,12 +19,12 @@ public class MonetAggregate extends FunctionNode<MonetAggregateFunction, MonetEx
 
     public enum MonetAggregateFunction {
         AVG("avg", 1, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL), 
-        COUNT("count", 1, MonetDataType.INT), COUNT_ALL("count", 0), MAX("max", 1), MIN("min", 1),
+        COUNT("count", 1, MonetDataType.TINYINT, MonetDataType.SMALLINT, MonetDataType.INT, MonetDataType.BIGINT, MonetDataType.HUGEINT), COUNT_ALL("count", 0), MAX("max", 1), MIN("min", 1),
         LISTAGG("listagg", 1, MonetDataType.STRING),
         GROUP_CONCAT("group_concat", 1, MonetDataType.STRING),
-        SUM("sum", 1, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL),
-        PROD("prod", 1, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL),
-        MEDIAN("median", 1, MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL),
+        SUM("sum", 1, MonetDataType.TINYINT, MonetDataType.SMALLINT, MonetDataType.INT, MonetDataType.BIGINT, MonetDataType.HUGEINT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL),
+        PROD("prod", 1, MonetDataType.TINYINT, MonetDataType.SMALLINT, MonetDataType.INT, MonetDataType.BIGINT, MonetDataType.HUGEINT, MonetDataType.DOUBLE, MonetDataType.REAL),
+        MEDIAN("median", 1, MonetDataType.TINYINT, MonetDataType.SMALLINT, MonetDataType.INT, MonetDataType.BIGINT, MonetDataType.HUGEINT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL),
         MEDIAN_AVG("median_avg", 1, MonetDataType.DOUBLE, MonetDataType.REAL),
 
         STDDEV_POP("stddev_pop", 1, MonetDataType.DOUBLE, MonetDataType.REAL),

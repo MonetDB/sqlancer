@@ -124,7 +124,7 @@ public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOption
             nrPerformed = r.getInteger(0, 10);
             break;
         case CREATE_PREPARE:
-            nrPerformed = r.getInteger(0, 20);
+            nrPerformed = r.getInteger(0, 50);
             break;
         case INSERT:
             nrPerformed = r.getInteger(0, globalState.getOptions().getMaxNumberInserts());

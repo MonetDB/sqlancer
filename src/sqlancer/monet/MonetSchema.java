@@ -29,11 +29,15 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
     private final String databaseName;
 
     public enum MonetDataType {
-        INT, BOOLEAN, STRING, DECIMAL, REAL, DOUBLE, TIME, TIMESTAMP, DATE, MONTH_INTERVAL, SECOND_INTERVAL, BLOB;
+        TINYINT, SMALLINT, INT, BIGINT, HUGEINT, BOOLEAN, STRING, DECIMAL, REAL, DOUBLE, TIME, TIMESTAMP, DATE, MONTH_INTERVAL, SECOND_INTERVAL, BLOB;
 
         public static MonetDataType getRandomType() {
             List<MonetDataType> dataTypes = new ArrayList<>(Arrays.asList(values()));
             if (MonetProvider.generateOnlyKnown) {
+                dataTypes.remove(MonetDataType.TINYINT);
+                dataTypes.remove(MonetDataType.SMALLINT);
+                dataTypes.remove(MonetDataType.BIGINT);
+                dataTypes.remove(MonetDataType.HUGEINT);
                 dataTypes.remove(MonetDataType.DECIMAL);
                 dataTypes.remove(MonetDataType.DOUBLE);
                 dataTypes.remove(MonetDataType.REAL);
@@ -86,9 +90,14 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
                     if (randomRowValues.getString(columnIndex) == null) {
                         constant = MonetConstant.createNullConstant();
                     } else {
-                        switch (column.getType()) {
+                        MonetDataType dt = column.getType();
+                        switch (dt) {
+                        case TINYINT:
+                        case SMALLINT:
                         case INT:
-                            constant = MonetConstant.createIntConstant(randomRowValues.getLong(columnIndex));
+                        case BIGINT:
+                        case HUGEINT:
+                            constant = MonetConstant.createIntConstant(randomRowValues.getLong(columnIndex), dt);
                             break;
                         case BOOLEAN:
                             constant = MonetConstant.createBooleanConstant(randomRowValues.getBoolean(columnIndex));
@@ -141,12 +150,16 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
     public static MonetDataType getColumnType(String typeString) {
         switch (typeString) {
         case "tinyint":
-        case "int":
+            return MonetDataType.TINYINT;
         case "smallint":
+            return MonetDataType.SMALLINT;
+        case "int":
         case "integer":
-        case "bigint":
-        case "hugeint":
             return MonetDataType.INT;
+        case "bigint":
+            return MonetDataType.BIGINT;
+        case "hugeint":
+            return MonetDataType.HUGEINT;
         case "boolean":
             return MonetDataType.BOOLEAN;
         case "any": /* we fit nulls as strings */

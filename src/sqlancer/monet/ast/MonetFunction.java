@@ -39,14 +39,14 @@ public class MonetFunction implements MonetExpression {
                 if (evaluatedArgs[0].isNull()) {
                     return MonetConstant.createNullConstant();
                 } else {
-                    return MonetConstant
-                            .createIntConstant(Math.abs(evaluatedArgs[0].cast(MonetDataType.INT).asInt()));
+                    return MonetConstant.createIntConstant(Math.abs(evaluatedArgs[0].cast(MonetDataType.INT).asInt()), MonetDataType.INT);
                 }
             }
 
             @Override
             public boolean supportsReturnType(MonetDataType type) {
-                return type == MonetDataType.INT || type == MonetDataType.REAL || type == MonetDataType.DOUBLE || 
+                return type == MonetDataType.TINYINT || type == MonetDataType.SMALLINT || type == MonetDataType.INT ||
+                type == MonetDataType.BIGINT || type == MonetDataType.HUGEINT || type == MonetDataType.REAL || type == MonetDataType.DOUBLE || 
                 type == MonetDataType.DECIMAL || type == MonetDataType.MONTH_INTERVAL || type == MonetDataType.SECOND_INTERVAL;
             }
 
@@ -86,12 +86,13 @@ public class MonetFunction implements MonetExpression {
                     return MonetConstant.createNullConstant();
                 }
                 String text = evaluatedArgs[0].asString();
-                return MonetConstant.createIntConstant(text.length());
+                return MonetConstant.createIntConstant(text.length(), MonetDataType.INT);
             }
 
             @Override
             public boolean supportsReturnType(MonetDataType type) {
-                return type == MonetDataType.INT;
+                return type == MonetDataType.TINYINT || type == MonetDataType.SMALLINT || type == MonetDataType.INT ||
+                type == MonetDataType.BIGINT || type == MonetDataType.HUGEINT;
             }
 
             @Override

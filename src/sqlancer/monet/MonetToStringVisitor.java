@@ -303,8 +303,20 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
         case BOOLEAN:
             sb.append("BOOLEAN");
             break;
-        case INT: // TODO support also other int types
+        case TINYINT:
+            sb.append("TINYINT");
+            break;
+        case SMALLINT:
+            sb.append("SMALLINT");
+            break;
+        case INT:
             sb.append("INT");
+            break;
+        case BIGINT:
+            sb.append("BIGINT");
+            break;
+        case HUGEINT:
+            sb.append("HUGEINT");
             break;
         case STRING:
             // TODO: append TEXT, CHAR

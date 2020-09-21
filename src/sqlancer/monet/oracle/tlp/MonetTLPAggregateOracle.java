@@ -84,7 +84,7 @@ public class MonetTLPAggregateOracle extends MonetTLPBase {
             List<MonetExpression> from) {
         String metamorphicQuery;
         MonetExpression whereClause = gen.generateExpression(MonetDataType.BOOLEAN);
-        MonetExpression negatedClause = new MonetPrefixOperation(whereClause, PrefixOperator.NOT);
+        MonetExpression negatedClause = new MonetPrefixOperation(whereClause, PrefixOperator.NOT, MonetDataType.BOOLEAN);
         MonetExpression notNullClause = new MonetPostfixOperation(whereClause, PostfixOperator.IS_NULL);
         List<MonetExpression> mappedAggregate = mapped(aggregate);
         MonetSelect leftSelect = getSelect(mappedAggregate, from, whereClause, select.getJoinClauses());

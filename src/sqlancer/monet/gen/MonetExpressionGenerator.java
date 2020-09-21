@@ -198,7 +198,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         case IN_OPERATION:
             return inOperation(depth + 1);
         case NOT:
-            return new MonetPrefixOperation(generateExpression(depth + 1, MonetDataType.BOOLEAN), PrefixOperator.NOT);
+            return new MonetPrefixOperation(generateExpression(depth + 1, MonetDataType.BOOLEAN), PrefixOperator.NOT, MonetDataType.BOOLEAN);
         case BINARY_LOGICAL_OPERATOR:
             MonetExpression first = generateExpression(depth + 1, MonetDataType.BOOLEAN);
             int nr = Randomly.smallNumber() + 1;
@@ -291,7 +291,8 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         return new MonetExpressionGenerator(globalState).generateExpression(0, type);
     }
 
-    private static final List<MonetDataType> NUMERIC_TYPES = Arrays.asList(new MonetDataType[]{MonetDataType.INT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL}); 
+    private static final List<MonetDataType> NUMERIC_TYPES = Arrays.asList(new MonetDataType[]{MonetDataType.TINYINT, MonetDataType.SMALLINT, MonetDataType.INT, 
+        MonetDataType.BIGINT, MonetDataType.HUGEINT, MonetDataType.REAL, MonetDataType.DOUBLE, MonetDataType.DECIMAL}); 
 
     public MonetExpression generateExpression(int depth, MonetDataType originalType) {
         MonetDataType dataType = originalType;
@@ -305,7 +306,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
             allowAggregateFunctions = false; // aggregate function calls cannot be nested
             return getAggregate(dataType);
         }
-        if (allowParameters && Randomly.getBoolean()) {
+        if (allowParameters && Randomly.getBooleanWithRatherLowProbability()) {
             return MonetConstant.createParameterConstant();
         }
         if (Randomly.getBooleanWithRatherLowProbability() || depth > maxDepth) {
@@ -331,7 +332,11 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
             switch (dataType) {
             case BOOLEAN:
                 return generateBooleanExpression(depth);
+            case TINYINT:
+            case SMALLINT:
             case INT:
+            case BIGINT:
+            case HUGEINT:
             case DECIMAL:
             case REAL:
             case DOUBLE:
@@ -355,7 +360,11 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         case BOOLEAN:
         case DECIMAL: // TODO
         case DOUBLE:
+        case TINYINT:
+        case SMALLINT:
         case INT:
+        case BIGINT:
+        case HUGEINT:
         case REAL:
         case TIME:
         case TIMESTAMP:
@@ -433,13 +442,13 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
             return generateConstant(r, int_tp);
         case UNARY_OPERATION:
             MonetExpression intExpression = generateExpression(depth + 1, int_tp);
-            return new MonetPrefixOperation(intExpression, Randomly.getBoolean() ? PrefixOperator.UNARY_PLUS : PrefixOperator.UNARY_MINUS);
+            return new MonetPrefixOperation(intExpression, Randomly.getBoolean() ? PrefixOperator.UNARY_PLUS : PrefixOperator.UNARY_MINUS, int_tp);
         case FUNCTION:
             return generateFunction(depth + 1, int_tp);
         case BINARY_OPERATION:
             return new MonetBinaryBitOperation(MonetBinaryBitOperator.getRandom(), generateExpression(depth + 1, int_tp), generateExpression(depth + 1, int_tp));
         case BINARY_ARITHMETIC_EXPRESSION:
-            return new MonetBinaryArithmeticOperation(generateExpression(depth + 1, int_tp), generateExpression(depth + 1, int_tp), MonetBinaryOperator.getRandom());
+            return new MonetBinaryArithmeticOperation(generateExpression(depth + 1, int_tp), generateExpression(depth + 1, int_tp), MonetBinaryOperator.getRandom(), int_tp);
         case SUBQUERY:
             MonetQuery select = MonetRandomQueryGenerator.createRandomSingleColumnQuery(depth + 1, int_tp, globalState, false, false, this.allowParameters);
             return new MonetQuery.MonetSubquery(select, null, int_tp);
@@ -487,7 +496,23 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
             return MonetConstant.createNullConstant();
         }
         switch (type) {
+        case TINYINT:
+            long bval = r.getIntegerBounded(Byte.MIN_VALUE + 1, Byte.MAX_VALUE);
+            if (Randomly.getBooleanWithSmallProbability()) {
+                return MonetConstant.createTextConstant(String.valueOf(bval));
+            } else {
+                return MonetConstant.createIntConstant(bval, type);
+            }
+        case SMALLINT:
+            long sval = r.getIntegerBounded(Short.MIN_VALUE + 1, Short.MAX_VALUE);
+            if (Randomly.getBooleanWithSmallProbability()) {
+                return MonetConstant.createTextConstant(String.valueOf(sval));
+            } else {
+                return MonetConstant.createIntConstant(sval, type);
+            }
         case INT:
+        case BIGINT:
+        case HUGEINT:
             long val = r.getInteger();
             if (val == (long) Byte.MIN_VALUE || val == (long) Short.MIN_VALUE || val == (long) Integer.MIN_VALUE || val == Long.MIN_VALUE) { /* Monet uses MIN_VALUEs as NULL */
                 val++;
@@ -495,7 +520,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
             if (Randomly.getBooleanWithSmallProbability()) {
                 return MonetConstant.createTextConstant(String.valueOf(val));
             } else {
-                return MonetConstant.createIntConstant(val);
+                return MonetConstant.createIntConstant(val, type);
             }
         case BOOLEAN:
             if (Randomly.getBooleanWithSmallProbability() && !MonetProvider.generateOnlyKnown) {
@@ -592,7 +617,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
 
     @Override
     public MonetExpression negatePredicate(MonetExpression predicate) {
-        return new MonetPrefixOperation(predicate, MonetPrefixOperation.PrefixOperator.NOT);
+        return new MonetPrefixOperation(predicate, MonetPrefixOperation.PrefixOperator.NOT, MonetDataType.BOOLEAN);
     }
 
     @Override

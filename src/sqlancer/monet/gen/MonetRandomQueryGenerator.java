@@ -109,9 +109,9 @@ public final class MonetRandomQueryGenerator {
             select.setOrderByExpressions(gen.generateOrderBy());
         }
         if (generateLimit && Randomly.getBoolean()) {
-            select.setLimitClause(MonetConstant.createIntConstant(Randomly.getPositiveOrZeroNonCachedInteger()));
+            select.setLimitClause(MonetConstant.createIntConstant(Randomly.getPositiveOrZeroNonCachedInteger(), MonetDataType.INT));
             if (Randomly.getBoolean()) {
-                select.setOffsetClause(MonetConstant.createIntConstant(Randomly.getPositiveOrZeroNonCachedInteger()));
+                select.setOffsetClause(MonetConstant.createIntConstant(Randomly.getPositiveOrZeroNonCachedInteger(), MonetDataType.INT));
             }
         }
         return select;
@@ -144,13 +144,13 @@ public final class MonetRandomQueryGenerator {
         return res;
     }
 
-    private static MonetQuery createValues(MonetExpressionGenerator gen, MonetGlobalState globalState, MonetTables tables, int depth, int nrColumns) {
-        if (tables == null) {
+    private static MonetQuery createValues(MonetExpressionGenerator gen, MonetGlobalState globalState/*, MonetTables tables*/, int depth, int nrColumns) {
+        /*if (tables == null) {
             tables = getNextBatchOfTables(globalState, depth, false);
         }
         if (tables != null) {
             gen.setColumns(tables.getColumns());
-        }
+        }*/
 
         List<MonetDataType> types = Randomly.nonEmptySubsetPotentialDuplicates(ALL_TYPES, nrColumns);
         int nrRows = Randomly.smallNumber() + 1;
@@ -177,7 +177,7 @@ public final class MonetRandomQueryGenerator {
             case 3:
                 return createSet(gen, globalState, tables, depth, nrColumns);
             case 4:
-                return createValues(gen, globalState, tables, depth, nrColumns);
+                return createValues(gen, globalState/*, tables*/, depth, nrColumns);
             default:
                 throw new AssertionError();
         }
@@ -214,8 +214,8 @@ public final class MonetRandomQueryGenerator {
     }
 
     private static MonetQuery createSingleColumnValues(MonetExpressionGenerator gen, MonetGlobalState globalState, int depth, MonetDataType tp) {
-        MonetTables tables = getNextBatchOfTables(globalState, depth, false);
-        gen.setColumns(tables.getColumns());
+        //MonetTables tables = getNextBatchOfTables(globalState, depth, false);
+        //gen.setColumns(tables.getColumns());
 
         int nrRows = Randomly.smallNumber() + 1;
         List<List<MonetExpression>> rows = new ArrayList<>(nrRows);

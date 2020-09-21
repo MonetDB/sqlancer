@@ -72,8 +72,12 @@ public abstract class MonetConstant implements MonetExpression {
             switch (type) {
             case BOOLEAN:
                 return this;
+            case TINYINT:
+            case SMALLINT:
             case INT:
-                return MonetConstant.createIntConstant((value) ? 1 : 0);
+            case BIGINT:
+            case HUGEINT:
+                return MonetConstant.createIntConstant((value) ? 1 : 0, type);
             case STRING:
                 return MonetConstant.createTextConstant(value ? "true" : "false");
             default:
@@ -193,11 +197,15 @@ public abstract class MonetConstant implements MonetExpression {
                 default:
                     return MonetConstant.createFalse();
                 }
+            case TINYINT:
+            case SMALLINT:
             case INT:
+            case BIGINT:
+            case HUGEINT:
                 try {
-                    return MonetConstant.createIntConstant(Long.parseLong(s));
+                    return MonetConstant.createIntConstant(Long.parseLong(s), type);
                 } catch (NumberFormatException e) {
-                    return MonetConstant.createIntConstant(-1);
+                    return MonetConstant.createIntConstant(-1, type);
                 }
             case STRING:
                 return this;
@@ -232,8 +240,11 @@ public abstract class MonetConstant implements MonetExpression {
 
         private final long val;
 
-        public IntConstant(long val) {
+        private final MonetDataType type;
+
+        public IntConstant(long val, MonetDataType type) {
             this.val = val;
+            this.type = type;
         }
 
         @Override
@@ -243,7 +254,7 @@ public abstract class MonetConstant implements MonetExpression {
 
         @Override
         public MonetDataType getExpressionType() {
-            return MonetDataType.INT;
+            return type;
         }
 
         @Override
@@ -265,7 +276,7 @@ public abstract class MonetConstant implements MonetExpression {
             } else if (rightVal.isInt()) {
                 return MonetConstant.createBooleanConstant(val == rightVal.asInt());
             } else if (rightVal.isString()) {
-                return MonetConstant.createBooleanConstant(val == rightVal.cast(MonetDataType.INT).asInt());
+                return MonetConstant.createBooleanConstant(val == rightVal.cast(this.type).asInt());
             } else {
                 throw new AssertionError(rightVal);
             }
@@ -280,7 +291,7 @@ public abstract class MonetConstant implements MonetExpression {
             } else if (rightVal.isBoolean()) {
                 throw new AssertionError(rightVal);
             } else if (rightVal.isString()) {
-                return MonetConstant.createBooleanConstant(val < rightVal.cast(MonetDataType.INT).asInt());
+                return MonetConstant.createBooleanConstant(val < rightVal.cast(this.type).asInt());
             } else {
                 throw new IgnoreMeException();
             }
@@ -292,7 +303,11 @@ public abstract class MonetConstant implements MonetExpression {
             switch (type) {
             case BOOLEAN:
                 return MonetConstant.createBooleanConstant(val != 0);
+            case TINYINT:
+            case SMALLINT:
             case INT:
+            case BIGINT:
+            case HUGEINT:
                 return this;
             case STRING:
                 return MonetConstant.createTextConstant(String.valueOf(val));
@@ -320,8 +335,8 @@ public abstract class MonetConstant implements MonetExpression {
         return false;
     }
 
-    public static MonetConstant createIntConstant(long val) {
-        return new IntConstant(val);
+    public static MonetConstant createIntConstant(long val, MonetDataType tp) {
+        return new IntConstant(val, tp);
     }
 
     public static MonetConstant createBooleanConstant(boolean val) {

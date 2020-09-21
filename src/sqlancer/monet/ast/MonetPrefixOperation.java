@@ -10,11 +10,6 @@ public class MonetPrefixOperation implements MonetExpression {
         NOT("NOT", MonetDataType.BOOLEAN) {
 
             @Override
-            public MonetDataType getExpressionType() {
-                return MonetDataType.BOOLEAN;
-            }
-
-            @Override
             protected MonetConstant getExpectedValue(MonetConstant expectedValue) {
                 if (expectedValue.isNull()) {
                     return MonetConstant.createNullConstant();
@@ -24,12 +19,7 @@ public class MonetPrefixOperation implements MonetExpression {
                 }
             }
         },
-        UNARY_PLUS("+", MonetDataType.INT) {
-
-            @Override
-            public MonetDataType getExpressionType() {
-                return MonetDataType.INT;
-            }
+        UNARY_PLUS("+", MonetDataType.TINYINT, MonetDataType.SMALLINT, MonetDataType.INT, MonetDataType.BIGINT, MonetDataType.HUGEINT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL) {
 
             @Override
             protected MonetConstant getExpectedValue(MonetConstant expectedValue) {
@@ -38,12 +28,7 @@ public class MonetPrefixOperation implements MonetExpression {
             }
 
         },
-        UNARY_MINUS("-", MonetDataType.INT) {
-
-            @Override
-            public MonetDataType getExpressionType() {
-                return MonetDataType.INT;
-            }
+        UNARY_MINUS("-", MonetDataType.TINYINT, MonetDataType.SMALLINT, MonetDataType.INT, MonetDataType.BIGINT, MonetDataType.HUGEINT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.MONTH_INTERVAL) {
 
             @Override
             protected MonetConstant getExpectedValue(MonetConstant expectedValue) {
@@ -55,7 +40,7 @@ public class MonetPrefixOperation implements MonetExpression {
                     throw new IgnoreMeException();
                 }
                 try {
-                    return MonetConstant.createIntConstant(-expectedValue.asInt());
+                    return MonetConstant.createIntConstant(-expectedValue.asInt(), MonetDataType.INT);
                 } catch (UnsupportedOperationException e) {
                     return null;
                 }
@@ -71,8 +56,6 @@ public class MonetPrefixOperation implements MonetExpression {
             this.dataTypes = dataTypes.clone();
         }
 
-        public abstract MonetDataType getExpressionType();
-
         protected abstract MonetConstant getExpectedValue(MonetConstant expectedValue);
 
         @Override
@@ -84,15 +67,17 @@ public class MonetPrefixOperation implements MonetExpression {
 
     private final MonetExpression expr;
     private final PrefixOperator op;
+    private final MonetDataType type;
 
-    public MonetPrefixOperation(MonetExpression expr, PrefixOperator op) {
+    public MonetPrefixOperation(MonetExpression expr, PrefixOperator op, MonetDataType type) {
         this.expr = expr;
         this.op = op;
+        this.type = type;
     }
 
     @Override
     public MonetDataType getExpressionType() {
-        return op.getExpressionType();
+        return type;
     }
 
     @Override

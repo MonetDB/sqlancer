@@ -135,7 +135,7 @@ public class MonetTableGenerator {
             // otherwise: ERROR: both default and identity specified for column
             constraintSubset.remove(Randomly.fromOptions(ColumnConstraint.GENERATED, ColumnConstraint.DEFAULT));
         }
-        if (constraintSubset.contains(ColumnConstraint.GENERATED) && type != MonetDataType.INT) {
+        if (constraintSubset.contains(ColumnConstraint.GENERATED) && (type != MonetDataType.INT && type != MonetDataType.BIGINT)) {
             // otherwise: ERROR: identity column type must be smallint, integer, or bigint
             constraintSubset.remove(ColumnConstraint.GENERATED);
         }

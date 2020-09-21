@@ -87,13 +87,30 @@ public final class MonetCommon {
         case BOOLEAN:
             sb.append("boolean");
             break;
+        case TINYINT:
+            sb.append("tinyint");
+            break;
+        case SMALLINT:
+            sb.append("smallint");
+            break;
         case INT:
             if (Randomly.getBoolean() && allowSerial) {
                 serial = true;
-                sb.append(Randomly.fromOptions("serial", "bigserial"));
+                sb.append("serial");
             } else {
-                sb.append(Randomly.fromOptions("tinyint", "smallint", "integer", "bigint", "hugeint"));
+                sb.append(Randomly.fromOptions("int", "integer"));
             }
+            break;
+        case BIGINT:
+            if (Randomly.getBoolean() && allowSerial) {
+                serial = true;
+                sb.append("bigserial");
+            } else {
+                sb.append("bigint");
+            }
+            break;
+        case HUGEINT:
+            sb.append("hugeint");
             break;
         case STRING:
             if (Randomly.getBoolean()) {

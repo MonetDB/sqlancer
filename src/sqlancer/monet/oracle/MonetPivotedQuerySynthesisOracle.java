@@ -89,7 +89,7 @@ public class MonetPivotedQuerySynthesisOracle
 
     private MonetConstant generateLimit() {
         if (Randomly.getBoolean()) {
-            return MonetConstant.createIntConstant(Integer.MAX_VALUE);
+            return MonetConstant.createIntConstant(Integer.MAX_VALUE, MonetDataType.INT);
         } else {
             return null;
         }
@@ -97,7 +97,7 @@ public class MonetPivotedQuerySynthesisOracle
 
     private MonetExpression generateOffset() {
         if (Randomly.getBoolean()) {
-            return MonetConstant.createIntConstant(0);
+            return MonetConstant.createIntConstant(0, MonetDataType.INT);
         } else {
             return null;
         }

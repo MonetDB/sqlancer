@@ -59,7 +59,7 @@ public class MonetBinaryArithmeticOperation extends BinaryOperatorNode<MonetExpr
                 long leftVal = left.cast(MonetDataType.INT).asInt();
                 long rightVal = right.cast(MonetDataType.INT).asInt();
                 long value = op.apply(leftVal, rightVal);
-                return MonetConstant.createIntConstant(value);
+                return MonetConstant.createIntConstant(value, MonetDataType.INT);
             }
         }
 
@@ -81,9 +81,12 @@ public class MonetBinaryArithmeticOperation extends BinaryOperatorNode<MonetExpr
     }
 
     public MonetBinaryArithmeticOperation(MonetExpression left, MonetExpression right,
-            MonetBinaryOperator op) {
+            MonetBinaryOperator op, MonetDataType type) {
         super(left, right, op);
+        this.type = type;
     }
+
+    private MonetDataType type;
 
     @Override
     public MonetConstant getExpectedValue() {
@@ -97,7 +100,7 @@ public class MonetBinaryArithmeticOperation extends BinaryOperatorNode<MonetExpr
 
     @Override
     public MonetDataType getExpressionType() {
-        return MonetDataType.INT;
+        return type;
     }
 
 }
