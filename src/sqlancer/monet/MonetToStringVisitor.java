@@ -67,7 +67,7 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
 
     @Override
     public void visit(MonetColumnValue c) {
-        sb.append(c.getColumn().getFullQualifiedName());
+        sb.append(c.getColumn().getQueryFullQualifiedName());
     }
 
     @Override
@@ -99,6 +99,10 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
     @Override
     public void visit(MonetFromTable from) {
         sb.append(from.getTable().getName());
+        if (from.getTableAlias() != null) {
+            sb.append(" AS ");
+            sb.append(from.getTableAlias());
+        }
     }
 
     @Override
@@ -149,6 +153,10 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
                     sb.append(",");
                 }
                 sb.append(cte.getName());
+                if (cte.getTableAlias() != null) {
+                    sb.append(" AS ");
+                    sb.append(cte.getTableAlias());
+                }
             }
         }
         for (MonetJoin j : s.getJoinClauses()) {

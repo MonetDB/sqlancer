@@ -13,7 +13,6 @@ import sqlancer.monet.MonetSchema.MonetColumn;
 import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.MonetSchema.MonetTable;
 import sqlancer.monet.MonetVisitor;
-import sqlancer.sqlite3.gen.SQLite3Common;
 
 public class MonetTableGenerator {
 
@@ -82,8 +81,7 @@ public class MonetTableGenerator {
             if (i != 0) {
                 sb.append(", ");
             }
-            String name = SQLite3Common.createColumnName(i);
-            createColumn(name);
+            createColumn(String.format("tc%d", i));
         }
         if (Randomly.getBoolean()) {
             MonetCommon.addTableConstraints(columnHasPrimaryKey, sb, table, globalState, errors);

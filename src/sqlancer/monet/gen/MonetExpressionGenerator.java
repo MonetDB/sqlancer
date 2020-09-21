@@ -116,12 +116,16 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         return expressions;
     }
 
-    public List<MonetExpression> generateOrderBy() {
+    public List<MonetExpression> generateOrderBy(int depth) {
         List<MonetExpression> orderBys = new ArrayList<>();
         for (int i = 0; i < Randomly.smallNumber(); i++) {
-            orderBys.add(new MonetOrderByTerm(generateExpression(0, Randomly.fromOptions(MonetDataType.values())), MonetOrder.getRandomOrder(), MonetNullsFirstOrLast.getRandomNullsOrder()));
+            orderBys.add(new MonetOrderByTerm(generateExpression(depth, Randomly.fromOptions(MonetDataType.values())), MonetOrder.getRandomOrder(), MonetNullsFirstOrLast.getRandomNullsOrder()));
         }
         return orderBys;
+    }
+
+    public List<MonetExpression> generateOrderBy() {
+        return generateOrderBy(0);
     }
 
     private enum BooleanExpression {
@@ -587,11 +591,15 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         return this;
     }
 
-    public MonetExpression generateHavingClause() {
+    public MonetExpression generateHavingClause(int depth) {
         this.allowAggregateFunctions = true;
-        MonetExpression expression = generateExpression(MonetDataType.BOOLEAN);
+        MonetExpression expression = generateExpression(depth, MonetDataType.BOOLEAN);
         this.allowAggregateFunctions = false;
         return expression;
+    }
+
+    public MonetExpression generateHavingClause() {
+        return generateHavingClause(0);
     }
 
     public MonetExpression generateAggregate() {

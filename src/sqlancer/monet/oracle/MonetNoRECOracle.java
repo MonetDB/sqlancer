@@ -55,7 +55,7 @@ public class MonetNoRECOracle extends NoRECBase<MonetGlobalState> {
         List<MonetTable> tables = randomTables.getTables();
 
         List<MonetJoin> joinStatements = getJoinStatements(state, columns, tables);
-        List<MonetExpression> fromTables = tables.stream().map(t -> new MonetFromTable(t, Randomly.getBoolean()))
+        List<MonetExpression> fromTables = tables.stream().map(t -> new MonetFromTable(t, Randomly.getBoolean(), null))
                 .collect(Collectors.toList());
         int secondCount = getUnoptimizedQueryCount(fromTables, randomWhereCondition, joinStatements);
         int firstCount = getOptimizedQueryCount(fromTables, columns, randomWhereCondition, joinStatements);
@@ -83,7 +83,7 @@ public class MonetNoRECOracle extends NoRECBase<MonetGlobalState> {
             MonetTable table = Randomly.fromList(tables);
             tables.remove(table);
             MonetJoinType options = MonetJoinType.getRandom();
-            MonetJoin j = new MonetJoin(new MonetFromTable(table, Randomly.getBoolean()), joinClause, options);
+            MonetJoin j = new MonetJoin(new MonetFromTable(table, Randomly.getBoolean(), null), joinClause, options);
             joinStatements.add(j);
         }
         // JOIN subqueries

@@ -55,7 +55,7 @@ public class MonetTLPBase extends TernaryLogicPartitioningOracleBase<MonetExpres
     }
 
     protected void generateSelectBase(List<MonetTable> tables, List<MonetJoin> joins) {
-        List<MonetExpression> tableList = tables.stream().map(t -> new MonetFromTable(t, Randomly.getBoolean()))
+        List<MonetExpression> tableList = tables.stream().map(t -> new MonetFromTable(t, Randomly.getBoolean(), null))
                 .collect(Collectors.toList());
         gen = new MonetExpressionGenerator(state).setColumns(targetTables.getColumns());
         initializeTernaryPredicateVariants();

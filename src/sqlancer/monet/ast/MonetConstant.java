@@ -661,7 +661,19 @@ public abstract class MonetConstant implements MonetExpression {
         private final String textRepr;
 
         public UUIDConstant(String val) {
-            this.textRepr = "UUID '" + val.substring(0, 8) + "-" + val.substring(8, 12) + "-" + val.substring(12, 16) + "-" + val.substring(16, 20) + "-" + val.substring(20, 32) + "'";
+            StringBuilder sb = new StringBuilder(64);
+            sb.append("UUID '")
+            .append(val.substring(0, 8))
+            .append("-")
+            .append(val.substring(8, 12))
+            .append("-")
+            .append(val.substring(12, 16))
+            .append("-")
+            .append(val.substring(16, 20))
+            .append("-")
+            .append(val.substring(20, 32))
+            .append("'");
+            this.textRepr = sb.toString();
         }
 
         @Override

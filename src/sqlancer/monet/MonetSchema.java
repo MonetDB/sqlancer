@@ -57,8 +57,28 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
 
     public static class MonetColumn extends AbstractTableColumn<MonetTable, MonetDataType> {
 
+        private String tableAlias;
+
         public MonetColumn(String name, MonetDataType columnType) {
             super(name, null, columnType);
+            this.tableAlias = null;
+        }
+
+        public MonetColumn(String name, MonetDataType columnType, String tableAlias) {
+            super(name, null, columnType);
+            this.tableAlias = tableAlias;
+        }
+
+        public String getQueryFullQualifiedName() {
+            if (this.tableAlias == null) {
+                return this.getFullQualifiedName();
+            } else {
+                return this.tableAlias + "." + this.getName();
+            }
+        }
+
+        public void setColumnTableAlias(String tableAlias) {
+            this.tableAlias = tableAlias;
         }
 
         public static MonetColumn createDummy(String name) {

@@ -7,7 +7,6 @@ import sqlancer.common.query.QueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetVisitor;
 import sqlancer.monet.ast.MonetQuery;
-import sqlancer.sqlite3.gen.SQLite3Common;
 
 public final class MonetViewGenerator {
 
@@ -34,7 +33,7 @@ public final class MonetViewGenerator {
             if (i != 0) {
                 sb.append(", ");
             }
-            sb.append(SQLite3Common.createColumnName(i));
+            sb.append(String.format("vc%d", i));
         }
         sb.append(")");
         sb.append(" AS (");

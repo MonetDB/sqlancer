@@ -15,11 +15,13 @@ public class MonetSelect extends MonetQuery {
 
     public static class MonetFromTable implements MonetExpression {
         private final MonetTable t;
+        private final String tableAlias;
         private final boolean only;
 
-        public MonetFromTable(MonetTable t, boolean only) {
+        public MonetFromTable(MonetTable t, boolean only, String tableAlias) {
             this.t = t;
             this.only = only;
+            this.tableAlias = tableAlias;
         }
 
         public MonetTable getTable() {
@@ -28,6 +30,10 @@ public class MonetSelect extends MonetQuery {
 
         public boolean isOnly() {
             return only;
+        }
+
+        public String getTableAlias() {
+            return tableAlias;
         }
 
         @Override
@@ -52,10 +58,12 @@ public class MonetSelect extends MonetQuery {
     public static class MonetQueryCTE implements MonetExpression {
         private final MonetCTE cte;
         private final String name;
+        private final String tableAlias;
 
-        public MonetQueryCTE(MonetCTE cte, String name) {
+        public MonetQueryCTE(MonetCTE cte, String name, String tableAlias) {
             this.cte = cte;
             this.name = name;
+            this.tableAlias = tableAlias;
         }
 
         public MonetCTE getCTE() {
@@ -64,6 +72,10 @@ public class MonetSelect extends MonetQuery {
 
         public String getName() {
             return name;
+        }
+
+        public String getTableAlias() {
+            return tableAlias;
         }
 
         @Override

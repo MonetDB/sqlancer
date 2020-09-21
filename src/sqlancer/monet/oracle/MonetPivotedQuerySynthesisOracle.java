@@ -46,7 +46,7 @@ public class MonetPivotedQuerySynthesisOracle
         pivotRow = randomFromTables.getRandomRowValue(globalState.getConnection());
 
         fetchColumns = columns;
-        selectStatement.setFromList(randomFromTables.getTables().stream().map(t -> new MonetFromTable(t, false))
+        selectStatement.setFromList(randomFromTables.getTables().stream().map(t -> new MonetFromTable(t, false, null))
                 .collect(Collectors.toList()));
         selectStatement.setFetchColumns(fetchColumns.stream()
                 .map(c -> new MonetColumnValue(getFetchValueAliasedColumn(c), pivotRow.getValues().get(c)))

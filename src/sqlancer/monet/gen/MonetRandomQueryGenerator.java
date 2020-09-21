@@ -36,7 +36,16 @@ public final class MonetRandomQueryGenerator {
     }
 
     private static MonetTables getNextBatchOfTables(MonetGlobalState globalState, int depth, boolean generateCTEs) {
-        List<MonetTable> tables = globalState.getSchema().getRandomTableNonEmptyTablesAsList();
+        List<MonetTable> databasetables = globalState.getSchema().getRandomTableNonEmptyTablesAsList();
+        List<MonetTable> tables = new ArrayList<>(databasetables.size());
+
+        for (MonetTable t : tables) {
+            List<MonetColumn> cols = new ArrayList<>(t.getColumns().size());
+            for (MonetColumn c : t.getColumns()) {
+                cols.add(new MonetColumn(c.getName(), c.getType(), String.format("l%d%s", depth, c.getName())));
+            }
+            tables.add(new MonetTable(t.getName(), cols, t.getIndexes(), t.getTableType(), t.getStatistics(), t.isView(), t.isInsertable()));
+        }
 
         if (generateCTEs && depth < MAX_SUBQUERY_DEPTH) { /* Protect against infinite recursion */
             for (int i = 0; i < Randomly.smallNumber(); i++) {
@@ -46,10 +55,11 @@ public final class MonetRandomQueryGenerator {
 
                 int j = 0;
                 for (MonetExpression ex : q.getFetchColumns()) {
+                    String nextColumnName = String.format("cc%d", j);
                     MonetDataType dt = ex.getExpressionType();
                     if (dt == null)
-                        throw new AssertionError("Ups " + ex.getClass().getName());
-                    cols.add(new MonetColumn(String.format("c%d", j), dt));
+                        throw new AssertionError("Ups " + ex.getClass().getName()); /* this is for debugging */
+                    cols.add(new MonetColumn(nextColumnName, dt, String.format("l%d%s", depth, nextColumnName)));
                     j++;
                 }
                 tables.add(new MonetCTE(nextName, cols, q));
@@ -67,9 +77,9 @@ public final class MonetRandomQueryGenerator {
             for (MonetTable t : tables.getTables()) {
                 if (t instanceof MonetCTE) {
                     MonetCTE cte = (MonetCTE) t;
-                    ctes.add(new MonetQueryCTE(cte, cte.getName()));
+                    ctes.add(new MonetQueryCTE(cte, cte.getName(), String.format("l%d%s", depth, cte.getName())));
                 } else {
-                    fromList.add(new MonetFromTable(t, Randomly.getBoolean()));
+                    fromList.add(new MonetFromTable(t, Randomly.getBoolean(), String.format("l%d%s", depth, t.getName())));
                 }
             }
             select.setCTEs(ctes);
@@ -87,7 +97,7 @@ public final class MonetRandomQueryGenerator {
             for (int i = 0; i < Randomly.smallNumber() && i < tablesToJoin.size(); i++) {
                 MonetTable table = Randomly.fromList(tablesToJoin);
                 tablesToJoin.remove(table);
-                joinStatements.add(new MonetJoin(new MonetFromTable(table, Randomly.getBoolean()), gen.generateExpression(depth + 1, MonetDataType.BOOLEAN), MonetJoinType.getRandom()));
+                joinStatements.add(new MonetJoin(new MonetFromTable(table, Randomly.getBoolean(), String.format("l%d%s", depth, table.getName())), gen.generateExpression(depth + 1, MonetDataType.BOOLEAN), MonetJoinType.getRandom()));
             }
             // JOIN subqueries
             if (depth < MAX_SUBQUERY_DEPTH) { /* Protect against infinite recursion */
@@ -100,13 +110,13 @@ public final class MonetRandomQueryGenerator {
             select.setJoinClauses(joinStatements);
         }
         if (Randomly.getBooleanWithRatherLowProbability()) {
-            select.setGroupByExpressions(gen.generateExpressions(Randomly.smallNumber() + 1));
+            select.setGroupByExpressions(gen.generateExpressions(Randomly.smallNumber() + 1, depth + 1));
             if (Randomly.getBoolean()) {
-                select.setHavingClause(gen.generateHavingClause());
+                select.setHavingClause(gen.generateHavingClause(depth + 1));
             }
         }
         if (generateOrderBy && Randomly.getBooleanWithRatherLowProbability()) {
-            select.setOrderByExpressions(gen.generateOrderBy());
+            select.setOrderByExpressions(gen.generateOrderBy(depth + 1));
         }
         if (generateLimit && Randomly.getBoolean()) {
             select.setLimitClause(MonetConstant.createIntConstant(Randomly.getPositiveOrZeroNonCachedInteger(), MonetDataType.INT));
