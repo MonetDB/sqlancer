@@ -29,7 +29,7 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
     private final String databaseName;
 
     public enum MonetDataType {
-        TINYINT, SMALLINT, INT, BIGINT, HUGEINT, BOOLEAN, STRING, DECIMAL, REAL, DOUBLE, TIME, TIMESTAMP, DATE, MONTH_INTERVAL, SECOND_INTERVAL, BLOB;
+        TINYINT, SMALLINT, INT, BIGINT, HUGEINT, BOOLEAN, STRING, DECIMAL, REAL, DOUBLE, TIME, TIMESTAMP, DATE, SECOND_INTERVAL, DAY_INTERVAL, MONTH_INTERVAL, BLOB;
 
         public static MonetDataType getRandomType() {
             List<MonetDataType> dataTypes = new ArrayList<>(Arrays.asList(values()));
@@ -45,8 +45,9 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
                 dataTypes.remove(MonetDataType.TIME);
                 dataTypes.remove(MonetDataType.TIMESTAMP);
                 dataTypes.remove(MonetDataType.DATE);
-                dataTypes.remove(MonetDataType.MONTH_INTERVAL);
                 dataTypes.remove(MonetDataType.SECOND_INTERVAL);
+                dataTypes.remove(MonetDataType.DAY_INTERVAL);
+                dataTypes.remove(MonetDataType.MONTH_INTERVAL);
                 dataTypes.remove(MonetDataType.BLOB);
             }
             return Randomly.fromList(dataTypes);
@@ -127,7 +128,8 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
                             constant = MonetConstant.createMonthIntervalConstant(randomRowValues.getBigDecimal(columnIndex).longValue());
                             break;
                         case SECOND_INTERVAL:
-                            constant = MonetConstant.createSecondIntervalConstant(randomRowValues.getBigDecimal(columnIndex).longValue());
+                        case DAY_INTERVAL:
+                            constant = MonetConstant.createSecondIntervalConstant(randomRowValues.getBigDecimal(columnIndex).longValue(), dt);
                             break;
                         case BLOB:
                             /*TODO constant = MonetConstant.createBlobConstant(randomRowValues.getBlob(columnIndex) ... );
@@ -189,10 +191,12 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
         case "timestamp":
         case "timestamptz":
             return MonetDataType.TIMESTAMP;
-        case "month_interval":
-            return MonetDataType.MONTH_INTERVAL;
         case "sec_interval":
             return MonetDataType.SECOND_INTERVAL;
+        case "day_interval":
+            return MonetDataType.DAY_INTERVAL;
+        case "month_interval":
+            return MonetDataType.MONTH_INTERVAL;
         case "blob":
             return MonetDataType.BLOB;
         default:

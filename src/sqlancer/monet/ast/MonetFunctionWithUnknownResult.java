@@ -127,7 +127,7 @@ public enum MonetFunctionWithUnknownResult {
 
     MONINT_YEAR("\"year\"", MonetDataType.INT, MonetDataType.MONTH_INTERVAL),
     MONINT_MONTH("\"month\"", MonetDataType.INT, MonetDataType.MONTH_INTERVAL),
-    SECINT_DAY("\"day\"", MonetDataType.INT, MonetDataType.SECOND_INTERVAL),
+    SECINT_DAY("\"day\"", MonetDataType.INT, MonetDataType.DAY_INTERVAL),
     SECINT_HOUR("\"hour\"", MonetDataType.INT, MonetDataType.SECOND_INTERVAL),
     SECINT_MINUTE("\"minute\"", MonetDataType.INT, MonetDataType.SECOND_INTERVAL),
     SECINT_SECOND("\"second\"", MonetDataType.INT, MonetDataType.SECOND_INTERVAL);

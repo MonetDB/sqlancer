@@ -144,11 +144,14 @@ public final class MonetCommon {
         case DATE:
             sb.append("DATE");
             break;
-        case MONTH_INTERVAL:
-            sb.append("INTERVAL MONTH");
-            break;
         case SECOND_INTERVAL:
             sb.append("INTERVAL SECOND");
+            break;
+        case DAY_INTERVAL:
+            sb.append("INTERVAL DAY");
+            break;
+        case MONTH_INTERVAL:
+            sb.append("INTERVAL MONTH");
             break;
         case BLOB:
             sb.append("BLOB");

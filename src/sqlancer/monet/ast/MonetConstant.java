@@ -594,10 +594,18 @@ public abstract class MonetConstant implements MonetExpression {
 
     public static class SecondIntervalConstant extends MonetConstantBase {
 
-        private final String textRepr;
+        private String textRepr;
 
-        public SecondIntervalConstant(long val) {
-            this.textRepr = "INTERVAL '" + val + "' SECOND";
+        private final MonetDataType type;
+
+        public SecondIntervalConstant(long val, MonetDataType tp) {
+            this.type = tp;
+            this.textRepr = "INTERVAL '" + val;
+            if (tp == MonetDataType.SECOND_INTERVAL) {
+                this.textRepr += "' SECOND";
+            } else {
+                this.textRepr += "' DAY";
+            }
         }
 
         @Override
@@ -607,7 +615,7 @@ public abstract class MonetConstant implements MonetExpression {
 
         @Override
         public MonetDataType getExpressionType() {
-            return MonetDataType.SECOND_INTERVAL;
+            return this.type;
         }
 
     }
@@ -616,8 +624,8 @@ public abstract class MonetConstant implements MonetExpression {
         return new MonthIntervalConstant(val);
     }
 
-    public static MonetConstant createSecondIntervalConstant(long val) {
-        return new SecondIntervalConstant(val);
+    public static MonetConstant createSecondIntervalConstant(long val, MonetDataType tp) {
+        return new SecondIntervalConstant(val, tp);
     }
 
     public static class BlobConstant extends MonetConstantBase {
@@ -626,9 +634,9 @@ public abstract class MonetConstant implements MonetExpression {
 
         public BlobConstant(String val) {
             if (val.length() % 2 == 1) {
-                this.textRepr = "blob '" + val + "0'";
+                this.textRepr = "BLOB '" + val + "0'";
             } else {
-                this.textRepr = "blob '" + val + "'";
+                this.textRepr = "BLOB '" + val + "'";
             }
         }
 
