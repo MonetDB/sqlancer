@@ -21,6 +21,7 @@ import sqlancer.monet.gen.MonetDeleteGenerator;
 import sqlancer.monet.gen.MonetDropIndexGenerator;
 import sqlancer.monet.gen.MonetIndexGenerator;
 import sqlancer.monet.gen.MonetInsertGenerator;
+import sqlancer.monet.gen.MonetLoggerSuspenderGenerator;
 import sqlancer.monet.gen.MonetMergeGenerator;
 import sqlancer.monet.gen.MonetPreparedStatementGenerator;
 import sqlancer.monet.gen.MonetQueryCatalogGenerator;
@@ -49,8 +50,7 @@ public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOption
 
     public enum Action implements AbstractAction<MonetGlobalState> {
         ANALYZE(MonetAnalyzeGenerator::create), //
-        ALTER_TABLE(g -> MonetAlterTableGenerator.create(g.getSchema().getRandomTable(t -> !t.isView()), g,
-                generateOnlyKnown)), //
+        ALTER_TABLE(g -> MonetAlterTableGenerator.create(g.getSchema().getRandomTable(t -> !t.isView()), g, generateOnlyKnown)), //
         COMMIT(g -> {
             Query query;
             if (Randomly.getBoolean()) {
@@ -69,13 +69,8 @@ public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOption
         TRUNCATE(MonetTruncateGenerator::create), //
         MERGE(MonetMergeGenerator::create), //
         VACUUM(MonetVacuumGenerator::create), //
+        LOGGER(MonetLoggerSuspenderGenerator::create), //
         CREATE_INDEX(MonetIndexGenerator::generate), //
-        /*SET_CONSTRAINTS((g) -> {
-            StringBuilder sb = new StringBuilder();
-            sb.append("SET CONSTRAINTS ALL ");
-            sb.append(Randomly.fromOptions("DEFERRED", "IMMEDIATE"));
-            return new QueryAdapter(sb.toString());
-        }), */
         COMMENT_ON(MonetCommentGenerator::generate), //
         //CREATE_SEQUENCE(MonetSequenceGenerator::createSequence), //
         CREATE_VIEW(MonetViewGenerator::create), //
@@ -101,17 +96,17 @@ public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOption
         case COMMIT:
             nrPerformed = r.getInteger(0, 0);
             break;
-        //case SET_CONSTRAINTS:
         case COMMENT_ON:
         //case CREATE_SEQUENCE:
         case TRUNCATE:
-        case VACUUM:
-        case ANALYZE:
+        case LOGGER:
         case QUERY_CATALOG:
         case CREATE_INDEX:
         case DROP_INDEX:
             nrPerformed = r.getInteger(0, 2);
             break;
+        case VACUUM:
+        case ANALYZE:
         case ALTER_TABLE:
         case DELETE:
         case MERGE:
