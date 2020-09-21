@@ -29,7 +29,7 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
     private final String databaseName;
 
     public enum MonetDataType {
-        TINYINT, SMALLINT, INT, BIGINT, HUGEINT, BOOLEAN, STRING, DECIMAL, REAL, DOUBLE, TIME, TIMESTAMP, DATE, SECOND_INTERVAL, DAY_INTERVAL, MONTH_INTERVAL, BLOB;
+        TINYINT, SMALLINT, INT, BIGINT, HUGEINT, BOOLEAN, STRING, DECIMAL, REAL, DOUBLE, TIME, TIMESTAMP, DATE, SECOND_INTERVAL, DAY_INTERVAL, MONTH_INTERVAL, BLOB, UUID;
 
         public static MonetDataType getRandomType() {
             List<MonetDataType> dataTypes = new ArrayList<>(Arrays.asList(values()));
@@ -49,6 +49,7 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
                 dataTypes.remove(MonetDataType.DAY_INTERVAL);
                 dataTypes.remove(MonetDataType.MONTH_INTERVAL);
                 dataTypes.remove(MonetDataType.BLOB);
+                dataTypes.remove(MonetDataType.UUID);
             }
             return Randomly.fromList(dataTypes);
         }
@@ -134,6 +135,9 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
                         case BLOB:
                             /*TODO constant = MonetConstant.createBlobConstant(randomRowValues.getBlob(columnIndex) ... );
                             break;*/
+                        case UUID:
+                            /*TODO constant = 
+                            break;*/
                          default:
                             throw new IgnoreMeException();
                         }
@@ -199,6 +203,8 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
             return MonetDataType.MONTH_INTERVAL;
         case "blob":
             return MonetDataType.BLOB;
+        case "uuid":
+            return MonetDataType.UUID;
         default:
             throw new AssertionError(typeString);
         }

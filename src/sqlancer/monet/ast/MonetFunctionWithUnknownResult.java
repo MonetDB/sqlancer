@@ -130,7 +130,11 @@ public enum MonetFunctionWithUnknownResult {
     SECINT_DAY("\"day\"", MonetDataType.INT, MonetDataType.DAY_INTERVAL),
     SECINT_HOUR("\"hour\"", MonetDataType.INT, MonetDataType.SECOND_INTERVAL),
     SECINT_MINUTE("\"minute\"", MonetDataType.INT, MonetDataType.SECOND_INTERVAL),
-    SECINT_SECOND("\"second\"", MonetDataType.INT, MonetDataType.SECOND_INTERVAL);
+    SECINT_SECOND("\"second\"", MonetDataType.INT, MonetDataType.SECOND_INTERVAL),
+
+    // UUID functions
+    UUID("\"uuid\"", MonetDataType.UUID),
+    ISAUUID("\"isaUUID\"", MonetDataType.BOOLEAN, MonetDataType.STRING);
 
     private String functionName;
     private MonetDataType returnType;

@@ -349,6 +349,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
             case DAY_INTERVAL:
             case MONTH_INTERVAL:
             case BLOB:
+            case UUID:
                 return generateAnyTypeExpression(depth, r, dataType);
             default:
                 throw new AssertionError(dataType);
@@ -374,6 +375,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         case DAY_INTERVAL:
         case MONTH_INTERVAL:
         case BLOB:
+        case UUID:
             return MonetCompoundDataType.create(type);
         case STRING: // TODO
             if (Randomly.getBoolean()) {
@@ -551,6 +553,8 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
             return MonetConstant.createMonthIntervalConstant(r.getIntegerBounded(-2147483647, 2147483647));
         case BLOB:
             return MonetConstant.createBlobConstant(r.getString(Randomly.StringGenerationStrategy.HEX));
+        case UUID:
+            return MonetConstant.createUUIDConstant(r.getString(Randomly.StringGenerationStrategy.HEX, 32));
         default:
             throw new AssertionError(type);
         }

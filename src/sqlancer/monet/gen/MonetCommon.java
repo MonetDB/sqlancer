@@ -156,6 +156,9 @@ public final class MonetCommon {
         case BLOB:
             sb.append("BLOB");
             break;
+        case UUID:
+            sb.append("UUID");
+            break;
         default:
             throw new AssertionError(type);
         }

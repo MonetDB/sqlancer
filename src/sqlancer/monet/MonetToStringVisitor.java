@@ -352,6 +352,9 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
         case BLOB:
             sb.append("BLOB");
             break;
+        case UUID:
+            sb.append("UUID");
+            break;
         default:
             throw new AssertionError(cast.getType());
         }

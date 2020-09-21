@@ -656,6 +656,30 @@ public abstract class MonetConstant implements MonetExpression {
         return new BlobConstant(val);
     }
 
+    public static class UUIDConstant extends MonetConstantBase {
+
+        private final String textRepr;
+
+        public UUIDConstant(String val) {
+            this.textRepr = "UUID '" + val.substring(0, 8) + "-" + val.substring(8, 12) + "-" + val.substring(12, 16) + "-" + val.substring(16, 20) + "-" + val.substring(20, 32) + "'";
+        }
+
+        @Override
+        public String getTextRepresentation() {
+            return this.textRepr;
+        }
+
+        @Override
+        public MonetDataType getExpressionType() {
+            return MonetDataType.UUID;
+        }
+
+    }
+
+    public static MonetConstant createUUIDConstant(String val) {
+        return new UUIDConstant(val);
+    }
+
     public static class MonetParameterConstant extends MonetConstantBase {
 
         @Override

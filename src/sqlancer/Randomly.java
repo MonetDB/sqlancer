@@ -233,40 +233,49 @@ public final class Randomly {
                 return getStringOfAlphabet(r, NUMERIC_ALPHABET);
             }
 
+            @Override
+            public String getString(Randomly r, int chars) {
+                return getStringOfAlphabet(r, NUMERIC_ALPHABET, chars);
+            }
         },
         ALPHANUMERIC {
-
             @Override
             public String getString(Randomly r) {
                 return getStringOfAlphabet(r, ALPHANUMERIC_ALPHABET);
-
             }
 
+            @Override
+            public String getString(Randomly r, int chars) {
+                return getStringOfAlphabet(r, ALPHANUMERIC_ALPHABET, chars);
+            }
         },
         ALPHANUMERIC_SPECIALCHAR {
-
             @Override
             public String getString(Randomly r) {
                 return getStringOfAlphabet(r, ALPHANUMERIC_SPECIALCHAR_ALPHABET);
-
             }
 
+            @Override
+            public String getString(Randomly r, int chars) {
+                return getStringOfAlphabet(r, ALPHANUMERIC_SPECIALCHAR_ALPHABET, chars);
+            }
         },
         HEX {
-
             @Override
             public String getString(Randomly r) {
                 return getStringOfAlphabet(r, HEX_ALPHABET);
-
             }
 
+            @Override
+            public String getString(Randomly r, int chars) {
+                return getStringOfAlphabet(r, HEX_ALPHABET, chars);
+            }
         },
         SOPHISTICATED {
 
             private static final String ALPHABET = ALPHANUMERIC_SPECIALCHAR_ALPHABET;
 
-            @Override
-            public String getString(Randomly r) {
+            private String getStringInternal(Randomly r, int chars) {
                 if (smallBiasProbability()) {
                     return Randomly.fromOptions("TRUE", "FALSE", "0.0", "-0.0", "1e500", "-1e500");
                 }
@@ -281,7 +290,6 @@ public final class Randomly {
 
                 StringBuilder sb = new StringBuilder();
 
-                int chars = getStringLength(r);
                 for (int i = 0; i < chars; i++) {
                     if (Randomly.getBooleanWithRatherLowProbability()) {
                         char val = (char) r.getInteger();
@@ -314,6 +322,16 @@ public final class Randomly {
 
                 r.addToCache(s);
                 return s;
+            }
+
+            @Override
+            public String getString(Randomly r) {
+                return getStringInternal(r, getStringLength(r));
+            }
+
+            @Override
+            public String getString(Randomly r, int chars) {
+                return getStringInternal(r, chars);
             }
 
             public String transformCachedString(Randomly r, String randomString) {
@@ -358,7 +376,17 @@ public final class Randomly {
             return sb.toString();
         }
 
+        private static String getStringOfAlphabet(Randomly r, String alphabet, int chars) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < chars; i++) {
+                sb.append(alphabet.charAt(getNextInt(0, alphabet.length())));
+            }
+            return sb.toString();
+        }
+
         public abstract String getString(Randomly r);
+
+        public abstract String getString(Randomly r, int chars);
 
         public String transformCachedString(Randomly r, String s) {
             return s;
@@ -370,8 +398,16 @@ public final class Randomly {
         return stringGenerationStrategy.getString(this);
     }
 
+    public String getString(int chars) {
+        return stringGenerationStrategy.getString(this, chars);
+    }
+
     public String getString(StringGenerationStrategy strategy) {
         return strategy.getString(this);
+    }
+
+    public String getString(StringGenerationStrategy strategy, int chars) {
+        return strategy.getString(this, chars);
     }
 
     public byte[] getBytes() {
@@ -429,8 +465,7 @@ public final class Randomly {
 
     public double getDouble() {
         if (smallBiasProbability()) {
-            return Randomly.fromOptions(0.0, -0.0, Double.MAX_VALUE, -Double.MAX_VALUE, Double.POSITIVE_INFINITY,
-                    Double.NEGATIVE_INFINITY);
+            return Randomly.fromOptions(0.0, -0.0, Double.MAX_VALUE, -Double.MAX_VALUE, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
         } else if (cacheProbability()) {
             Double d = getFromDoubleCache();
             if (d != null) {
