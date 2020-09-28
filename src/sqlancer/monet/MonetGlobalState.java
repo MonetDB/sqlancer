@@ -76,8 +76,8 @@ public class MonetGlobalState extends GlobalState<MonetOptions, MonetSchema> {
     }
 
     @Override
-    public void updateSchema() throws SQLException {
-        setSchema(MonetSchema.fromConnection(getConnection(), getDatabaseName()));
+    public MonetSchema readSchema() throws SQLException {
+        return MonetSchema.fromConnection(getConnection(), getDatabaseName());
     }
 
     public void addFunctionAndType(String functionName, Character functionType) {
