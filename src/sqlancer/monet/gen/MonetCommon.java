@@ -63,6 +63,7 @@ public final class MonetCommon {
         errors.add("common column name");
         errors.add("ambiguous");
         errors.add(" overflows type");
+        errors.add("is not in the number of projections range");
         /* TODO the following errors should be removed */
         errors.add("Decimal ");
         errors.add("Timestamp ");
