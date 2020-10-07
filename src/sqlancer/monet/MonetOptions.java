@@ -23,7 +23,7 @@ import sqlancer.monet.oracle.tlp.MonetTLPWhereOracle;
 public class MonetOptions implements DBMSSpecificOptions<MonetOracleFactory> {
 
     @Parameter(names = "--bulk-insert", description = "Specifies whether INSERT statements should be issued in bulk", arity = 1)
-    public boolean allowBulkInsert;
+    public boolean allowBulkInsert = true;
 
     @Parameter(names = "--oracle", description = "Specifies which test oracle should be used for MonetQL")
     public List<MonetOracleFactory> oracle = Arrays.asList(MonetOracleFactory.QUERY_PARTITIONING);

@@ -44,12 +44,17 @@ public final class MonetInsertGenerator {
                 if (i != 0) {
                     sbRowValue.append(", ");
                 }
-                sbRowValue.append(MonetVisitor.asString(MonetExpressionGenerator
+                if (Randomly.getBoolean()) {
+                    sbRowValue.append(MonetVisitor.asString(MonetExpressionGenerator
                         .generateConstant(globalState.getRandomly(), columns.get(i).getType())));
+                } else {
+                    sbRowValue.append(MonetVisitor.asString(new MonetExpressionGenerator(globalState)
+                        .generateExpression(columns.get(i).getType())));
+                }
             }
             sbRowValue.append(")");
 
-            int n = (int) Randomly.getNotCachedInteger(100, 1000);
+            int n = (int) Randomly.getNotCachedInteger(1, 3);
             for (int i = 0; i < n; i++) {
                 if (i != 0) {
                     sb.append(", ");
