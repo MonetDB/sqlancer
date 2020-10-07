@@ -143,7 +143,7 @@ public enum MonetFunctionWithUnknownResult {
 
     // UUID functions
     UUID("\"uuid\"", MonetDataType.UUID),
-    ISAUUID("\"isaUUID\"", MonetDataType.BOOLEAN, MonetDataType.STRING);
+    ISAUUID("\"isauuid\"", MonetDataType.BOOLEAN, MonetDataType.STRING);
 
     private String functionName;
     private MonetDataType returnType;

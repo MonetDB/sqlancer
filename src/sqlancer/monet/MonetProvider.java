@@ -151,16 +151,6 @@ public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOption
         return con;
     }
 
-    /*protected void readFunctions(MonetGlobalState globalState) throws SQLException {
-        QueryAdapter query = new QueryAdapter("SELECT proname, provolatile FROM pg_proc;");
-        SQLancerResultSet rs = query.executeAndGet(globalState);
-        while (rs.next()) {
-            String functionName = rs.getString(1);
-            Character functionType = rs.getString(2).charAt(0);
-            globalState.addFunctionAndType(functionName, functionType);
-        }
-    }*/
-
     protected void createTables(MonetGlobalState globalState, int numTables) throws SQLException {
         while (globalState.getSchema().getDatabaseTables().size() < numTables) {
             try {

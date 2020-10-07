@@ -4,9 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import sqlancer.GlobalState;
 import sqlancer.Randomly;
@@ -20,9 +18,6 @@ public class MonetGlobalState extends GlobalState<MonetOptions, MonetSchema> {
     private List<String> operators = Collections.emptyList();
     private List<String> collates = Collections.emptyList();
     private List<String> opClasses = Collections.emptyList();
-    // store and allow filtering by function volatility classifications
-    private final Map<String, Character> functionsAndTypes = new HashMap<>();
-    private List<Character> allowedFunctionTypes = Arrays.asList(IMMUTABLE, STABLE, VOLATILE);
 
     @Override
     public void setConnection(Connection con) {
@@ -78,26 +73,6 @@ public class MonetGlobalState extends GlobalState<MonetOptions, MonetSchema> {
     @Override
     public MonetSchema readSchema() throws SQLException {
         return MonetSchema.fromConnection(getConnection(), getDatabaseName());
-    }
-
-    public void addFunctionAndType(String functionName, Character functionType) {
-        this.functionsAndTypes.put(functionName, functionType);
-    }
-
-    public Map<String, Character> getFunctionsAndTypes() {
-        return this.functionsAndTypes;
-    }
-
-    public void setAllowedFunctionTypes(List<Character> types) {
-        this.allowedFunctionTypes = types;
-    }
-
-    public void setDefaultAllowedFunctionTypes() {
-        this.allowedFunctionTypes = Arrays.asList(IMMUTABLE, STABLE, VOLATILE);
-    }
-
-    public List<Character> getAllowedFunctionTypes() {
-        return this.allowedFunctionTypes;
     }
 
 }

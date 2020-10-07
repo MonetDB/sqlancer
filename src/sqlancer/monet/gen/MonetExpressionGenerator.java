@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -69,16 +68,10 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
 
     private boolean allowParameters;
 
-    private final Map<String, Character> functionsAndTypes;
-
-    private final List<Character> allowedFunctionTypes;
-
     public MonetExpressionGenerator(MonetGlobalState globalState) {
         this.r = globalState.getRandomly();
         this.maxDepth = globalState.getOptions().getMaxExpressionDepth();
         this.globalState = globalState;
-        this.functionsAndTypes = globalState.getFunctionsAndTypes();
-        this.allowedFunctionTypes = globalState.getAllowedFunctionTypes();
     }
 
     public MonetExpressionGenerator setColumns(List<MonetColumn> columns) {
@@ -135,10 +128,6 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     private MonetExpression generateFunctionWithUnknownResult(int depth, MonetDataType type) {
         List<MonetFunctionWithUnknownResult> supportedFunctions = MonetFunctionWithUnknownResult
                 .getSupportedFunctions(type);
-        // filters functions by allowed type (STABLE 's', IMMUTABLE 'i', VOLATILE 'v')
-        supportedFunctions = supportedFunctions.stream()
-                .filter(f -> allowedFunctionTypes.contains(functionsAndTypes.get(f.getName())))
-                .collect(Collectors.toList());
         if (supportedFunctions.isEmpty()) {
             throw new IgnoreMeException();
         }
@@ -149,9 +138,6 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     private MonetExpression generateFunctionWithKnownResult(int depth, MonetDataType type) {
         List<MonetFunctionWithResult> functions = Stream.of(MonetFunction.MonetFunctionWithResult.values())
                 .filter(f -> f.supportsReturnType(type)).collect(Collectors.toList());
-        // filters functions by allowed type (STABLE 's', IMMUTABLE 'i', VOLATILE 'v')
-        functions = functions.stream().filter(f -> allowedFunctionTypes.contains(functionsAndTypes.get(f.getName())))
-                .collect(Collectors.toList());
         if (functions.isEmpty()) {
             throw new IgnoreMeException();
         }
