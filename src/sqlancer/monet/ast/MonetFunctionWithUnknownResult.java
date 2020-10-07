@@ -106,9 +106,11 @@ public enum MonetFunctionWithUnknownResult {
     DATE_DAYOFWEEK("dayofweek", MonetDataType.INT, MonetDataType.DATE),
     DATE_DAYOFMONTH("dayofmonth", MonetDataType.INT, MonetDataType.DATE),
     DATE_WEEK("\"week\"", MonetDataType.INT, MonetDataType.DATE),
+    DATE_EPOCH("\"epoch_ms\"", MonetDataType.INT, MonetDataType.DATE),
     TIME_HOUR("\"hour\"", MonetDataType.INT, MonetDataType.TIME),
     TIME_MINUTE("\"minute\"", MonetDataType.INT, MonetDataType.TIME),
     TIME_SECOND("\"second\"", MonetDataType.DECIMAL, MonetDataType.TIME),
+    TIME_EPOCH("\"epoch_ms\"", MonetDataType.INT, MonetDataType.TIME),
 
     TIMESTAMP_CENTURY("\"century\"", MonetDataType.INT, MonetDataType.TIMESTAMP),
     TIMESTAMP_DECADE("\"decade\"", MonetDataType.INT, MonetDataType.TIMESTAMP),
@@ -124,13 +126,20 @@ public enum MonetFunctionWithUnknownResult {
     TIMESTAMP_HOUR("\"hour\"", MonetDataType.INT, MonetDataType.TIMESTAMP),
     TIMESTAMP_MINUTE("\"minute\"", MonetDataType.INT, MonetDataType.TIMESTAMP),
     TIMESTAMP_SECOND("\"second\"", MonetDataType.DECIMAL, MonetDataType.TIMESTAMP),
+    TIMESTAMP_EPOCH("\"epoch_ms\"", MonetDataType.INT, MonetDataType.TIMESTAMP),
 
     MONINT_YEAR("\"year\"", MonetDataType.INT, MonetDataType.MONTH_INTERVAL),
     MONINT_MONTH("\"month\"", MonetDataType.INT, MonetDataType.MONTH_INTERVAL),
-    SECINT_DAY("\"day\"", MonetDataType.INT, MonetDataType.DAY_INTERVAL),
+    DAYINT_DAY("\"day\"", MonetDataType.INT, MonetDataType.DAY_INTERVAL),
+    DAYINT_HOUR("\"hour\"", MonetDataType.INT, MonetDataType.DAY_INTERVAL),
+    DAYINT_MINUTE("\"minute\"", MonetDataType.INT, MonetDataType.DAY_INTERVAL),
+    DAYINT_SECOND("\"second\"", MonetDataType.INT, MonetDataType.DAY_INTERVAL),
+    DAYINT_EPOCH("\"epoch_ms\"", MonetDataType.INT, MonetDataType.DAY_INTERVAL),
+    SECINT_DAY("\"day\"", MonetDataType.INT, MonetDataType.SECOND_INTERVAL),
     SECINT_HOUR("\"hour\"", MonetDataType.INT, MonetDataType.SECOND_INTERVAL),
     SECINT_MINUTE("\"minute\"", MonetDataType.INT, MonetDataType.SECOND_INTERVAL),
     SECINT_SECOND("\"second\"", MonetDataType.INT, MonetDataType.SECOND_INTERVAL),
+    SECINT_EPOCH("\"epoch_ms\"", MonetDataType.INT, MonetDataType.SECOND_INTERVAL),
 
     // UUID functions
     UUID("\"uuid\"", MonetDataType.UUID),
