@@ -18,7 +18,7 @@ public final class MonetTruncateGenerator {
             sb.append(" TABLE");
         }
         sb.append(" ");
-        sb.append(globalState.getSchema().getRandomTable().getName());
+        sb.append(globalState.getSchema().getRandomTable(t -> t.isInsertable()).getName());
         if (Randomly.getBoolean()) {
             sb.append(" ");
             sb.append(Randomly.fromOptions("RESTART IDENTITY", "CONTINUE IDENTITY"));

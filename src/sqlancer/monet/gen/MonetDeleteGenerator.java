@@ -15,7 +15,7 @@ public final class MonetDeleteGenerator {
     }
 
     public static Query create(MonetGlobalState globalState) {
-        MonetTable table = globalState.getSchema().getRandomTable(t -> !t.isView());
+        MonetTable table = globalState.getSchema().getRandomTable(t -> t.isInsertable());
         ExpectedErrors errors = new ExpectedErrors();
         MonetCommon.addCommonInsertUpdateErrors(errors);
         StringBuilder sb = new StringBuilder("DELETE FROM");
