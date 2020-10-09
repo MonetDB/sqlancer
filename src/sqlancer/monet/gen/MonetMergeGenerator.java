@@ -70,7 +70,7 @@ public final class MonetMergeGenerator {
     }
 
     public static Query create(MonetGlobalState globalState) {
-        MonetTable table = globalState.getSchema().getRandomTable(t -> !t.isView());
+        MonetTable table = globalState.getSchema().getRandomTable(t -> t.isInsertable());
         MonetTable joined = globalState.getSchema().getRandomTable();
         ExpectedErrors errors = new ExpectedErrors();
         MonetCommon.addCommonInsertUpdateErrors(errors);

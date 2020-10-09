@@ -316,7 +316,7 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
                         List<MonetColumn> databaseColumns = getTableColumns(con, tableID);
                         List<MonetIndex> indexes = getIndexes(con, tableID);
                         List<MonetStatisticsObject> statistics = new ArrayList<>(); //TODO? getStatistics(con);
-                        MonetTable t = new MonetTable(tableName, databaseColumns, indexes, MonetTableType, statistics, isView, true);
+                        MonetTable t = new MonetTable(tableName, databaseColumns, indexes, MonetTableType, statistics, isView, !isView);
                         for (MonetColumn c : databaseColumns) {
                             c.setTable(t);
                         }

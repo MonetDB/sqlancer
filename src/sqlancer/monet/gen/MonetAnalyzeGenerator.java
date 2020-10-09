@@ -15,7 +15,7 @@ public final class MonetAnalyzeGenerator {
     }
 
     public static Query create(MonetGlobalState globalState) {
-        MonetTable table = globalState.getSchema().getRandomTable();
+        MonetTable table = globalState.getSchema().getRandomTable(t -> t.isInsertable());
         StringBuilder sb = new StringBuilder("ANALYZE");
         sb.append(" sys.");
         sb.append(table.getName());
