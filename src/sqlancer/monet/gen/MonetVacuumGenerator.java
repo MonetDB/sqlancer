@@ -15,7 +15,7 @@ public final class MonetVacuumGenerator {
         StringBuilder sb = new StringBuilder("CALL sys.");
         sb.append(Randomly.fromOptions("shrink", "reuse", "vacuum"));
         sb.append("('sys', '");
-        sb.append(globalState.getSchema().getRandomTable(t -> t.isInsertable()));
+        sb.append(globalState.getSchema().getRandomTable(t -> t.isInsertable()).getName());
         sb.append("')");
 
         return new QueryAdapter(sb.toString(), ExpectedErrors.from("not allowed on tables with indices", "is not persistent"));
