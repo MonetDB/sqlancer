@@ -65,6 +65,7 @@ public final class MonetCommon {
         errors.add(" overflows type");
         errors.add("is not in the number of projections range");
         errors.add("Not a UUID");
+        errors.add("atom2sql");
         /* TODO the following errors should be removed */
         errors.add("Decimal ");
         errors.add("Timestamp ");
