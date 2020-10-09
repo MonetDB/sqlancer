@@ -54,13 +54,13 @@ public enum MonetFunctionWithUnknownResult {
     ROUND_DEC("round", MonetDataType.DECIMAL, MonetDataType.DECIMAL, MonetDataType.INT),
     SCALEUP("scale_up", MonetDataType.REAL, MonetDataType.REAL, MonetDataType.REAL),
     SCALEUP_DOUBLE("scale_up", MonetDataType.DOUBLE, MonetDataType.DOUBLE, MonetDataType.DOUBLE),
-    SCALEUP_DEC("scale_up", MonetDataType.DECIMAL, MonetDataType.DECIMAL, MonetDataType.DECIMAL),
+    SCALEUP_DEC("scale_up", MonetDataType.DECIMAL, MonetDataType.DECIMAL, MonetDataType.INT),
     SCALEDOWN("scale_down", MonetDataType.REAL, MonetDataType.REAL, MonetDataType.REAL),
     SCALEDOWN_DOUBLE("scale_down", MonetDataType.DOUBLE, MonetDataType.DOUBLE, MonetDataType.DOUBLE),
-    SCALEDOWN_DEC("scale_down", MonetDataType.DECIMAL, MonetDataType.DECIMAL, MonetDataType.DECIMAL),
+    SCALEDOWN_DEC("scale_down", MonetDataType.DECIMAL, MonetDataType.DECIMAL, MonetDataType.INT),
 
     // mathematical functions
-    SIGN("sign", MonetDataType.REAL, MonetDataType.REAL),
+    
     CBRT("cbrt", MonetDataType.REAL, MonetDataType.REAL),
     CEIL("ceil", MonetDataType.REAL, MonetDataType.REAL),
     CEILING("ceiling", MonetDataType.REAL, MonetDataType.REAL),
@@ -165,12 +165,9 @@ public enum MonetFunctionWithUnknownResult {
     INTERVAL_ADD1("sql_add", MonetDataType.SECOND_INTERVAL, MonetDataType.SECOND_INTERVAL, MonetDataType.SECOND_INTERVAL),
     INTERVAL_ADD2("sql_add", MonetDataType.DAY_INTERVAL, MonetDataType.DAY_INTERVAL, MonetDataType.DAY_INTERVAL),
     INTERVAL_ADD3("sql_add", MonetDataType.MONTH_INTERVAL, MonetDataType.MONTH_INTERVAL, MonetDataType.MONTH_INTERVAL),
-    INTERVAL_ABS1("abs", MonetDataType.SECOND_INTERVAL, MonetDataType.SECOND_INTERVAL),
-    INTERVAL_ABS2("abs", MonetDataType.DAY_INTERVAL, MonetDataType.DAY_INTERVAL),
-    INTERVAL_ABS3("abs", MonetDataType.MONTH_INTERVAL, MonetDataType.MONTH_INTERVAL),
-    INTERVAL_SIGN1("sign", MonetDataType.SECOND_INTERVAL, MonetDataType.SECOND_INTERVAL),
-    INTERVAL_SIGN2("sign", MonetDataType.DAY_INTERVAL, MonetDataType.DAY_INTERVAL),
-    INTERVAL_SIGN3("sign", MonetDataType.MONTH_INTERVAL, MonetDataType.MONTH_INTERVAL),
+    INTERVAL_NEG1("sql_neg", MonetDataType.SECOND_INTERVAL, MonetDataType.SECOND_INTERVAL),
+    INTERVAL_NEG2("sql_neg", MonetDataType.DAY_INTERVAL, MonetDataType.DAY_INTERVAL),
+    INTERVAL_NEG3("sql_neg", MonetDataType.MONTH_INTERVAL, MonetDataType.MONTH_INTERVAL),
 
     // UUID functions
     UUID("\"uuid\"", MonetDataType.UUID),

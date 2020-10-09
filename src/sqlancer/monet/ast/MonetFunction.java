@@ -56,6 +56,30 @@ public class MonetFunction implements MonetExpression {
             }
 
         },
+        SIGN(1, "sign") {
+
+            @Override
+            public MonetConstant apply(MonetConstant[] evaluatedArgs, MonetExpression... args) {
+                if (evaluatedArgs[0].isNull()) {
+                    return MonetConstant.createNullConstant();
+                } else {
+                    return MonetConstant.createIntConstant(Math.abs(evaluatedArgs[0].cast(MonetDataType.INT).asInt()), MonetDataType.INT);
+                }
+            }
+
+            @Override
+            public boolean supportsReturnType(MonetDataType type) {
+                return type == MonetDataType.TINYINT || type == MonetDataType.SMALLINT || type == MonetDataType.INT ||
+                type == MonetDataType.BIGINT || type == MonetDataType.HUGEINT || type == MonetDataType.REAL || type == MonetDataType.DOUBLE || 
+                type == MonetDataType.DECIMAL || type == MonetDataType.SECOND_INTERVAL || type == MonetDataType.DAY_INTERVAL || type == MonetDataType.MONTH_INTERVAL;
+            }
+
+            @Override
+            public MonetDataType[] getInputTypesForReturnType(MonetDataType returnType, int nrArguments) {
+                return new MonetDataType[] { returnType };
+            }
+
+        },
         LOWER(1, "lower") {
 
             @Override
