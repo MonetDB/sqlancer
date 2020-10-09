@@ -20,11 +20,11 @@ public enum MonetFunctionWithUnknownResult {
     REVERSE("reverse", MonetDataType.STRING, MonetDataType.STRING),
     UPPER("upper", MonetDataType.STRING, MonetDataType.STRING),
     LOWER("lower", MonetDataType.STRING, MonetDataType.STRING),
-    /* These functions are dangerous if the input amount is large
-    SPACE("space", MonetDataType.STRING, MonetDataType.INT),
     INDEX("\"index\"", MonetDataType.INT, MonetDataType.STRING, MonetDataType.BOOLEAN),
     RIGHT("\"right\"", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT),
     LEFT("\"left\"", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT),
+    /* These functions are dangerous if the input amount is large
+    SPACE("space", MonetDataType.STRING, MonetDataType.INT),
     REPEAT("repeat", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT),
     LPAD("lpad", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT),
     LPAD2("lpad", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT, MonetDataType.STRING),
@@ -60,7 +60,6 @@ public enum MonetFunctionWithUnknownResult {
     SCALEDOWN_DEC("scale_down", MonetDataType.DECIMAL, MonetDataType.DECIMAL, MonetDataType.INT),
 
     // mathematical functions
-    
     CBRT("cbrt", MonetDataType.REAL, MonetDataType.REAL),
     CEIL("ceil", MonetDataType.REAL, MonetDataType.REAL),
     CEILING("ceiling", MonetDataType.REAL, MonetDataType.REAL),
