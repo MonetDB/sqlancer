@@ -170,7 +170,6 @@ public enum MonetFunctionWithUnknownResult {
     INTERVAL_NEG3("sql_neg", MonetDataType.MONTH_INTERVAL, MonetDataType.MONTH_INTERVAL),
 
     // UUID functions
-    UUID("\"uuid\"", MonetDataType.UUID),
     ISAUUID("\"isauuid\"", MonetDataType.BOOLEAN, MonetDataType.STRING);
 
     private String functionName;
