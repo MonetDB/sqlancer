@@ -31,13 +31,18 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
     public enum MonetDataType {
         TINYINT, SMALLINT, INT, BIGINT, HUGEINT, BOOLEAN, STRING, DECIMAL, REAL, DOUBLE, TIME, TIMESTAMP, DATE, SECOND_INTERVAL, DAY_INTERVAL, MONTH_INTERVAL, BLOB, UUID;
 
-        public static MonetDataType getRandomType() {
+        private static String OS = System.getProperty("os.name").toLowerCase();
+
+        public static List<MonetDataType> getAllTypes() {
             List<MonetDataType> dataTypes = new ArrayList<>(Arrays.asList(values()));
+
+            if (MonetProvider.generateOnlyKnown || OS.contains("win")) {
+                dataTypes.remove(MonetDataType.HUGEINT); /* No huge integers on Windows :( */
+            }
             if (MonetProvider.generateOnlyKnown) {
                 dataTypes.remove(MonetDataType.TINYINT);
                 dataTypes.remove(MonetDataType.SMALLINT);
                 dataTypes.remove(MonetDataType.BIGINT);
-                dataTypes.remove(MonetDataType.HUGEINT);
                 dataTypes.remove(MonetDataType.DECIMAL);
                 dataTypes.remove(MonetDataType.DOUBLE);
                 dataTypes.remove(MonetDataType.REAL);
@@ -51,7 +56,11 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
                 dataTypes.remove(MonetDataType.BLOB);
                 dataTypes.remove(MonetDataType.UUID);
             }
-            return Randomly.fromList(dataTypes);
+            return dataTypes;
+        }
+
+        public static MonetDataType getRandomType() {
+            return Randomly.fromList(getAllTypes());
         }
     }
 

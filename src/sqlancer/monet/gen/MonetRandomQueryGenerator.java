@@ -28,7 +28,7 @@ import sqlancer.monet.ast.MonetValues;
 
 public final class MonetRandomQueryGenerator {
 
-    private static final List<MonetDataType> ALL_TYPES = Arrays.asList(MonetDataType.values());
+    private static final List<MonetDataType> ALL_TYPES = MonetDataType.getAllTypes();
 
     private static final int MAX_SUBQUERY_DEPTH = 3;
 

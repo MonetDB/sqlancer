@@ -19,7 +19,8 @@ public class MonetPostfixOperation implements MonetExpression {
 
             @Override
             public MonetDataType[] getInputDataTypes() {
-                return MonetDataType.values();
+                MonetDataType[] typesArray = new MonetDataType[MonetDataType.getAllTypes().size()];
+                return MonetDataType.getAllTypes().toArray(typesArray);
             }
 
         },
@@ -32,7 +33,8 @@ public class MonetPostfixOperation implements MonetExpression {
 
             @Override
             public MonetDataType[] getInputDataTypes() {
-                return MonetDataType.values();
+                MonetDataType[] typesArray = new MonetDataType[MonetDataType.getAllTypes().size()];
+                return MonetDataType.getAllTypes().toArray(typesArray);
             }
 
         },
