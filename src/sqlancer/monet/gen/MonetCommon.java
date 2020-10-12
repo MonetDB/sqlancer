@@ -67,6 +67,7 @@ public final class MonetCommon {
         errors.add("Not a UUID");
         errors.add("atom2sql");
         errors.add("Rounding of decimal");
+        errors.add("Result too large");
         /* TODO the following errors should be removed */
         errors.add("Decimal ");
         errors.add("Timestamp ");
