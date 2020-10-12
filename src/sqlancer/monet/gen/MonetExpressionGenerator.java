@@ -122,7 +122,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     }
 
     private enum BooleanExpression {
-        POSTFIX_OPERATOR, NOT, BINARY_LOGICAL_OPERATOR, BINARY_COMPARISON, CONSTANT, FUNCTION, CAST, LIKE, BETWEEN, IN_OPERATION, EXISTS, ANYALL, CASE, ANYTYPE_EXPRESSION, SUBQUERY
+        POSTFIX_OPERATOR, NOT, BINARY_LOGICAL_OPERATOR, BINARY_COMPARISON, CONSTANT, FUNCTION, CAST, LIKE, BETWEEN, CASE, ANYTYPE_EXPRESSION, IN_OPERATION, EXISTS, ANYALL, SUBQUERY
     }
 
     private MonetExpression generateFunctionWithUnknownResult(int depth, MonetDataType type) {
@@ -281,15 +281,12 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         return new MonetExpressionGenerator(globalState).generateExpression(0, type);
     }
 
-    private static final List<MonetDataType> NUMERIC_TYPES = Arrays.asList(new MonetDataType[]{MonetDataType.TINYINT, MonetDataType.SMALLINT, MonetDataType.INT, 
-        MonetDataType.BIGINT, MonetDataType.HUGEINT, MonetDataType.REAL, MonetDataType.DOUBLE, MonetDataType.DECIMAL}); 
-
     public MonetExpression generateExpression(int depth, MonetDataType originalType) {
         MonetDataType dataType = originalType;
-        if (NUMERIC_TYPES.contains(dataType) && Randomly.getBoolean()) {
-            dataType = Randomly.fromList(NUMERIC_TYPES);
+        if (MonetDataType.getNumericTypes().contains(dataType) && Randomly.getBoolean()) {
+            dataType = Randomly.fromList(MonetDataType.getNumericTypes());
         }
-        if (!filterColumns(dataType).isEmpty() && Randomly.getBoolean()) {
+        if (!filterColumns(dataType).isEmpty() && Randomly.getBooleanWithRatherLowProbability()) {
             return createColumnOfType(dataType);
         }
         if (allowAggregateFunctions && Randomly.getBoolean()) {
@@ -301,7 +298,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         }
         if (Randomly.getBooleanWithRatherLowProbability() || depth > maxDepth) {
             // generic expression
-            if (Randomly.getBoolean() || depth > maxDepth) {
+            if (Randomly.getBooleanWithRatherLowProbability() || depth > maxDepth) {
                 if (Randomly.getBooleanWithRatherLowProbability()) {
                     return generateConstant(r, dataType);
                 } else {
@@ -312,7 +309,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
                     }
                 }
             } else {
-                if (Randomly.getBoolean()) {
+                if (Randomly.getBooleanWithRatherLowProbability()) {
                     return new MonetCastOperation(generateExpression(depth + 1), getCompoundDataType(dataType));
                 } else {
                     return generateFunctionWithUnknownResult(depth, dataType);

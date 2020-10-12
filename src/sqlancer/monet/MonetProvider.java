@@ -14,6 +14,7 @@ import sqlancer.common.query.Query;
 import sqlancer.common.query.QueryAdapter;
 import sqlancer.common.query.QueryProvider;
 import sqlancer.monet.MonetOptions.MonetOracleFactory;
+import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.gen.MonetAlterTableGenerator;
 import sqlancer.monet.gen.MonetAnalyzeGenerator;
 import sqlancer.monet.gen.MonetCommentGenerator;
@@ -74,7 +75,7 @@ public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOption
         COMMENT_ON(MonetCommentGenerator::generate), //
         //CREATE_SEQUENCE(MonetSequenceGenerator::createSequence), //
         CREATE_VIEW(MonetViewGenerator::create), //
-        CREATE_PREPARE(MonetPreparedStatementGenerator::create), //
+        PREPARE(MonetPreparedStatementGenerator::create), //
         QUERY_CATALOG((g) -> MonetQueryCatalogGenerator.query());
 
         private final QueryProvider<MonetGlobalState> queryProvider;
@@ -118,7 +119,7 @@ public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOption
         case UPDATE:
             nrPerformed = r.getInteger(0, 10);
             break;
-        case CREATE_PREPARE:
+        case PREPARE:
             nrPerformed = r.getInteger(0, 50);
             break;
         case INSERT:
@@ -144,6 +145,8 @@ public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOption
                 .anyMatch((o) -> o == MonetOracleFactory.PQS)) {
             generateOnlyKnown = true;
         }
+
+        MonetDataType.intitializeTypes();
         String url = "jdbc:monetdb://localhost:50000/:inmemory";
         Connection con = DriverManager.getConnection(url, "monetdb", "monetdb");
 

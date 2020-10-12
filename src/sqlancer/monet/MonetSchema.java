@@ -33,34 +33,60 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
 
         private static String OS = System.getProperty("os.name").toLowerCase();
 
-        public static List<MonetDataType> getAllTypes() {
-            List<MonetDataType> dataTypes = new ArrayList<>(Arrays.asList(values()));
+        private static List<MonetDataType> numericTypes;
+
+        private static List<MonetDataType> allTypes;
+
+        public static void intitializeTypes() {
+            allTypes = new ArrayList<>(Arrays.asList(values()));
 
             if (MonetProvider.generateOnlyKnown || OS.contains("win")) {
-                dataTypes.remove(MonetDataType.HUGEINT); /* No huge integers on Windows :( */
+                allTypes.remove(MonetDataType.HUGEINT); /* No huge integers on Windows :( */
             }
             if (MonetProvider.generateOnlyKnown) {
-                dataTypes.remove(MonetDataType.TINYINT);
-                dataTypes.remove(MonetDataType.SMALLINT);
-                dataTypes.remove(MonetDataType.BIGINT);
-                dataTypes.remove(MonetDataType.DECIMAL);
-                dataTypes.remove(MonetDataType.DOUBLE);
-                dataTypes.remove(MonetDataType.REAL);
-                dataTypes.remove(MonetDataType.BOOLEAN);
-                dataTypes.remove(MonetDataType.TIME);
-                dataTypes.remove(MonetDataType.TIMESTAMP);
-                dataTypes.remove(MonetDataType.DATE);
-                dataTypes.remove(MonetDataType.SECOND_INTERVAL);
-                dataTypes.remove(MonetDataType.DAY_INTERVAL);
-                dataTypes.remove(MonetDataType.MONTH_INTERVAL);
-                dataTypes.remove(MonetDataType.BLOB);
-                dataTypes.remove(MonetDataType.UUID);
+                allTypes.remove(MonetDataType.TINYINT);
+                allTypes.remove(MonetDataType.SMALLINT);
+                allTypes.remove(MonetDataType.BIGINT);
+                allTypes.remove(MonetDataType.DECIMAL);
+                allTypes.remove(MonetDataType.DOUBLE);
+                allTypes.remove(MonetDataType.REAL);
+                allTypes.remove(MonetDataType.BOOLEAN);
+                allTypes.remove(MonetDataType.TIME);
+                allTypes.remove(MonetDataType.TIMESTAMP);
+                allTypes.remove(MonetDataType.DATE);
+                allTypes.remove(MonetDataType.SECOND_INTERVAL);
+                allTypes.remove(MonetDataType.DAY_INTERVAL);
+                allTypes.remove(MonetDataType.MONTH_INTERVAL);
+                allTypes.remove(MonetDataType.BLOB);
+                allTypes.remove(MonetDataType.UUID);
             }
-            return dataTypes;
+
+            numericTypes = new ArrayList<>();
+
+            numericTypes.add(MonetDataType.INT);
+            if (!MonetProvider.generateOnlyKnown) {
+                numericTypes.add(MonetDataType.TINYINT);
+                numericTypes.add(MonetDataType.SMALLINT);
+                numericTypes.add(MonetDataType.BIGINT);
+                numericTypes.add(MonetDataType.DECIMAL);
+                numericTypes.add(MonetDataType.DOUBLE);
+                numericTypes.add(MonetDataType.REAL);
+            }
+            if (!MonetProvider.generateOnlyKnown && !OS.contains("win")) {
+                numericTypes.add(MonetDataType.HUGEINT);
+            }
+        }
+
+        public static List<MonetDataType> getAllTypes() {
+            return new ArrayList<>(allTypes);
         }
 
         public static MonetDataType getRandomType() {
-            return Randomly.fromList(getAllTypes());
+            return Randomly.fromList(allTypes);
+        }
+
+        public static List<MonetDataType> getNumericTypes() {
+            return numericTypes;
         }
     }
 
