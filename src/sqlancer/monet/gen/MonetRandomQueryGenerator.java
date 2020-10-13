@@ -92,13 +92,7 @@ public final class MonetRandomQueryGenerator {
         }
         if (tables != null && !tables.getTables().isEmpty() && Randomly.getBoolean()) {
             List<MonetJoin> joinStatements = new ArrayList<>();
-            List<MonetTable> tablesToJoin = new ArrayList<>(tables.getTables());
 
-            for (int i = 0; i < Randomly.smallNumber() && i < tablesToJoin.size(); i++) {
-                MonetTable table = Randomly.fromList(tablesToJoin);
-                tablesToJoin.remove(table);
-                joinStatements.add(new MonetJoin(new MonetFromTable(table, Randomly.getBoolean(), String.format("l%d%s", depth, table.getName())), gen.generateExpression(depth + 1, MonetDataType.BOOLEAN), MonetJoinType.getRandom()));
-            }
             // JOIN subqueries
             if (depth < MAX_SUBQUERY_DEPTH) { /* Protect against infinite recursion */
                 for (int i = 0; i < Randomly.smallNumber() + 1; i++) {
