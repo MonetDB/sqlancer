@@ -168,6 +168,15 @@ public enum MonetFunctionWithUnknownResult {
     INTERVAL_NEG2("sql_neg", MonetDataType.DAY_INTERVAL, MonetDataType.DAY_INTERVAL),
     INTERVAL_NEG3("sql_neg", MonetDataType.MONTH_INTERVAL, MonetDataType.MONTH_INTERVAL),
 
+    //Each type should have at least 1 function with unknown result associated
+    LEAST1("least", MonetDataType.TINYINT, MonetDataType.TINYINT, MonetDataType.TINYINT),
+    LEAST2("least", MonetDataType.SMALLINT, MonetDataType.SMALLINT, MonetDataType.SMALLINT),
+    LEAST3("least", MonetDataType.BIGINT, MonetDataType.BIGINT, MonetDataType.BIGINT),
+    LEAST4("least", MonetDataType.HUGEINT, MonetDataType.HUGEINT, MonetDataType.HUGEINT),
+    LEAST5("least", MonetDataType.UUID, MonetDataType.UUID, MonetDataType.UUID),
+    LEAST6("least", MonetDataType.BOOLEAN, MonetDataType.BOOLEAN, MonetDataType.BOOLEAN),
+    LEAST7("least", MonetDataType.BLOB, MonetDataType.BLOB, MonetDataType.BLOB),
+
     // UUID functions
     ISAUUID("\"isauuid\"", MonetDataType.BOOLEAN, MonetDataType.STRING);
 

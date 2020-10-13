@@ -39,7 +39,7 @@ public final class MonetRandomQueryGenerator {
         List<MonetTable> databasetables = globalState.getSchema().getRandomTableNonEmptyTablesAsList();
         List<MonetTable> tables = new ArrayList<>(databasetables.size());
 
-        for (MonetTable t : tables) {
+        for (MonetTable t : databasetables) {
             List<MonetColumn> cols = new ArrayList<>(t.getColumns().size());
             for (MonetColumn c : t.getColumns()) {
                 cols.add(new MonetColumn(c.getName(), c.getType(), String.format("l%d%s", depth, c.getName())));
@@ -128,7 +128,7 @@ public final class MonetRandomQueryGenerator {
     }
 
     private static MonetQuery createSimpleSelect(MonetExpressionGenerator gen, MonetGlobalState globalState, MonetTables tables, int depth, List<MonetDataType> types, boolean generateOrderBy, boolean generateLimit, boolean generateCTEs) {
-        if (tables == null && !Randomly.getBoolean()) { /* also generate from-less queries */
+        if (tables == null && Randomly.getBoolean()) { /* also generate from-less queries */
             tables = getNextBatchOfTables(globalState, depth, generateCTEs);
         }
         if (tables != null) {
@@ -202,7 +202,7 @@ public final class MonetRandomQueryGenerator {
     /* Single column cases................. */
 
     private static MonetQuery createSingleColumnSelect(MonetExpressionGenerator gen, MonetGlobalState globalState, MonetTables tables, int depth, MonetDataType tp, boolean generateOrderBy, boolean generateLimit, boolean generateCTEs) {
-        if (tables == null) {
+        if (tables == null && Randomly.getBoolean()) { /* also generate from-less queries */
             tables = getNextBatchOfTables(globalState, depth, generateCTEs);
         }
         if (tables != null) {
