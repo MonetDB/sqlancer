@@ -69,6 +69,7 @@ public final class MonetCommon {
         errors.add("Rounding of decimal");
         errors.add("Result too large");
         errors.add("Domain error");
+        errors.add("Digits out of bounds");
         /* TODO the following errors should be removed */
         errors.add("Decimal ");
         errors.add("Timestamp ");
