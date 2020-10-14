@@ -95,7 +95,7 @@ public final class MonetRandomQueryGenerator {
 
             // JOIN subqueries
             if (depth < MAX_SUBQUERY_DEPTH) { /* Protect against infinite recursion */
-                for (int i = 0; i < Randomly.smallNumber() + 1; i++) {
+                for (int i = 0; i < Randomly.fromOptions(1, 2, 3, 4); i++) {
                     MonetQuery q = createRandomQuery(depth + 1, Randomly.smallNumber() + 1, globalState, null, false, false, false);
                     MonetSubquery subquery = new MonetSubquery(q, String.format("sub%d", i), null);
                     joinStatements.add(new MonetJoin(subquery, gen.generateExpression(depth + 1, MonetDataType.BOOLEAN), MonetJoinType.getRandom()));
@@ -122,7 +122,7 @@ public final class MonetRandomQueryGenerator {
     }
 
     private static MonetQuery createSimpleSelect(MonetExpressionGenerator gen, MonetGlobalState globalState, MonetTables tables, int depth, List<MonetDataType> types, boolean generateOrderBy, boolean generateLimit, boolean generateCTEs) {
-        if (tables == null && Randomly.getBoolean()) { /* also generate from-less queries */
+        if (tables == null && !Randomly.getBooleanWithRatherLowProbability()) { /* also generate from-less queries */
             tables = getNextBatchOfTables(globalState, depth, generateCTEs);
         }
         if (tables != null) {
@@ -196,7 +196,7 @@ public final class MonetRandomQueryGenerator {
     /* Single column cases................. */
 
     private static MonetQuery createSingleColumnSelect(MonetExpressionGenerator gen, MonetGlobalState globalState, MonetTables tables, int depth, MonetDataType tp, boolean generateOrderBy, boolean generateLimit, boolean generateCTEs) {
-        if (tables == null && Randomly.getBoolean()) { /* also generate from-less queries */
+        if (tables == null && !Randomly.getBooleanWithRatherLowProbability()) { /* also generate from-less queries */
             tables = getNextBatchOfTables(globalState, depth, generateCTEs);
         }
         if (tables != null) {

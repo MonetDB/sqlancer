@@ -78,16 +78,16 @@ public class MonetNoRECOracle extends NoRECBase<MonetGlobalState> {
             List<MonetTable> tables) {
         List<MonetJoin> joinStatements = new ArrayList<>();
         MonetExpressionGenerator gen = new MonetExpressionGenerator(globalState).setColumns(columns);
-        for (int i = 1; i < tables.size(); i++) {
+        /*for (int i = 1; i < tables.size(); i++) {
             MonetExpression joinClause = gen.generateExpression(MonetDataType.BOOLEAN);
             MonetTable table = Randomly.fromList(tables);
             tables.remove(table);
             MonetJoinType options = MonetJoinType.getRandom();
             MonetJoin j = new MonetJoin(new MonetFromTable(table, Randomly.getBoolean(), null), joinClause, options);
             joinStatements.add(j);
-        }
+        }*/
         // JOIN subqueries
-        for (int i = 0; i < Randomly.smallNumber(); i++) {
+        for (int i = 0; i < Randomly.fromOptions(1, 2, 3, 4); i++) {
             MonetTables subqueryTables = globalState.getSchema().getRandomTableNonEmptyTables();
             MonetSubquery subquery = MonetTLPBase.createSubquery(globalState, String.format("sub%d", i),
                     subqueryTables);
