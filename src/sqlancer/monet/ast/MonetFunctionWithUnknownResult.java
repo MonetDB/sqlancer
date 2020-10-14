@@ -20,7 +20,6 @@ public enum MonetFunctionWithUnknownResult {
     REVERSE("reverse", MonetDataType.STRING, MonetDataType.STRING),
     UPPER("upper", MonetDataType.STRING, MonetDataType.STRING),
     LOWER("lower", MonetDataType.STRING, MonetDataType.STRING),
-    INDEX("\"index\"", MonetDataType.INT, MonetDataType.STRING, MonetDataType.BOOLEAN),
     RIGHT("\"right\"", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT),
     LEFT("\"left\"", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT),
     /* These functions are dangerous if the input amount is large
