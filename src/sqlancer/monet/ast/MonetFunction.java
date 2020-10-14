@@ -146,6 +146,24 @@ public class MonetFunction implements MonetExpression {
                 return new MonetDataType[] { MonetDataType.STRING };
             }
 
+        },
+        GREATEST(2, "greatest") {
+
+            @Override
+            public MonetConstant apply(MonetConstant[] evaluatedArgs, MonetExpression... args) {
+                throw new AssertionError(this);
+            }
+
+            @Override
+            public boolean supportsReturnType(MonetDataType type) {
+                return true;
+            }
+
+            @Override
+            public MonetDataType[] getInputTypesForReturnType(MonetDataType returnType, int nrArguments) {
+                return new MonetDataType[] { returnType, returnType };
+            }
+
         };
 
         private String functionName;

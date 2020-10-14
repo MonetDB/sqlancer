@@ -418,7 +418,7 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
         if (tables.isEmpty()) {
             return new MonetTables(Collections.emptyList());
         } else {
-            return new MonetTables(Randomly.nonEmptySubset(tables));
+            return new MonetTables(Randomly.nonEmptySubset(tables, Math.min(tables.size(), Randomly.fromOptions(1, 2, 3))));
         }
     }
 
@@ -427,7 +427,7 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
         if (tables.isEmpty()) {
             return Collections.emptyList();
         } else {
-            return Randomly.nonEmptySubset(tables, Math.min(tables.size(), Randomly.fromOptions(1, 2, 3, 4)));
+            return Randomly.nonEmptySubset(tables, Math.min(tables.size(), Randomly.fromOptions(1, 2, 3)));
         }
     }
 

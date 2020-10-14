@@ -81,7 +81,7 @@ public class MonetTableGenerator {
             if (i != 0) {
                 sb.append(", ");
             }
-            createColumn(String.format("tc%d", i));
+            createColumn(String.format("c%d", i));
         }
         if (Randomly.getBoolean()) {
             MonetCommon.addTableConstraints(columnHasPrimaryKey, sb, table, globalState, errors);
