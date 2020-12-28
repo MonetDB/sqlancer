@@ -43,6 +43,7 @@ public class MonetTableGenerator {
         errors.add("conversion of");
         errors.add("SQL feature not yet available for expressions and default values");
         errors.add("not implemented as");
+        errors.add("a table can have only one PRIMARY KEY");
         MonetCommon.addCommonExpressionErrors(errors);
         MonetCommon.addCommonTableErrors(errors);
     }
@@ -156,7 +157,6 @@ public class MonetTableGenerator {
             case PRIMARY_KEY:
                 sb.append("PRIMARY KEY");
                 errors.add("NOT NULL constraint violated for column");
-                errors.add("a table can have only one PRIMARY KEY");
                 columnHasPrimaryKey = true;
                 break;
             case DEFAULT:
