@@ -14,16 +14,16 @@ import sqlancer.monet.ast.MonetConstant;
 import sqlancer.monet.ast.MonetExpression;
 import sqlancer.monet.ast.MonetJoin;
 import sqlancer.monet.ast.MonetJoin.MonetJoinType;
+import sqlancer.monet.ast.MonetQuery;
+import sqlancer.monet.ast.MonetQuery.MonetSubquery;
 import sqlancer.monet.ast.MonetSelect;
-import sqlancer.monet.ast.MonetSelect.MonetFromTable;
 import sqlancer.monet.ast.MonetSelect.MonetCTE;
-import sqlancer.monet.ast.MonetSelect.SelectType;
+import sqlancer.monet.ast.MonetSelect.MonetFromTable;
 import sqlancer.monet.ast.MonetSelect.MonetQueryCTE;
+import sqlancer.monet.ast.MonetSelect.SelectType;
 import sqlancer.monet.ast.MonetSet;
 import sqlancer.monet.ast.MonetSet.SetDistictOrAll;
 import sqlancer.monet.ast.MonetSet.SetType;
-import sqlancer.monet.ast.MonetQuery;
-import sqlancer.monet.ast.MonetQuery.MonetSubquery;
 import sqlancer.monet.ast.MonetValues;
 
 public final class MonetRandomQueryGenerator {
@@ -60,8 +60,9 @@ public final class MonetRandomQueryGenerator {
                     for (MonetExpression ex : q.getFetchColumns()) {
                         String nextColumnName = String.format("c%d", j);
                         MonetDataType dt = ex.getExpressionType();
-                        if (dt == null)
+                        if (dt == null) {
                             throw new AssertionError("Ups " + ex.getClass().getName()); /* this is for debugging */
+                        }
                         cols.add(new MonetColumn(nextColumnName, dt, String.format("l%d%s", depth, nextName)));
                         j++;
                     }
@@ -135,11 +136,13 @@ public final class MonetRandomQueryGenerator {
     private static MonetQuery createSimpleSelect(MonetExpressionGenerator gen, MonetGlobalState globalState,
             MonetTables tables, int depth, List<MonetDataType> types, boolean generateOrderBy, boolean generateLimit,
             boolean generateCTEs) {
-        if (tables == null && !Randomly.getBooleanWithRatherLowProbability()) { /* also generate from-less queries */
-            tables = getNextBatchOfTables(globalState, depth, generateCTEs);
+        MonetTables tb = tables;
+
+        if (tb == null && !Randomly.getBooleanWithRatherLowProbability()) { /* also generate from-less queries */
+            tb = getNextBatchOfTables(globalState, depth, generateCTEs);
         }
-        if (tables != null) {
-            gen.setColumns(tables.getColumns());
+        if (tb != null) {
+            gen.setColumns(tb.getColumns());
         }
 
         MonetSelect select = new MonetSelect();
@@ -147,7 +150,7 @@ public final class MonetRandomQueryGenerator {
         for (MonetDataType tp : types) {
             columns.add(gen.generateExpression(depth, tp));
         }
-        return createSelect(gen, globalState, tables, depth, select, columns, generateOrderBy, generateLimit);
+        return createSelect(gen, globalState, tb, depth, select, columns, generateOrderBy, generateLimit);
     }
 
     private static MonetQuery createSet(MonetExpressionGenerator gen, MonetGlobalState globalState, MonetTables tables,
@@ -163,8 +166,10 @@ public final class MonetRandomQueryGenerator {
         return res;
     }
 
-    private static MonetQuery createValues(MonetExpressionGenerator gen,
-            MonetGlobalState globalState/* , MonetTables tables */, int depth, int nrColumns) {
+    private static MonetQuery createValues(
+            MonetExpressionGenerator gen/*
+                                         * , MonetGlobalState globalState , MonetTables tables
+                                         */, int depth, int nrColumns) {
         /*
          * if (tables == null) { tables = getNextBatchOfTables(globalState, depth, false); } if (tables != null) {
          * gen.setColumns(tables.getColumns()); }
@@ -196,7 +201,7 @@ public final class MonetRandomQueryGenerator {
         case 3:
             return createSet(gen, globalState, tables, depth, nrColumns);
         case 4:
-            return createValues(gen, globalState/* , tables */, depth, nrColumns);
+            return createValues(gen/* , globalState , tables */, depth, nrColumns);
         default:
             throw new AssertionError();
         }
@@ -214,30 +219,31 @@ public final class MonetRandomQueryGenerator {
     private static MonetQuery createSingleColumnSelect(MonetExpressionGenerator gen, MonetGlobalState globalState,
             MonetTables tables, int depth, MonetDataType tp, boolean generateOrderBy, boolean generateLimit,
             boolean generateCTEs) {
-        if (tables == null && !Randomly.getBooleanWithRatherLowProbability()) { /* also generate from-less queries */
-            tables = getNextBatchOfTables(globalState, depth, generateCTEs);
+        MonetTables tb = tables;
+
+        if (tb == null && !Randomly.getBooleanWithRatherLowProbability()) { /* also generate from-less queries */
+            tb = getNextBatchOfTables(globalState, depth, generateCTEs);
         }
-        if (tables != null) {
-            gen.setColumns(tables.getColumns());
+        if (tb != null) {
+            gen.setColumns(tb.getColumns());
         }
 
         MonetSelect select = new MonetSelect();
         List<MonetExpression> columns = new ArrayList<>(1);
         columns.add(gen.generateExpression(depth, tp));
-        return createSelect(gen, globalState, tables, depth, select, columns, generateOrderBy, generateLimit);
+        return createSelect(gen, globalState, tb, depth, select, columns, generateOrderBy, generateLimit);
     }
 
     private static MonetQuery createSingleColumnSet(MonetExpressionGenerator gen, MonetGlobalState globalState,
             int depth, MonetDataType tp) {
         MonetQuery left = createSingleColumnSelect(gen, globalState, null, depth, tp, false, false, false);
         MonetQuery right = createSingleColumnSelect(gen, globalState, null, depth, tp, false, false, false);
-        MonetQuery res = new MonetSet(Randomly.fromList(Arrays.asList(SetType.values())),
+        return new MonetSet(Randomly.fromList(Arrays.asList(SetType.values())),
                 Randomly.fromList(Arrays.asList(SetDistictOrAll.values())), left, right);
         // res.setFetchColumns(left.getFetchColumns());
-        return res;
     }
 
-    private static MonetQuery createSingleColumnValues(MonetExpressionGenerator gen, MonetGlobalState globalState,
+    private static MonetQuery createSingleColumnValues(MonetExpressionGenerator gen/* , MonetGlobalState globalState */,
             int depth, MonetDataType tp) {
         // MonetTables tables = getNextBatchOfTables(globalState, depth, false);
         // gen.setColumns(tables.getColumns());
@@ -264,7 +270,7 @@ public final class MonetRandomQueryGenerator {
         case 3:
             return createSingleColumnSet(gen, globalState, depth, tp);
         case 4:
-            return createSingleColumnValues(gen, globalState, depth, tp);
+            return createSingleColumnValues(gen/* , globalState */, depth, tp);
         default:
             throw new AssertionError();
         }

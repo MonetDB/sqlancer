@@ -1,18 +1,18 @@
 package sqlancer.monet.gen;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import sqlancer.Randomly;
 import sqlancer.common.query.ExpectedErrors;
 import sqlancer.common.query.SQLQueryAdapter;
-import sqlancer.monet.ast.MonetExpression;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetColumn;
 import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.MonetSchema.MonetTable;
 import sqlancer.monet.MonetVisitor;
+import sqlancer.monet.ast.MonetExpression;
 
 public final class MonetMergeGenerator {
 
@@ -84,7 +84,7 @@ public final class MonetMergeGenerator {
         sb.append(joined.getName());
         sb.append(" ON ");
         MonetExpressionGenerator gen = new MonetExpressionGenerator(globalState);
-        List<MonetColumn> array3 = new ArrayList<MonetColumn>(table.getColumns().size() + joined.getColumns().size());
+        List<MonetColumn> array3 = new ArrayList<>(table.getColumns().size() + joined.getColumns().size());
         array3.addAll(table.getColumns());
         array3.addAll(joined.getColumns());
         sb.append(MonetVisitor.asString(gen.generateExpression(MonetDataType.BOOLEAN)));

@@ -125,7 +125,7 @@ public final class MonetCommon {
                 sb.append(Randomly.fromOptions("STRING", "CLOB"));
             } else {
                 // TODO: support CHAR (without VAR)
-                if (MonetProvider.generateOnlyKnown || Randomly.getBoolean()) {
+                if (MonetProvider.GENERATE_ONLY_KNOWN || Randomly.getBoolean()) {
                     sb.append("VAR");
                 }
                 sb.append("CHAR");

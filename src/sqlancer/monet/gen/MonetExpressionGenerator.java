@@ -18,9 +18,9 @@ import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.MonetSchema.MonetRowValue;
 import sqlancer.monet.ast.MonetAggregate;
 import sqlancer.monet.ast.MonetAggregate.MonetAggregateFunction;
-import sqlancer.monet.ast.MonetAnyTypeOperation.MonetAnyTypeOperationType;
 import sqlancer.monet.ast.MonetAnyAllOperation;
 import sqlancer.monet.ast.MonetAnyTypeOperation;
+import sqlancer.monet.ast.MonetAnyTypeOperation.MonetAnyTypeOperationType;
 import sqlancer.monet.ast.MonetBetweenOperation;
 import sqlancer.monet.ast.MonetBinaryArithmeticOperation;
 import sqlancer.monet.ast.MonetBinaryArithmeticOperation.MonetBinaryOperator;
@@ -62,7 +62,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
 
     /* private boolean expectedResult; */
 
-    private MonetGlobalState globalState;
+    private final MonetGlobalState globalState;
 
     private boolean allowAggregateFunctions;
 
@@ -166,7 +166,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
             int options = Randomly.smallNumber() + 2;
             arguments = generateExpressions(depth, options, type);
         } else if (op == MonetAnyTypeOperationType.IFTHENELSE) {
-            arguments = new ArrayList<MonetExpression>();
+            arguments = new ArrayList<>();
             arguments.add(generateExpression(depth, MonetDataType.BOOLEAN)); /* IF */
             arguments.add(generateExpression(depth, type)); /* THEN */
             arguments.add(generateExpression(depth, type)); /* ELSE */
@@ -179,7 +179,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     private MonetExpression generateBooleanExpression(int depth) {
         List<BooleanExpression> validOptions = new ArrayList<>(Arrays.asList(BooleanExpression.values()));
         /*
-         * if (MonetProvider.generateOnlyKnown) { validOptions.remove(BooleanExpression.BINARY_RANGE_COMPARISON); }
+         * if (MonetProvider.GENERATE_ONLY_KNOWN) { validOptions.remove(BooleanExpression.BINARY_RANGE_COMPARISON); }
          */
         BooleanExpression option = Randomly.fromList(validOptions);
         switch (option) {
@@ -258,7 +258,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     }
 
     private MonetExpression generateFunction(int depth, MonetDataType type) {
-        if (MonetProvider.generateOnlyKnown || Randomly.getBoolean()) {
+        if (MonetProvider.GENERATE_ONLY_KNOWN || Randomly.getBoolean()) {
             return generateFunctionWithKnownResult(depth, type);
         } else {
             return generateFunctionWithUnknownResult(depth, type);
@@ -272,9 +272,8 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     }
 
     private MonetExpression getComparison(MonetExpression leftExpr, MonetExpression rightExpr) {
-        MonetBinaryComparisonOperation op = new MonetBinaryComparisonOperation(leftExpr, rightExpr,
+        return new MonetBinaryComparisonOperation(leftExpr, rightExpr,
                 MonetBinaryComparisonOperation.MonetBinaryComparisonOperator.getRandom());
-        return op;
     }
 
     private MonetExpression inOperation(int depth) {
@@ -399,8 +398,9 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         case CAST:
             return new MonetCastOperation(generateExpression(depth + 1), getCompoundDataType(type));
         case FUNCTION:
-            if (type == MonetDataType.STRING && Randomly.getBooleanWithSmallProbability())
+            if (type == MonetDataType.STRING && Randomly.getBooleanWithSmallProbability()) {
                 return generateConcat(depth);
+            }
             return generateFunction(depth + 1, type);
         case CONSTANT:
             return generateConstant(r, type);
@@ -432,41 +432,41 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         ANYTYPE_EXPRESSION, SUBQUERY
     }
 
-    private MonetExpression generateIntExpression(int depth, MonetDataType int_tp) {
+    private MonetExpression generateIntExpression(int depth, MonetDataType integerType) {
         List<IntExpression> options = new ArrayList<>(Arrays.asList(IntExpression.values()));
 
-        if (int_tp == MonetDataType.REAL || int_tp == MonetDataType.DOUBLE) {
+        if (integerType == MonetDataType.REAL || integerType == MonetDataType.DOUBLE) {
             options.remove(IntExpression.BINARY_OPERATION);
         }
         switch (Randomly.fromList(options)) {
         case CAST:
-            return new MonetCastOperation(generateExpression(depth + 1), getCompoundDataType(int_tp));
+            return new MonetCastOperation(generateExpression(depth + 1), getCompoundDataType(integerType));
         case CONSTANT:
-            return generateConstant(r, int_tp);
+            return generateConstant(r, integerType);
         case UNARY_OPERATION:
-            MonetExpression intExpression = generateExpression(depth + 1, int_tp);
+            MonetExpression intExpression = generateExpression(depth + 1, integerType);
             return new MonetPrefixOperation(intExpression,
-                    Randomly.getBoolean() ? PrefixOperator.UNARY_PLUS : PrefixOperator.UNARY_MINUS, int_tp);
+                    Randomly.getBoolean() ? PrefixOperator.UNARY_PLUS : PrefixOperator.UNARY_MINUS, integerType);
         case FUNCTION:
-            return generateFunction(depth + 1, int_tp);
+            return generateFunction(depth + 1, integerType);
         case BINARY_OPERATION:
             return new MonetBinaryBitOperation(MonetBinaryBitOperator.getRandom(),
-                    generateExpression(depth + 1, int_tp), generateExpression(depth + 1, int_tp));
+                    generateExpression(depth + 1, integerType), generateExpression(depth + 1, integerType));
         case BINARY_ARITHMETIC_EXPRESSION:
-            return new MonetBinaryArithmeticOperation(generateExpression(depth + 1, int_tp),
-                    generateExpression(depth + 1, int_tp), MonetBinaryOperator.getRandom(), int_tp);
+            return new MonetBinaryArithmeticOperation(generateExpression(depth + 1, integerType),
+                    generateExpression(depth + 1, integerType), MonetBinaryOperator.getRandom(), integerType);
         case SUBQUERY:
-            MonetQuery select = MonetRandomQueryGenerator.createRandomSingleColumnQuery(depth + 1, int_tp, globalState,
-                    false, false, this.allowParameters);
-            return new MonetQuery.MonetSubquery(select, null, int_tp);
+            MonetQuery select = MonetRandomQueryGenerator.createRandomSingleColumnQuery(depth + 1, integerType,
+                    globalState, false, false, this.allowParameters);
+            return new MonetQuery.MonetSubquery(select, null, integerType);
         case CASE:
             MonetDataType tp = MonetDataType.getRandomType();
             int noptions = Randomly.smallNumber() + 1;
             return new MonetCaseOperation(Randomly.getBoolean() ? generateExpression(depth + 1, tp) : null,
-                    generateExpressions(depth + 1, noptions, tp), generateExpressions(depth + 1, noptions, int_tp),
-                    Randomly.getBoolean() ? generateExpression(depth + 1, int_tp) : null, int_tp);
+                    generateExpressions(depth + 1, noptions, tp), generateExpressions(depth + 1, noptions, integerType),
+                    Randomly.getBoolean() ? generateExpression(depth + 1, integerType) : null, integerType);
         case ANYTYPE_EXPRESSION:
-            return generateAnyTypeOperation(depth + 1, int_tp);
+            return generateAnyTypeOperation(depth + 1, integerType);
         default:
             throw new AssertionError();
         }
@@ -530,7 +530,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
                 return MonetConstant.createIntConstant(val, type);
             }
         case BOOLEAN:
-            if (Randomly.getBooleanWithSmallProbability() && !MonetProvider.generateOnlyKnown) {
+            if (Randomly.getBooleanWithSmallProbability() && !MonetProvider.GENERATE_ONLY_KNOWN) {
                 return MonetConstant.createTextConstant(Randomly.fromOptions("TRUE", "FALSE", "0", "1"));
             } else {
                 return MonetConstant.createBooleanConstant(Randomly.getBoolean());

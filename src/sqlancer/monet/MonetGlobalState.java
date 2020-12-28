@@ -22,29 +22,10 @@ public class MonetGlobalState extends SQLGlobalState<MonetOptions, MonetSchema> 
     @Override
     public void setConnection(SQLConnection con) {
         super.setConnection(con);
-        try {
-            this.opClasses = getOpclasses(getConnection());
-            this.operators = getOperators(getConnection());
-            this.collates = getCollnames(getConnection());
-        } catch (SQLException e) {
-            throw new AssertionError(e);
-        }
-    }
-
-    private List<String> getCollnames(SQLConnection con) throws SQLException {
-        List<String> opClasses = Arrays.asList(new String[] {});
-        return opClasses;
-    }
-
-    private List<String> getOpclasses(SQLConnection con) throws SQLException {
-        List<String> opClasses = Arrays.asList(new String[] {});
-        return opClasses;
-    }
-
-    private List<String> getOperators(SQLConnection con) throws SQLException {
-        List<String> opClasses = Arrays.asList(new String[] { "<", ">", "<=", ">=", "=", "<>", "!", "^", "|", "||", "&",
-                "~", "+", "-", "/", "%", "*", "<<", ">>", "@" });
-        return opClasses;
+        this.opClasses = Arrays.asList(new String[] {});
+        this.operators = Arrays.asList(new String[] { "<", ">", "<=", ">=", "=", "<>", "!", "^", "|", "||", "&", "~",
+                "+", "-", "/", "%", "*", "<<", ">>", "@" });
+        this.collates = Arrays.asList(new String[] {});
     }
 
     public List<String> getOperators() {

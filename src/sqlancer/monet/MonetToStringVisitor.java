@@ -7,6 +7,8 @@ import java.util.Optional;
 import sqlancer.Randomly;
 import sqlancer.common.visitor.BinaryOperation;
 import sqlancer.common.visitor.ToStringVisitor;
+import sqlancer.monet.MonetSchema.MonetColumn;
+import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.ast.MonetAggregate;
 import sqlancer.monet.ast.MonetAggregate.MonetAggregateFunction;
 import sqlancer.monet.ast.MonetAnyAllOperation;
@@ -32,12 +34,10 @@ import sqlancer.monet.ast.MonetPrefixOperation;
 import sqlancer.monet.ast.MonetQuery;
 import sqlancer.monet.ast.MonetQuery.MonetSubquery;
 import sqlancer.monet.ast.MonetSelect;
-import sqlancer.monet.ast.MonetSelect.MonetQueryCTE;
 import sqlancer.monet.ast.MonetSelect.MonetFromTable;
+import sqlancer.monet.ast.MonetSelect.MonetQueryCTE;
 import sqlancer.monet.ast.MonetSet;
 import sqlancer.monet.ast.MonetValues;
-import sqlancer.monet.MonetSchema.MonetColumn;
-import sqlancer.monet.MonetSchema.MonetDataType;
 
 public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression> implements MonetVisitor {
 
@@ -367,9 +367,8 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
             throw new AssertionError(cast.getType());
         }
         Optional<Integer> size = compoundType.getSize();
-        MonetDataType[] exclude = new MonetDataType[] { MonetDataType.INT, MonetDataType.TIME, MonetDataType.TIMESTAMP,
-                MonetDataType.DATE, MonetDataType.SECOND_INTERVAL, MonetDataType.DAY_INTERVAL,
-                MonetDataType.MONTH_INTERVAL };
+        MonetDataType[] exclude = { MonetDataType.INT, MonetDataType.TIME, MonetDataType.TIMESTAMP, MonetDataType.DATE,
+                MonetDataType.SECOND_INTERVAL, MonetDataType.DAY_INTERVAL, MonetDataType.MONTH_INTERVAL };
         if (size.isPresent() && !Arrays.stream(exclude).allMatch(t -> t.equals(compoundType.getDataType()))) {
             sb.append("(");
             sb.append(size.get());

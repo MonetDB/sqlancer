@@ -14,12 +14,12 @@ import sqlancer.monet.MonetVisitor;
 
 public class MonetAlterTableGenerator {
 
-    private MonetTable randomTable;
+    private final MonetTable randomTable;
     // private Randomly r;
     private static MonetColumn randomColumn;
     // private boolean generateOnlyKnown;
     // private List<String> opClasses;
-    private MonetGlobalState globalState;
+    private final MonetGlobalState globalState;
 
     protected enum Action {
         // ALTER_TABLE_ADD_COLUMN, // [ COLUMN ] column data_type [ COLLATE collation ] [
@@ -34,17 +34,15 @@ public class MonetAlterTableGenerator {
         ADD_TABLE_CONSTRAINT // ADD table_constraint [ NOT VALID ]
     }
 
-    public MonetAlterTableGenerator(MonetTable randomTable, MonetGlobalState globalState, boolean generateOnlyKnown) {
+    public MonetAlterTableGenerator(MonetTable randomTable, MonetGlobalState globalState) {
         this.randomTable = randomTable;
         this.globalState = globalState;
         // this.r = globalState.getRandomly();
-        // this.generateOnlyKnown = generateOnlyKnown;
         // this.opClasses = globalState.getOpClasses();
     }
 
-    public static SQLQueryAdapter create(MonetTable randomTable, MonetGlobalState globalState,
-            boolean generateOnlyKnown) {
-        return new MonetAlterTableGenerator(randomTable, globalState, generateOnlyKnown).generate();
+    public static SQLQueryAdapter create(MonetTable randomTable, MonetGlobalState globalState) {
+        return new MonetAlterTableGenerator(randomTable, globalState).generate();
     }
 
     public List<Action> getActions(ExpectedErrors errors) {

@@ -1,8 +1,8 @@
 package sqlancer.monet.ast;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.math.BigDecimal;
 
 import sqlancer.IgnoreMeException;
 import sqlancer.monet.MonetSchema.MonetDataType;
@@ -76,7 +76,7 @@ public abstract class MonetConstant implements MonetExpression {
             case INT:
             case BIGINT:
             case HUGEINT:
-                return MonetConstant.createIntConstant((value) ? 1 : 0, type);
+                return MonetConstant.createIntConstant(value ? 1 : 0, type);
             case STRING:
                 return MonetConstant.createTextConstant(value ? "true" : "false");
             default:

@@ -32,7 +32,7 @@ public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
         TINYINT, SMALLINT, INT, BIGINT, HUGEINT, BOOLEAN, STRING, DECIMAL, REAL, DOUBLE, TIME, TIMESTAMP, DATE,
         SECOND_INTERVAL, DAY_INTERVAL, MONTH_INTERVAL, BLOB, UUID;
 
-        private static String OS = System.getProperty("os.name").toLowerCase();
+        private static String oS = System.getProperty("os.name").toLowerCase();
 
         private static List<MonetDataType> numericTypes;
 
@@ -41,10 +41,10 @@ public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
         public static void intitializeTypes() {
             allTypes = new ArrayList<>(Arrays.asList(values()));
 
-            if (MonetProvider.generateOnlyKnown || OS.contains("win")) {
+            if (MonetProvider.GENERATE_ONLY_KNOWN || oS.contains("win")) {
                 allTypes.remove(MonetDataType.HUGEINT); /* No huge integers on Windows :( */
             }
-            if (MonetProvider.generateOnlyKnown) {
+            if (MonetProvider.GENERATE_ONLY_KNOWN) {
                 allTypes.remove(MonetDataType.TINYINT);
                 allTypes.remove(MonetDataType.SMALLINT);
                 allTypes.remove(MonetDataType.BIGINT);
@@ -65,7 +65,7 @@ public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
             numericTypes = new ArrayList<>();
 
             numericTypes.add(MonetDataType.INT);
-            if (!MonetProvider.generateOnlyKnown) {
+            if (!MonetProvider.GENERATE_ONLY_KNOWN) {
                 numericTypes.add(MonetDataType.TINYINT);
                 numericTypes.add(MonetDataType.SMALLINT);
                 numericTypes.add(MonetDataType.BIGINT);
@@ -73,7 +73,7 @@ public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
                 numericTypes.add(MonetDataType.DOUBLE);
                 numericTypes.add(MonetDataType.REAL);
             }
-            if (!MonetProvider.generateOnlyKnown && !OS.contains("win")) {
+            if (!MonetProvider.GENERATE_ONLY_KNOWN && !oS.contains("win")) {
                 numericTypes.add(MonetDataType.HUGEINT);
             }
         }
@@ -206,7 +206,7 @@ public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
                     }
                     values.put(column, constant);
                 }
-                assert (!randomRowValues.next());
+                assert !randomRowValues.next();
                 return new MonetRowValue(this, values);
             } catch (SQLException e) {
                 throw new IgnoreMeException();
@@ -334,11 +334,6 @@ public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
             return new MonetIndex(indexName);
         }
 
-        @Override
-        public String getIndexName() {
-            return super.getIndexName();
-        }
-
     }
 
     public static MonetSchema fromConnection(SQLConnection con, String databaseName) throws SQLException {
@@ -354,11 +349,11 @@ public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
                         int tableCommitAction = rs.getInt("table_commit_action");
 
                         boolean isView = tableType == 1;
-                        MonetTable.TableType MonetTableType = getTableType(tableCommitAction);
+                        MonetTable.TableType monetTableType = getTableType(tableCommitAction);
                         List<MonetColumn> databaseColumns = getTableColumns(con, tableID);
                         List<MonetIndex> indexes = getIndexes(con, tableID);
                         List<MonetStatisticsObject> statistics = new ArrayList<>(); // TODO? getStatistics(con);
-                        MonetTable t = new MonetTable(tableName, databaseColumns, indexes, MonetTableType, statistics,
+                        MonetTable t = new MonetTable(tableName, databaseColumns, indexes, monetTableType, statistics,
                                 isView, !isView);
                         for (MonetColumn c : databaseColumns) {
                             c.setTable(t);

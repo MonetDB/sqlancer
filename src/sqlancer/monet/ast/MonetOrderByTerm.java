@@ -22,7 +22,7 @@ public class MonetOrderByTerm implements MonetExpression {
 
         private final String text;
 
-        private MonetNullsFirstOrLast(String text) {
+        MonetNullsFirstOrLast(String text) {
             this.text = text;
         }
 

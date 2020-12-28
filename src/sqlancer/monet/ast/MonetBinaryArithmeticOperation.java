@@ -11,6 +11,8 @@ import sqlancer.monet.ast.MonetBinaryArithmeticOperation.MonetBinaryOperator;
 public class MonetBinaryArithmeticOperation extends BinaryOperatorNode<MonetExpression, MonetBinaryOperator>
         implements MonetExpression {
 
+    private MonetDataType type;
+
     public enum MonetBinaryOperator implements Operator {
 
         ADDITION("+") {
@@ -85,8 +87,6 @@ public class MonetBinaryArithmeticOperation extends BinaryOperatorNode<MonetExpr
         super(left, right, op);
         this.type = type;
     }
-
-    private MonetDataType type;
 
     @Override
     public MonetConstant getExpectedValue() {

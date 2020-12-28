@@ -10,11 +10,10 @@ import sqlancer.Randomly;
 import sqlancer.SQLConnection;
 import sqlancer.SQLProviderAdapter;
 import sqlancer.StatementExecutor;
-import sqlancer.common.query.ExpectedErrors;
 import sqlancer.common.DBMSCommon;
+import sqlancer.common.query.ExpectedErrors;
 import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.common.query.SQLQueryProvider;
-import sqlancer.monet.MonetOptions.MonetOracleFactory;
 import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.gen.MonetAlterTableGenerator;
 import sqlancer.monet.gen.MonetAnalyzeGenerator;
@@ -39,7 +38,7 @@ public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOpt
     /**
      * Generate only data types and expressions that are understood by PQS.
      */
-    public static boolean generateOnlyKnown;
+    public static final boolean GENERATE_ONLY_KNOWN = false;
 
     public MonetProvider() {
         super(MonetGlobalState.class, MonetOptions.class);
@@ -51,8 +50,7 @@ public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOpt
 
     public enum Action implements AbstractAction<MonetGlobalState> {
         ANALYZE(MonetAnalyzeGenerator::create), //
-        ALTER_TABLE(g -> MonetAlterTableGenerator.create(g.getSchema().getRandomTable(t -> !t.isView()), g,
-                generateOnlyKnown)), //
+        ALTER_TABLE(g -> MonetAlterTableGenerator.create(g.getSchema().getRandomTable(t -> !t.isView()), g)), //
         COMMIT(g -> {
             SQLQueryAdapter query;
             if (Randomly.getBoolean()) {
@@ -142,10 +140,10 @@ public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOpt
 
     @Override
     public SQLConnection createDatabase(MonetGlobalState globalState) throws SQLException {
-        if (globalState.getDmbsSpecificOptions().getTestOracleFactory().stream()
-                .anyMatch((o) -> o == MonetOracleFactory.PQS)) {
-            generateOnlyKnown = true;
-        }
+        /*
+         * if (globalState.getDmbsSpecificOptions().getTestOracleFactory().stream() .anyMatch((o) -> o ==
+         * MonetOracleFactory.PQS)) { GENERATE_ONLY_KNOWN = true; }
+         */
 
         MonetDataType.intitializeTypes();
         String url = "jdbc:monetdb://localhost:50000/:inmemory";
@@ -160,7 +158,7 @@ public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOpt
             try {
                 String tableName = DBMSCommon.createTableName(globalState.getSchema().getDatabaseTables().size());
                 SQLQueryAdapter createTable = MonetTableGenerator.generate(tableName, globalState.getSchema(),
-                        generateOnlyKnown, globalState);
+                        GENERATE_ONLY_KNOWN, globalState);
                 globalState.executeStatement(createTable);
             } catch (IgnoreMeException e) {
 

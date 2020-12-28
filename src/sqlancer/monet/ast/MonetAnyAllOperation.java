@@ -1,7 +1,7 @@
 package sqlancer.monet.ast;
 
-import sqlancer.monet.ast.MonetBinaryComparisonOperation.MonetBinaryComparisonOperator;
 import sqlancer.monet.MonetSchema.MonetDataType;
+import sqlancer.monet.ast.MonetBinaryComparisonOperation.MonetBinaryComparisonOperator;
 
 public class MonetAnyAllOperation implements MonetExpression {
 

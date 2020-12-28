@@ -7,7 +7,7 @@ import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetVisitor;
 import sqlancer.monet.ast.MonetQuery;
 
-public class MonetPreparedStatementGenerator {
+public final class MonetPreparedStatementGenerator {
 
     private MonetPreparedStatementGenerator() {
     }

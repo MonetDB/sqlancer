@@ -3,7 +3,7 @@ package sqlancer.monet.ast;
 import sqlancer.common.ast.SelectBase;
 import sqlancer.monet.MonetSchema.MonetDataType;
 
-public abstract class MonetQuery extends SelectBase<MonetExpression> implements MonetExpression {
+public class MonetQuery extends SelectBase<MonetExpression> implements MonetExpression {
 
     public static class MonetSubquery implements MonetExpression {
         private final MonetQuery s;
