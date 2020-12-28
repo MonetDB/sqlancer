@@ -203,7 +203,7 @@ public final class Randomly {
 
     private long getIntegerBoundedImp(int min, int max) {
         if (smallBiasProbability()) {
-            return Randomly.fromOptions(-1L, (long)max, (long)min, 1L, 0L);
+            return Randomly.fromOptions(-1L, (long) max, (long) min, 1L, 0L);
         } else {
             if (cacheProbability()) {
                 Long l = getFromLongCache();
@@ -465,7 +465,8 @@ public final class Randomly {
 
     public double getDouble() {
         if (smallBiasProbability()) {
-            return Randomly.fromOptions(0.0, -0.0, Double.MAX_VALUE, -Double.MAX_VALUE, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
+            return Randomly.fromOptions(0.0, -0.0, Double.MAX_VALUE, -Double.MAX_VALUE, Double.POSITIVE_INFINITY,
+                    Double.NEGATIVE_INFINITY);
         } else if (cacheProbability()) {
             Double d = getFromDoubleCache();
             if (d != null) {

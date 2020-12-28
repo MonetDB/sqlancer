@@ -6,8 +6,8 @@ import sqlancer.common.ast.BinaryOperatorNode.Operator;
 import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.ast.MonetBinaryComparisonOperation.MonetBinaryComparisonOperator;
 
-public class MonetBinaryComparisonOperation
-        extends BinaryOperatorNode<MonetExpression, MonetBinaryComparisonOperator> implements MonetExpression {
+public class MonetBinaryComparisonOperation extends BinaryOperatorNode<MonetExpression, MonetBinaryComparisonOperator>
+        implements MonetExpression {
 
     public enum MonetBinaryComparisonOperator implements Operator {
         EQUALS("=") {

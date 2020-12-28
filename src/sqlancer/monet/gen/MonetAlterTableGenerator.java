@@ -15,35 +15,35 @@ import sqlancer.monet.MonetVisitor;
 public class MonetAlterTableGenerator {
 
     private MonetTable randomTable;
-    //private Randomly r;
+    // private Randomly r;
     private static MonetColumn randomColumn;
-    //private boolean generateOnlyKnown;
-    //private List<String> opClasses;
+    // private boolean generateOnlyKnown;
+    // private List<String> opClasses;
     private MonetGlobalState globalState;
 
     protected enum Action {
-        //ALTER_TABLE_ADD_COLUMN, // [ COLUMN ] column data_type [ COLLATE collation ] [
+        // ALTER_TABLE_ADD_COLUMN, // [ COLUMN ] column data_type [ COLLATE collation ] [
         // column_constraint [ ... ] ]
         ALTER_TABLE_DROP_COLUMN, // DROP [ COLUMN ] [ IF EXISTS ] column [ RESTRICT | CASCADE ]
-        //ALTER_COLUMN_TYPE, // ALTER [ COLUMN ] column [ SET DATA ] TYPE data_type [ COLLATE collation ] [
-                           // USING expression ]
+        // ALTER_COLUMN_TYPE, // ALTER [ COLUMN ] column [ SET DATA ] TYPE data_type [ COLLATE collation ] [
+        // USING expression ]
         ALTER_COLUMN_SET_DROP_DEFAULT, // ALTER [ COLUMN ] column SET DEFAULT expression and ALTER [ COLUMN ] column
                                        // DROP DEFAULT
         ALTER_COLUMN_SET_DROP_NULL, // ALTER [ COLUMN ] column { SET | DROP } NOT NULL
-        //ALTER_COLUMN_SET_STORAGE, // ALTER [ COLUMN ] column SET STORAGE { PLAIN | EXTERNAL | EXTENDED | MAIN }
+        // ALTER_COLUMN_SET_STORAGE, // ALTER [ COLUMN ] column SET STORAGE { PLAIN | EXTERNAL | EXTENDED | MAIN }
         ADD_TABLE_CONSTRAINT // ADD table_constraint [ NOT VALID ]
     }
 
-    public MonetAlterTableGenerator(MonetTable randomTable, MonetGlobalState globalState,
-            boolean generateOnlyKnown) {
+    public MonetAlterTableGenerator(MonetTable randomTable, MonetGlobalState globalState, boolean generateOnlyKnown) {
         this.randomTable = randomTable;
         this.globalState = globalState;
-        //this.r = globalState.getRandomly();
-        //this.generateOnlyKnown = generateOnlyKnown;
-        //this.opClasses = globalState.getOpClasses();
+        // this.r = globalState.getRandomly();
+        // this.generateOnlyKnown = generateOnlyKnown;
+        // this.opClasses = globalState.getOpClasses();
     }
 
-    public static SQLQueryAdapter create(MonetTable randomTable, MonetGlobalState globalState, boolean generateOnlyKnown) {
+    public static SQLQueryAdapter create(MonetTable randomTable, MonetGlobalState globalState,
+            boolean generateOnlyKnown) {
         return new MonetAlterTableGenerator(randomTable, globalState, generateOnlyKnown).generate();
     }
 
@@ -54,7 +54,7 @@ public class MonetAlterTableGenerator {
 
         errors.add("conversion of");
         errors.add("not supported on TEMPORARY table");
-        errors.add("ALTER TABLE: can't alter temporary table");        
+        errors.add("ALTER TABLE: can't alter temporary table");
 
         List<Action> action = Randomly.nonEmptySubset(Arrays.asList(Action.values()), 1);
         if (randomTable.getColumns().size() == 1) {
@@ -92,17 +92,12 @@ public class MonetAlterTableGenerator {
                 errors.add("cannot drop column");
                 errors.add("cannot drop inherited column");
                 break;
-            /*case ALTER_COLUMN_TYPE:
-                alterColumn(randomTable, sb);
-                if (Randomly.getBoolean()) {
-                    sb.append(" SET DATA");
-                }
-                sb.append(" TYPE ");
-                MonetDataType randomType = MonetDataType.getRandomType();
-                MonetCommon.appendDataType(randomType, sb, false, generateOnlyKnown, opClasses);
-                errors.add("types ");
-                errors.add("has no valid default value");
-                break;*/
+            /*
+             * case ALTER_COLUMN_TYPE: alterColumn(randomTable, sb); if (Randomly.getBoolean()) {
+             * sb.append(" SET DATA"); } sb.append(" TYPE "); MonetDataType randomType = MonetDataType.getRandomType();
+             * MonetCommon.appendDataType(randomType, sb, false, generateOnlyKnown, opClasses); errors.add("types ");
+             * errors.add("has no valid default value"); break;
+             */
             case ALTER_COLUMN_SET_DROP_DEFAULT:
                 alterColumn(randomTable, sb);
                 if (Randomly.getBoolean()) {
@@ -119,16 +114,15 @@ public class MonetAlterTableGenerator {
                 errors.add("contains null values");
                 errors.add("NOT NULL constraint violated for column");
                 break;
-            /*case ALTER_COLUMN_SET_STORAGE:
-                alterColumn(randomTable, sb);
-                sb.append("SET STORAGE ");
-                sb.append(Randomly.fromOptions("PLAIN", "EXTERNAL", "EXTENDED", "MAIN"));
-                break;*/
+            /*
+             * case ALTER_COLUMN_SET_STORAGE: alterColumn(randomTable, sb); sb.append("SET STORAGE ");
+             * sb.append(Randomly.fromOptions("PLAIN", "EXTERNAL", "EXTENDED", "MAIN")); break;
+             */
             case ADD_TABLE_CONSTRAINT:
                 sb.append("ADD ");
                 MonetCommon.addTableConstraint(sb, randomTable, globalState, errors);
 
-                //errors.add("types ");
+                // errors.add("types ");
                 errors.add("shift operand too large in ");
                 errors.add("has no valid default value");
                 errors.add("value too long for type (var)char");

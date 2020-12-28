@@ -22,8 +22,8 @@ public final class MonetDeleteGenerator {
         sb.append(table.getName());
         if (Randomly.getBoolean()) {
             sb.append(" WHERE ");
-            sb.append(MonetVisitor.asString(MonetExpressionGenerator.generateExpression(globalState,
-                    table.getColumns(), MonetDataType.BOOLEAN)));
+            sb.append(MonetVisitor.asString(MonetExpressionGenerator.generateExpression(globalState, table.getColumns(),
+                    MonetDataType.BOOLEAN)));
         }
         MonetCommon.addCommonExpressionErrors(errors);
         errors.add("division by zero");

@@ -16,22 +16,24 @@ public enum MonetFunctionWithUnknownResult {
     CHAR_LENGTH("char_length", MonetDataType.INT, MonetDataType.STRING),
     OCTET_LENGTH1("octet_length", MonetDataType.INT, MonetDataType.BLOB),
     OCTET_LENGTH2("octet_length", MonetDataType.INT, MonetDataType.STRING),
-    REPLACE("replace", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.STRING, MonetDataType.STRING), 
+    REPLACE("replace", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.STRING, MonetDataType.STRING),
     REVERSE("reverse", MonetDataType.STRING, MonetDataType.STRING),
     UPPER("upper", MonetDataType.STRING, MonetDataType.STRING),
     LOWER("lower", MonetDataType.STRING, MonetDataType.STRING),
     RIGHT("\"right\"", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT),
     LEFT("\"left\"", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT),
-    /* These functions are dangerous if the input amount is large
-    SPACE("space", MonetDataType.STRING, MonetDataType.INT),
-    REPEAT("repeat", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT),
-    LPAD("lpad", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT),
-    LPAD2("lpad", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT, MonetDataType.STRING),
-    RPAD("rpad", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT),
-    RPAD2("rpad", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT, MonetDataType.STRING),*/
+    /*
+     * These functions are dangerous if the input amount is large SPACE("space", MonetDataType.STRING,
+     * MonetDataType.INT), REPEAT("repeat", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT), LPAD("lpad",
+     * MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT), LPAD2("lpad", MonetDataType.STRING,
+     * MonetDataType.STRING, MonetDataType.INT, MonetDataType.STRING), RPAD("rpad", MonetDataType.STRING,
+     * MonetDataType.STRING, MonetDataType.INT), RPAD2("rpad", MonetDataType.STRING, MonetDataType.STRING,
+     * MonetDataType.INT, MonetDataType.STRING),
+     */
     SUBSTR("substr", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT),
     SUBSTR2("substr", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT, MonetDataType.INT),
-    INSERT("\"insert\"", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT, MonetDataType.INT, MonetDataType.STRING),
+    INSERT("\"insert\"", MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT, MonetDataType.INT,
+            MonetDataType.STRING),
     LOCATE("\"locate\"", MonetDataType.INT, MonetDataType.STRING, MonetDataType.STRING),
     LOCATE3("\"locate\"", MonetDataType.INT, MonetDataType.STRING, MonetDataType.STRING, MonetDataType.INT),
     CHARINDEX("charindex", MonetDataType.INT, MonetDataType.STRING, MonetDataType.STRING),
@@ -59,36 +61,27 @@ public enum MonetFunctionWithUnknownResult {
     SCALEDOWN_DEC("scale_down", MonetDataType.DECIMAL, MonetDataType.DECIMAL, MonetDataType.INT),
 
     // mathematical functions
-    CBRT("cbrt", MonetDataType.REAL, MonetDataType.REAL),
-    CEIL("ceil", MonetDataType.REAL, MonetDataType.REAL),
+    CBRT("cbrt", MonetDataType.REAL, MonetDataType.REAL), CEIL("ceil", MonetDataType.REAL, MonetDataType.REAL),
     CEILING("ceiling", MonetDataType.REAL, MonetDataType.REAL),
     DEGREES("degrees", MonetDataType.REAL, MonetDataType.REAL),
-    RADIANS("radians", MonetDataType.REAL, MonetDataType.REAL),
-    EXP("exp", MonetDataType.REAL, MonetDataType.REAL),
+    RADIANS("radians", MonetDataType.REAL, MonetDataType.REAL), EXP("exp", MonetDataType.REAL, MonetDataType.REAL),
     LN("ln", MonetDataType.REAL, MonetDataType.REAL),
     LOG("log", MonetDataType.REAL, MonetDataType.REAL, MonetDataType.REAL),
-    LOG2("log", MonetDataType.REAL, MonetDataType.REAL),
-    LOG10("log10", MonetDataType.REAL, MonetDataType.REAL),
-    PI("pi", MonetDataType.REAL),
-    POWER("power", MonetDataType.REAL, MonetDataType.REAL, MonetDataType.REAL),
-    FLOOR("floor", MonetDataType.REAL, MonetDataType.REAL),
-    SQRT("sqrt", MonetDataType.REAL, MonetDataType.REAL),
- 
+    LOG2("log", MonetDataType.REAL, MonetDataType.REAL), LOG10("log10", MonetDataType.REAL, MonetDataType.REAL),
+    PI("pi", MonetDataType.REAL), POWER("power", MonetDataType.REAL, MonetDataType.REAL, MonetDataType.REAL),
+    FLOOR("floor", MonetDataType.REAL, MonetDataType.REAL), SQRT("sqrt", MonetDataType.REAL, MonetDataType.REAL),
+
     // trigonometric functions - complete
-    ACOS("acos", MonetDataType.REAL, MonetDataType.REAL),
-    ASIN("asin", MonetDataType.REAL, MonetDataType.REAL),
+    ACOS("acos", MonetDataType.REAL, MonetDataType.REAL), ASIN("asin", MonetDataType.REAL, MonetDataType.REAL),
     ATAN("atan", MonetDataType.REAL, MonetDataType.REAL, MonetDataType.REAL),
-    COS("cos", MonetDataType.REAL, MonetDataType.REAL),
-    COT("cot", MonetDataType.REAL, MonetDataType.REAL),
-    SIN("sin", MonetDataType.REAL, MonetDataType.REAL),
-    TAN("tan", MonetDataType.REAL, MonetDataType.REAL),
+    COS("cos", MonetDataType.REAL, MonetDataType.REAL), COT("cot", MonetDataType.REAL, MonetDataType.REAL),
+    SIN("sin", MonetDataType.REAL, MonetDataType.REAL), TAN("tan", MonetDataType.REAL, MonetDataType.REAL),
 
     // hyperbolic functions - complete
-    SINH("sinh", MonetDataType.REAL, MonetDataType.REAL),
-    COSH("cosh", MonetDataType.REAL, MonetDataType.REAL),
+    SINH("sinh", MonetDataType.REAL, MonetDataType.REAL), COSH("cosh", MonetDataType.REAL, MonetDataType.REAL),
     TANH("tanh", MonetDataType.REAL, MonetDataType.REAL),
 
-    //time functions
+    // time functions
     LOCAL_TIMEZONE("local_timezone", MonetDataType.SECOND_INTERVAL),
     CURRENT_DATE("\"current_date\"", MonetDataType.DATE),
 
@@ -157,17 +150,19 @@ public enum MonetFunctionWithUnknownResult {
     SECINT_SECOND("\"second\"", MonetDataType.INT, MonetDataType.SECOND_INTERVAL),
     SECINT_EPOCH("\"epoch_ms\"", MonetDataType.INT, MonetDataType.SECOND_INTERVAL),
 
-    INTERVAL_SUB1("sql_sub", MonetDataType.SECOND_INTERVAL, MonetDataType.SECOND_INTERVAL, MonetDataType.SECOND_INTERVAL),
+    INTERVAL_SUB1("sql_sub", MonetDataType.SECOND_INTERVAL, MonetDataType.SECOND_INTERVAL,
+            MonetDataType.SECOND_INTERVAL),
     INTERVAL_SUB2("sql_sub", MonetDataType.DAY_INTERVAL, MonetDataType.DAY_INTERVAL, MonetDataType.DAY_INTERVAL),
     INTERVAL_SUB3("sql_sub", MonetDataType.MONTH_INTERVAL, MonetDataType.MONTH_INTERVAL, MonetDataType.MONTH_INTERVAL),
-    INTERVAL_ADD1("sql_add", MonetDataType.SECOND_INTERVAL, MonetDataType.SECOND_INTERVAL, MonetDataType.SECOND_INTERVAL),
+    INTERVAL_ADD1("sql_add", MonetDataType.SECOND_INTERVAL, MonetDataType.SECOND_INTERVAL,
+            MonetDataType.SECOND_INTERVAL),
     INTERVAL_ADD2("sql_add", MonetDataType.DAY_INTERVAL, MonetDataType.DAY_INTERVAL, MonetDataType.DAY_INTERVAL),
     INTERVAL_ADD3("sql_add", MonetDataType.MONTH_INTERVAL, MonetDataType.MONTH_INTERVAL, MonetDataType.MONTH_INTERVAL),
     INTERVAL_NEG1("sql_neg", MonetDataType.SECOND_INTERVAL, MonetDataType.SECOND_INTERVAL),
     INTERVAL_NEG2("sql_neg", MonetDataType.DAY_INTERVAL, MonetDataType.DAY_INTERVAL),
     INTERVAL_NEG3("sql_neg", MonetDataType.MONTH_INTERVAL, MonetDataType.MONTH_INTERVAL),
 
-    //Each type should have at least 1 function with unknown result associated
+    // Each type should have at least 1 function with unknown result associated
     LEAST1("least", MonetDataType.TINYINT, MonetDataType.TINYINT, MonetDataType.TINYINT),
     LEAST2("least", MonetDataType.SMALLINT, MonetDataType.SMALLINT, MonetDataType.SMALLINT),
     LEAST3("least", MonetDataType.BIGINT, MonetDataType.BIGINT, MonetDataType.BIGINT),

@@ -14,8 +14,8 @@ public final class MonetAnyTypeOperation implements MonetExpression {
     private final MonetDataType type;
 
     public enum MonetAnyTypeOperationType {
-        COALESCE("COALESCE", 0), IFTHENELSE("ifthenelse", 3), NULLIF("NULLIF", 2),
-        GREATEST("greatest", 2), LEAST("least", 2), SQL_MIN("sql_min", 2), SQL_MAX("sql_max", 2);
+        COALESCE("COALESCE", 0), IFTHENELSE("ifthenelse", 3), NULLIF("NULLIF", 2), GREATEST("greatest", 2),
+        LEAST("least", 2), SQL_MIN("sql_min", 2), SQL_MAX("sql_max", 2);
 
         private String functionName;
 
@@ -39,11 +39,13 @@ public final class MonetAnyTypeOperation implements MonetExpression {
         }
     }
 
-    public MonetAnyTypeOperation(MonetAnyTypeOperationType function, List<MonetExpression> arguments, MonetDataType type) {
+    public MonetAnyTypeOperation(MonetAnyTypeOperationType function, List<MonetExpression> arguments,
+            MonetDataType type) {
         this.function = function;
         this.arguments = arguments;
         this.type = type;
-        if ((function.getNargs() == 0 && arguments.size() < 2) || (function.getNargs() > 0 && arguments.size() != function.getNargs()))
+        if ((function.getNargs() == 0 && arguments.size() < 2)
+                || (function.getNargs() > 0 && arguments.size() != function.getNargs()))
             throw new AssertionError(this);
     }
 

@@ -29,7 +29,8 @@ public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
     private final String databaseName;
 
     public enum MonetDataType {
-        TINYINT, SMALLINT, INT, BIGINT, HUGEINT, BOOLEAN, STRING, DECIMAL, REAL, DOUBLE, TIME, TIMESTAMP, DATE, SECOND_INTERVAL, DAY_INTERVAL, MONTH_INTERVAL, BLOB, UUID;
+        TINYINT, SMALLINT, INT, BIGINT, HUGEINT, BOOLEAN, STRING, DECIMAL, REAL, DOUBLE, TIME, TIMESTAMP, DATE,
+        SECOND_INTERVAL, DAY_INTERVAL, MONTH_INTERVAL, BLOB, UUID;
 
         private static String OS = System.getProperty("os.name").toLowerCase();
 
@@ -175,25 +176,31 @@ public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
                             constant = MonetConstant.createTimeConstant(randomRowValues.getTime(columnIndex).getTime());
                             break;
                         case TIMESTAMP:
-                            constant = MonetConstant.createTimestampConstant(randomRowValues.getTimestamp(columnIndex).getTime());
+                            constant = MonetConstant
+                                    .createTimestampConstant(randomRowValues.getTimestamp(columnIndex).getTime());
                             break;
                         case DATE:
                             constant = MonetConstant.createDateConstant(randomRowValues.getDate(columnIndex).getTime());
                             break;
                         case MONTH_INTERVAL:
-                            constant = MonetConstant.createMonthIntervalConstant(randomRowValues.getBigDecimal(columnIndex).longValue());
+                            constant = MonetConstant.createMonthIntervalConstant(
+                                    randomRowValues.getBigDecimal(columnIndex).longValue());
                             break;
                         case SECOND_INTERVAL:
                         case DAY_INTERVAL:
-                            constant = MonetConstant.createSecondIntervalConstant(randomRowValues.getBigDecimal(columnIndex).longValue(), dt);
+                            constant = MonetConstant.createSecondIntervalConstant(
+                                    randomRowValues.getBigDecimal(columnIndex).longValue(), dt);
                             break;
                         case BLOB:
-                            /*TODO constant = MonetConstant.createBlobConstant(randomRowValues.getBlob(columnIndex) ... );
-                            break;*/
+                            /*
+                             * TODO constant = MonetConstant.createBlobConstant(randomRowValues.getBlob(columnIndex) ...
+                             * ); break;
+                             */
                         case UUID:
-                            /*TODO constant = 
-                            break;*/
-                         default:
+                            /*
+                             * TODO constant = break;
+                             */
+                        default:
                             throw new IgnoreMeException();
                         }
                     }
@@ -283,8 +290,8 @@ public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
         private final List<MonetStatisticsObject> statistics;
         private final boolean isInsertable;
 
-        public MonetTable(String tableName, List<MonetColumn> columns, List<MonetIndex> indexes,
-                TableType tableType, List<MonetStatisticsObject> statistics, boolean isView, boolean isInsertable) {
+        public MonetTable(String tableName, List<MonetColumn> columns, List<MonetIndex> indexes, TableType tableType,
+                List<MonetStatisticsObject> statistics, boolean isView, boolean isInsertable) {
             super(tableName, columns, indexes, isView);
             this.statistics = statistics;
             this.isInsertable = isInsertable;
@@ -339,7 +346,7 @@ public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
             List<MonetTable> databaseTables = new ArrayList<>();
             try (Statement s = con.createStatement()) {
                 try (ResultSet rs = s.executeQuery(
-                    "select t.id as table_id, t.name as table_name, t.type as table_type, t.commit_action as table_commit_action from sys.tables t where t.system=false order by table_name;")) {
+                        "select t.id as table_id, t.name as table_name, t.type as table_type, t.commit_action as table_commit_action from sys.tables t where t.system=false order by table_name;")) {
                     while (rs.next()) {
                         int tableID = rs.getInt("table_id");
                         String tableName = rs.getString("table_name");
@@ -350,8 +357,9 @@ public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
                         MonetTable.TableType MonetTableType = getTableType(tableCommitAction);
                         List<MonetColumn> databaseColumns = getTableColumns(con, tableID);
                         List<MonetIndex> indexes = getIndexes(con, tableID);
-                        List<MonetStatisticsObject> statistics = new ArrayList<>(); //TODO? getStatistics(con);
-                        MonetTable t = new MonetTable(tableName, databaseColumns, indexes, MonetTableType, statistics, isView, !isView);
+                        List<MonetStatisticsObject> statistics = new ArrayList<>(); // TODO? getStatistics(con);
+                        MonetTable t = new MonetTable(tableName, databaseColumns, indexes, MonetTableType, statistics,
+                                isView, !isView);
                         for (MonetColumn c : databaseColumns) {
                             c.setTable(t);
                         }
@@ -380,8 +388,9 @@ public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
     protected static List<MonetIndex> getIndexes(SQLConnection con, int tableID) throws SQLException {
         List<MonetIndex> indexes = new ArrayList<>();
         try (Statement s = con.createStatement()) {
-            try (ResultSet rs = s
-                    .executeQuery(String.format("SELECT idxs.\"name\" as indexname FROM sys.idxs WHERE table_id='%d' order by indexname;", tableID))) {
+            try (ResultSet rs = s.executeQuery(String.format(
+                    "SELECT idxs.\"name\" as indexname FROM sys.idxs WHERE table_id='%d' order by indexname;",
+                    tableID))) {
                 while (rs.next()) {
                     String indexName = rs.getString("indexname");
                     indexes.add(MonetIndex.create(indexName));
@@ -394,8 +403,8 @@ public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
     protected static List<MonetColumn> getTableColumns(SQLConnection con, int tableID) throws SQLException {
         List<MonetColumn> columns = new ArrayList<>();
         try (Statement s = con.createStatement()) {
-            try (ResultSet rs = s
-                    .executeQuery("select columns.\"name\" as column_name, columns.\"type\" as data_type from sys.columns where table_id = '"
+            try (ResultSet rs = s.executeQuery(
+                    "select columns.\"name\" as column_name, columns.\"type\" as data_type from sys.columns where table_id = '"
                             + tableID + "' order by column_name")) {
                 while (rs.next()) {
                     String columnName = rs.getString("column_name");
@@ -418,7 +427,8 @@ public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
         if (tables.isEmpty()) {
             return new MonetTables(Collections.emptyList());
         } else {
-            return new MonetTables(Randomly.nonEmptySubset(tables, Math.min(tables.size(), Randomly.fromOptions(1, 2, 3))));
+            return new MonetTables(
+                    Randomly.nonEmptySubset(tables, Math.min(tables.size(), Randomly.fromOptions(1, 2, 3))));
         }
     }
 

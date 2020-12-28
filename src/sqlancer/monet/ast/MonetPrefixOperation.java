@@ -14,13 +14,13 @@ public class MonetPrefixOperation implements MonetExpression {
                 if (expectedValue.isNull()) {
                     return MonetConstant.createNullConstant();
                 } else {
-                    return MonetConstant
-                            .createBooleanConstant(!expectedValue.cast(MonetDataType.BOOLEAN).asBoolean());
+                    return MonetConstant.createBooleanConstant(!expectedValue.cast(MonetDataType.BOOLEAN).asBoolean());
                 }
             }
         },
-        UNARY_PLUS("+", MonetDataType.TINYINT, MonetDataType.SMALLINT, MonetDataType.INT, MonetDataType.BIGINT, MonetDataType.HUGEINT, MonetDataType.DOUBLE, MonetDataType.REAL,
-                        MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.DAY_INTERVAL, MonetDataType.MONTH_INTERVAL) {
+        UNARY_PLUS("+", MonetDataType.TINYINT, MonetDataType.SMALLINT, MonetDataType.INT, MonetDataType.BIGINT,
+                MonetDataType.HUGEINT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL,
+                MonetDataType.SECOND_INTERVAL, MonetDataType.DAY_INTERVAL, MonetDataType.MONTH_INTERVAL) {
 
             @Override
             protected MonetConstant getExpectedValue(MonetConstant expectedValue) {
@@ -29,8 +29,9 @@ public class MonetPrefixOperation implements MonetExpression {
             }
 
         },
-        UNARY_MINUS("-", MonetDataType.TINYINT, MonetDataType.SMALLINT, MonetDataType.INT, MonetDataType.BIGINT, MonetDataType.HUGEINT, MonetDataType.DOUBLE, MonetDataType.REAL,
-                         MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL, MonetDataType.DAY_INTERVAL, MonetDataType.MONTH_INTERVAL) {
+        UNARY_MINUS("-", MonetDataType.TINYINT, MonetDataType.SMALLINT, MonetDataType.INT, MonetDataType.BIGINT,
+                MonetDataType.HUGEINT, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL,
+                MonetDataType.SECOND_INTERVAL, MonetDataType.DAY_INTERVAL, MonetDataType.MONTH_INTERVAL) {
 
             @Override
             protected MonetConstant getExpectedValue(MonetConstant expectedValue) {

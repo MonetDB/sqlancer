@@ -16,7 +16,8 @@ public class MonetPreparedStatementGenerator {
         ExpectedErrors errors = new ExpectedErrors();
 
         StringBuilder sb = new StringBuilder("PREPARE ");
-        MonetQuery select = MonetRandomQueryGenerator.createRandomQuery(0, Randomly.smallNumber() + 1, globalState, null, true, true, true);
+        MonetQuery select = MonetRandomQueryGenerator.createRandomQuery(0, Randomly.smallNumber() + 1, globalState,
+                null, true, true, true);
         sb.append(MonetVisitor.asString(select));
 
         MonetCommon.addGroupingErrors(errors);

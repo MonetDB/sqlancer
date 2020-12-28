@@ -174,7 +174,7 @@ public final class MonetCommon {
     }
 
     public enum TableConstraints {
-        UNIQUE, PRIMARY_KEY, FOREIGN_KEY //, CHECK
+        UNIQUE, PRIMARY_KEY, FOREIGN_KEY // , CHECK
     }
 
     public static void addTableConstraints(boolean excludePrimaryKey, StringBuilder sb, MonetTable table,
@@ -205,25 +205,24 @@ public final class MonetCommon {
         List<MonetColumn> otherColumns;
         MonetCommon.addCommonExpressionErrors(errors);
         switch (t) {
-        /*case CHECK:
-            sb.append("CHECK(");
-            sb.append(MonetVisitor.getExpressionAsString(globalState, MonetDataType.BOOLEAN, table.getColumns()));
-            sb.append(")");
-            errors.add("constraint must be added to child tables too");
-            errors.add("missing FROM-clause entry for table");
-            break;*/
+        /*
+         * case CHECK: sb.append("CHECK("); sb.append(MonetVisitor.getExpressionAsString(globalState,
+         * MonetDataType.BOOLEAN, table.getColumns())); sb.append(")");
+         * errors.add("constraint must be added to child tables too");
+         * errors.add("missing FROM-clause entry for table"); break;
+         */
         case UNIQUE:
             sb.append("UNIQUE(");
             sb.append(randomNonEmptyColumnSubset.stream().map(c -> c.getName()).collect(Collectors.joining(", ")));
             sb.append(")");
             errors.add("already exists");
-            //appendIndexParameters(sb, globalState, errors);
+            // appendIndexParameters(sb, globalState, errors);
             break;
         case PRIMARY_KEY:
             sb.append("PRIMARY KEY(");
             sb.append(randomNonEmptyColumnSubset.stream().map(c -> c.getName()).collect(Collectors.joining(", ")));
             sb.append(")");
-            //appendIndexParameters(sb, globalState, errors);
+            // appendIndexParameters(sb, globalState, errors);
             errors.add("NOT NULL constraint violated for column");
             errors.add("a table can have only one PRIMARY KEY");
             break;
@@ -245,23 +244,20 @@ public final class MonetCommon {
             if (Randomly.getBoolean()) {
                 sb.append(Randomly.fromOptions(" MATCH FULL", " MATCH SIMPLE", " MATCH PARTIAL"));
             }
-            /*if (Randomly.getBoolean()) {
-                sb.append(" ON DELETE ");
-                deleteOrUpdateAction(sb);
-            }
-            if (Randomly.getBoolean()) {
-                sb.append(" ON UPDATE ");
-                deleteOrUpdateAction(sb);
-            }*/
+            /*
+             * if (Randomly.getBoolean()) { sb.append(" ON DELETE "); deleteOrUpdateAction(sb); } if
+             * (Randomly.getBoolean()) { sb.append(" ON UPDATE "); deleteOrUpdateAction(sb); }
+             */
             break;
         default:
             throw new AssertionError(t);
         }
     }
 
-    /*private static void deleteOrUpdateAction(StringBuilder sb) {
-        sb.append(Randomly.fromOptions("NO ACTION", "RESTRICT", "CASCADE", "SET NULL", "SET DEFAULT"));
-    }*/
+    /*
+     * private static void deleteOrUpdateAction(StringBuilder sb) { sb.append(Randomly.fromOptions("NO ACTION",
+     * "RESTRICT", "CASCADE", "SET NULL", "SET DEFAULT")); }
+     */
 
     public static void addGroupingErrors(ExpectedErrors errors) {
         errors.add("must appear in the GROUP BY clause or be used in an aggregate function");

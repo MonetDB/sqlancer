@@ -51,7 +51,8 @@ public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOpt
 
     public enum Action implements AbstractAction<MonetGlobalState> {
         ANALYZE(MonetAnalyzeGenerator::create), //
-        ALTER_TABLE(g -> MonetAlterTableGenerator.create(g.getSchema().getRandomTable(t -> !t.isView()), g, generateOnlyKnown)), //
+        ALTER_TABLE(g -> MonetAlterTableGenerator.create(g.getSchema().getRandomTable(t -> !t.isView()), g,
+                generateOnlyKnown)), //
         COMMIT(g -> {
             SQLQueryAdapter query;
             if (Randomly.getBoolean()) {
@@ -73,7 +74,7 @@ public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOpt
         LOGGER(MonetLoggerSuspenderGenerator::create), //
         CREATE_INDEX(MonetIndexGenerator::generate), //
         COMMENT_ON(MonetCommentGenerator::generate), //
-        //CREATE_SEQUENCE(MonetSequenceGenerator::createSequence), //
+        // CREATE_SEQUENCE(MonetSequenceGenerator::createSequence), //
         CREATE_VIEW(MonetViewGenerator::create), //
         PREPARE(MonetPreparedStatementGenerator::create), //
         QUERY_CATALOG((g) -> MonetQueryCatalogGenerator.query());
@@ -98,7 +99,7 @@ public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOpt
             nrPerformed = r.getInteger(0, 0);
             break;
         case COMMENT_ON:
-        //case CREATE_SEQUENCE:
+            // case CREATE_SEQUENCE:
         case TRUNCATE:
         case LOGGER:
         case QUERY_CATALOG:
@@ -134,8 +135,8 @@ public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOpt
 
     @Override
     public void generateDatabase(MonetGlobalState globalState) throws Exception {
-        //readFunctions(globalState);
-        createTables(globalState, 3); //Randomly.fromOptions(4, 5, 6));
+        // readFunctions(globalState);
+        createTables(globalState, 3); // Randomly.fromOptions(4, 5, 6));
         prepareTables(globalState);
     }
 
@@ -150,7 +151,7 @@ public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOpt
         String url = "jdbc:monetdb://localhost:50000/:inmemory";
         Connection con = DriverManager.getConnection(url, "monetdb", "monetdb");
 
-        //TODO clean database
+        // TODO clean database
         return new SQLConnection(con);
     }
 

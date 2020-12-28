@@ -45,8 +45,7 @@ public class MonetPostfixOperation implements MonetExpression {
                 if (expectedValue.isNull()) {
                     return MonetConstant.createFalse();
                 } else {
-                    return MonetConstant
-                            .createBooleanConstant(expectedValue.cast(MonetDataType.BOOLEAN).asBoolean());
+                    return MonetConstant.createBooleanConstant(expectedValue.cast(MonetDataType.BOOLEAN).asBoolean());
                 }
             }
 
@@ -63,8 +62,7 @@ public class MonetPostfixOperation implements MonetExpression {
                 if (expectedValue.isNull()) {
                     return MonetConstant.createFalse();
                 } else {
-                    return MonetConstant
-                            .createBooleanConstant(!expectedValue.cast(MonetDataType.BOOLEAN).asBoolean());
+                    return MonetConstant.createBooleanConstant(!expectedValue.cast(MonetDataType.BOOLEAN).asBoolean());
                 }
             }
 

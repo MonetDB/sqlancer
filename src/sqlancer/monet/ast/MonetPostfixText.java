@@ -9,8 +9,7 @@ public class MonetPostfixText implements MonetExpression {
     private final MonetConstant expectedValue;
     private final MonetDataType type;
 
-    public MonetPostfixText(MonetExpression expr, String text, MonetConstant expectedValue,
-            MonetDataType type) {
+    public MonetPostfixText(MonetExpression expr, String text, MonetConstant expectedValue, MonetDataType type) {
         this.expr = expr;
         this.text = text;
         this.expectedValue = expectedValue;

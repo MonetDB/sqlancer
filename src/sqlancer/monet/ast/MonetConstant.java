@@ -48,8 +48,7 @@ public abstract class MonetConstant implements MonetExpression {
             } else if (rightVal.isBoolean()) {
                 return MonetConstant.createBooleanConstant(value == rightVal.asBoolean());
             } else if (rightVal.isString()) {
-                return MonetConstant
-                        .createBooleanConstant(value == rightVal.cast(MonetDataType.BOOLEAN).asBoolean());
+                return MonetConstant.createBooleanConstant(value == rightVal.cast(MonetDataType.BOOLEAN).asBoolean());
             } else {
                 throw new AssertionError(rightVal);
             }
@@ -662,17 +661,9 @@ public abstract class MonetConstant implements MonetExpression {
 
         public UUIDConstant(String val) {
             StringBuilder sb = new StringBuilder(64);
-            sb.append("UUID '")
-            .append(val.substring(0, 8))
-            .append("-")
-            .append(val.substring(8, 12))
-            .append("-")
-            .append(val.substring(12, 16))
-            .append("-")
-            .append(val.substring(16, 20))
-            .append("-")
-            .append(val.substring(20, 32))
-            .append("'");
+            sb.append("UUID '").append(val.substring(0, 8)).append("-").append(val.substring(8, 12)).append("-")
+                    .append(val.substring(12, 16)).append("-").append(val.substring(16, 20)).append("-")
+                    .append(val.substring(20, 32)).append("'");
             this.textRepr = sb.toString();
         }
 

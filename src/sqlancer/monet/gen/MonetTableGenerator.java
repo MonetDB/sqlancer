@@ -56,11 +56,10 @@ public class MonetTableGenerator {
     private SQLQueryAdapter generate() {
         columnCanHavePrimaryKey = true;
         sb.append("CREATE");
-        /*if (Randomly.getBoolean()) {
-            sb.append(" ");
-            isTemporaryTable = true;
-            sb.append(Randomly.fromOptions("TEMPORARY", "TEMP"));
-        }*/
+        /*
+         * if (Randomly.getBoolean()) { sb.append(" "); isTemporaryTable = true;
+         * sb.append(Randomly.fromOptions("TEMPORARY", "TEMP")); }
+         */
         sb.append(" TABLE");
         if (Randomly.getBoolean()) {
             sb.append(" IF NOT EXISTS");
@@ -87,7 +86,7 @@ public class MonetTableGenerator {
             MonetCommon.addTableConstraints(columnHasPrimaryKey, sb, table, globalState, errors);
         }
         sb.append(")");
-        //MonetCommon.generateWith(sb, globalState, errors);
+        // MonetCommon.generateWith(sb, globalState, errors);
         if (Randomly.getBoolean() && isTemporaryTable) {
             sb.append(" ON COMMIT ");
             sb.append(Randomly.fromOptions("PRESERVE ROWS", "DELETE ROWS", "DROP"));
@@ -122,10 +121,10 @@ public class MonetTableGenerator {
 
     private void createColumnConstraint(MonetDataType type, boolean serial) {
         List<ColumnConstraint> constraintSubset = Randomly.nonEmptySubset(ColumnConstraint.values());
-        /*if (Randomly.getBoolean()) {
-            // make checks constraints less likely
-            constraintSubset.remove(ColumnConstraint.CHECK);
-        }*/
+        /*
+         * if (Randomly.getBoolean()) { // make checks constraints less likely
+         * constraintSubset.remove(ColumnConstraint.CHECK); }
+         */
         if (!columnCanHavePrimaryKey || columnHasPrimaryKey || serial) {
             constraintSubset.remove(ColumnConstraint.PRIMARY_KEY);
         }
@@ -134,7 +133,8 @@ public class MonetTableGenerator {
             // otherwise: ERROR: both default and identity specified for column
             constraintSubset.remove(Randomly.fromOptions(ColumnConstraint.GENERATED, ColumnConstraint.DEFAULT));
         }
-        if (constraintSubset.contains(ColumnConstraint.GENERATED) && (type != MonetDataType.INT && type != MonetDataType.BIGINT)) {
+        if (constraintSubset.contains(ColumnConstraint.GENERATED)
+                && (type != MonetDataType.INT && type != MonetDataType.BIGINT)) {
             // otherwise: ERROR: identity column type must be smallint, integer, or bigint
             constraintSubset.remove(ColumnConstraint.GENERATED);
         }
@@ -167,13 +167,11 @@ public class MonetTableGenerator {
                 errors.add("out of range");
                 errors.add("is a generated column");
                 break;
-            /*case CHECK:
-                sb.append("CHECK (");
-                sb.append(MonetVisitor.asString(MonetExpressionGenerator.generateExpression(globalState,
-                        columnsToBeAdded, MonetDataType.BOOLEAN)));
-                sb.append(")");
-                errors.add("out of range");
-                break;*/
+            /*
+             * case CHECK: sb.append("CHECK (");
+             * sb.append(MonetVisitor.asString(MonetExpressionGenerator.generateExpression(globalState,
+             * columnsToBeAdded, MonetDataType.BOOLEAN))); sb.append(")"); errors.add("out of range"); break;
+             */
             case GENERATED:
                 if (Randomly.getBoolean()) {
                     sb.append("AUTO_INCREMENT");

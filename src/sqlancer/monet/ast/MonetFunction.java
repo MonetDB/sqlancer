@@ -16,8 +16,7 @@ public class MonetFunction implements MonetExpression {
         this.args = args.clone();
     }
 
-    public MonetFunction(MonetFunctionWithUnknownResult f, MonetDataType returnType,
-            MonetExpression... args) {
+    public MonetFunction(MonetFunctionWithUnknownResult f, MonetDataType returnType, MonetExpression... args) {
         this.func = f.getName();
         this.returnType = returnType;
         this.args = args.clone();
@@ -39,15 +38,18 @@ public class MonetFunction implements MonetExpression {
                 if (evaluatedArgs[0].isNull()) {
                     return MonetConstant.createNullConstant();
                 } else {
-                    return MonetConstant.createIntConstant(Math.abs(evaluatedArgs[0].cast(MonetDataType.INT).asInt()), MonetDataType.INT);
+                    return MonetConstant.createIntConstant(Math.abs(evaluatedArgs[0].cast(MonetDataType.INT).asInt()),
+                            MonetDataType.INT);
                 }
             }
 
             @Override
             public boolean supportsReturnType(MonetDataType type) {
-                return type == MonetDataType.TINYINT || type == MonetDataType.SMALLINT || type == MonetDataType.INT ||
-                type == MonetDataType.BIGINT || type == MonetDataType.HUGEINT || type == MonetDataType.REAL || type == MonetDataType.DOUBLE || 
-                type == MonetDataType.DECIMAL || type == MonetDataType.SECOND_INTERVAL || type == MonetDataType.DAY_INTERVAL || type == MonetDataType.MONTH_INTERVAL;
+                return type == MonetDataType.TINYINT || type == MonetDataType.SMALLINT || type == MonetDataType.INT
+                        || type == MonetDataType.BIGINT || type == MonetDataType.HUGEINT || type == MonetDataType.REAL
+                        || type == MonetDataType.DOUBLE || type == MonetDataType.DECIMAL
+                        || type == MonetDataType.SECOND_INTERVAL || type == MonetDataType.DAY_INTERVAL
+                        || type == MonetDataType.MONTH_INTERVAL;
             }
 
             @Override
@@ -63,15 +65,18 @@ public class MonetFunction implements MonetExpression {
                 if (evaluatedArgs[0].isNull()) {
                     return MonetConstant.createNullConstant();
                 } else {
-                    return MonetConstant.createIntConstant(Math.abs(evaluatedArgs[0].cast(MonetDataType.INT).asInt()), MonetDataType.INT);
+                    return MonetConstant.createIntConstant(Math.abs(evaluatedArgs[0].cast(MonetDataType.INT).asInt()),
+                            MonetDataType.INT);
                 }
             }
 
             @Override
             public boolean supportsReturnType(MonetDataType type) {
-                return type == MonetDataType.TINYINT || type == MonetDataType.SMALLINT || type == MonetDataType.INT ||
-                type == MonetDataType.BIGINT || type == MonetDataType.HUGEINT || type == MonetDataType.REAL || type == MonetDataType.DOUBLE || 
-                type == MonetDataType.DECIMAL || type == MonetDataType.SECOND_INTERVAL || type == MonetDataType.DAY_INTERVAL || type == MonetDataType.MONTH_INTERVAL;
+                return type == MonetDataType.TINYINT || type == MonetDataType.SMALLINT || type == MonetDataType.INT
+                        || type == MonetDataType.BIGINT || type == MonetDataType.HUGEINT || type == MonetDataType.REAL
+                        || type == MonetDataType.DOUBLE || type == MonetDataType.DECIMAL
+                        || type == MonetDataType.SECOND_INTERVAL || type == MonetDataType.DAY_INTERVAL
+                        || type == MonetDataType.MONTH_INTERVAL;
             }
 
             @Override
@@ -115,8 +120,8 @@ public class MonetFunction implements MonetExpression {
 
             @Override
             public boolean supportsReturnType(MonetDataType type) {
-                return type == MonetDataType.TINYINT || type == MonetDataType.SMALLINT || type == MonetDataType.INT ||
-                type == MonetDataType.BIGINT || type == MonetDataType.HUGEINT;
+                return type == MonetDataType.TINYINT || type == MonetDataType.SMALLINT || type == MonetDataType.INT
+                        || type == MonetDataType.BIGINT || type == MonetDataType.HUGEINT;
             }
 
             @Override

@@ -47,7 +47,8 @@ public class MonetTLPHavingOracle extends MonetTLPBase {
         List<String> combinedString = new ArrayList<>();
         List<String> secondResultSet = ComparatorHelper.getCombinedResultSet(firstQueryString, secondQueryString,
                 thirdQueryString, combinedString, !orderBy, state, errors);
-        ComparatorHelper.assumeResultSetsAreEqual(resultSet, secondResultSet, originalQueryString, combinedString, state);
+        ComparatorHelper.assumeResultSetsAreEqual(resultSet, secondResultSet, originalQueryString, combinedString,
+                state);
     }
 
     @Override
@@ -57,8 +58,7 @@ public class MonetTLPHavingOracle extends MonetTLPBase {
 
     @Override
     List<MonetExpression> generateFetchColumns() {
-        List<MonetExpression> expressions = gen.allowAggregates(true)
-                .generateExpressions(Randomly.smallNumber() + 1);
+        List<MonetExpression> expressions = gen.allowAggregates(true).generateExpressions(Randomly.smallNumber() + 1);
         gen.allowAggregates(false);
         return expressions;
     }

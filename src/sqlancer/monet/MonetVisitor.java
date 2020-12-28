@@ -147,8 +147,7 @@ public interface MonetVisitor {
         return v.get();
     }
 
-    static String getExpressionAsString(MonetGlobalState globalState, MonetDataType type,
-            List<MonetColumn> columns) {
+    static String getExpressionAsString(MonetGlobalState globalState, MonetDataType type, List<MonetColumn> columns) {
         MonetExpression expression = MonetExpressionGenerator.generateExpression(globalState, columns, type);
         MonetToStringVisitor visitor = new MonetToStringVisitor();
         visitor.visit(expression);

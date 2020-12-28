@@ -19,8 +19,8 @@ public final class MonetMergeGenerator {
     private MonetMergeGenerator() {
     }
 
-    private static void generateInsert(MonetGlobalState globalState, MonetExpressionGenerator gen, 
-                                       StringBuilder sb, MonetTable table) {
+    private static void generateInsert(MonetGlobalState globalState, MonetExpressionGenerator gen, StringBuilder sb,
+            MonetTable table) {
         List<MonetColumn> columns = table.getRandomNonEmptyColumnSubset();
         sb.append("(");
         sb.append(columns.stream().map(c -> c.getName()).collect(Collectors.joining(", ")));
@@ -34,7 +34,8 @@ public final class MonetMergeGenerator {
             if (!Randomly.getBooleanWithSmallProbability()) {
                 MonetExpression generateConstant;
                 if (Randomly.getBoolean()) {
-                    generateConstant = MonetExpressionGenerator.generateConstant(globalState.getRandomly(), column.getType());
+                    generateConstant = MonetExpressionGenerator.generateConstant(globalState.getRandomly(),
+                            column.getType());
                 } else {
                     generateConstant = gen.generateExpression(column.getType());
                 }
@@ -46,8 +47,8 @@ public final class MonetMergeGenerator {
         sb.append(")");
     }
 
-    private static void generateUpdate(MonetGlobalState globalState, MonetExpressionGenerator gen, 
-                                       StringBuilder sb, List<MonetColumn> columns) {
+    private static void generateUpdate(MonetGlobalState globalState, MonetExpressionGenerator gen, StringBuilder sb,
+            List<MonetColumn> columns) {
         sb.append("UPDATE SET ");
         for (int i = 0; i < columns.size(); i++) {
             if (i != 0) {
@@ -57,7 +58,8 @@ public final class MonetMergeGenerator {
             sb.append(column.getName());
             sb.append(" = ");
             if (!Randomly.getBoolean()) {
-                sb.append(MonetVisitor.asString(MonetExpressionGenerator.generateConstant(globalState.getRandomly(), column.getType())));
+                sb.append(MonetVisitor.asString(
+                        MonetExpressionGenerator.generateConstant(globalState.getRandomly(), column.getType())));
             } else if (Randomly.getBoolean()) {
                 sb.append("DEFAULT");
             } else {
@@ -87,30 +89,30 @@ public final class MonetMergeGenerator {
         array3.addAll(joined.getColumns());
         sb.append(MonetVisitor.asString(gen.generateExpression(MonetDataType.BOOLEAN)));
         switch (Randomly.fromOptions(1, 2, 3)) {
-            case 1:
-                sb.append(" WHEN MATCHED THEN ");
-                if (Randomly.getBoolean()) {
-                    generateUpdate(globalState, gen, sb, table.getColumns());
-                } else {
-                    sb.append("DELETE");
-                }
-                break;
-            case 2:
-                sb.append(" WHEN NOT MATCHED THEN INSERT ");
-                generateInsert(globalState, gen, sb, table);
-                break;
-            case 3:
-                sb.append(" WHEN MATCHED THEN ");
-                if (Randomly.getBoolean()) {
-                    generateUpdate(globalState, gen, sb, table.getColumns());
-                } else {
-                    sb.append("DELETE");
-                }
-                sb.append(" WHEN NOT MATCHED THEN INSERT ");
-                generateInsert(globalState, gen, sb, table);
-                break;
-            default:
-                throw new AssertionError();
+        case 1:
+            sb.append(" WHEN MATCHED THEN ");
+            if (Randomly.getBoolean()) {
+                generateUpdate(globalState, gen, sb, table.getColumns());
+            } else {
+                sb.append("DELETE");
+            }
+            break;
+        case 2:
+            sb.append(" WHEN NOT MATCHED THEN INSERT ");
+            generateInsert(globalState, gen, sb, table);
+            break;
+        case 3:
+            sb.append(" WHEN MATCHED THEN ");
+            if (Randomly.getBoolean()) {
+                generateUpdate(globalState, gen, sb, table.getColumns());
+            } else {
+                sb.append("DELETE");
+            }
+            sb.append(" WHEN NOT MATCHED THEN INSERT ");
+            generateInsert(globalState, gen, sb, table);
+            break;
+        default:
+            throw new AssertionError();
         }
         MonetCommon.addCommonExpressionErrors(errors);
         errors.add("Multiple rows in the input relation");

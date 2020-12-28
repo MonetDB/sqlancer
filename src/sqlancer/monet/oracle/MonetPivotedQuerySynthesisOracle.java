@@ -62,8 +62,7 @@ public class MonetPivotedQuerySynthesisOracle
             MonetExpression offsetClause = generateOffset();
             selectStatement.setOffsetClause(offsetClause);
         }
-        List<MonetExpression> orderBy = new MonetExpressionGenerator(globalState).setColumns(columns)
-                .generateOrderBy();
+        List<MonetExpression> orderBy = new MonetExpressionGenerator(globalState).setColumns(columns).generateOrderBy();
         selectStatement.setOrderByExpressions(orderBy);
 
         return new SQLQueryAdapter(MonetVisitor.asString(selectStatement));
@@ -111,9 +110,8 @@ public class MonetPivotedQuerySynthesisOracle
         if (expr.getExpectedValue().isNull()) {
             result = MonetPostfixOperation.create(expr, PostfixOperator.IS_NULL);
         } else {
-            result = MonetPostfixOperation.create(expr,
-                    expr.getExpectedValue().cast(MonetDataType.BOOLEAN).asBoolean() ? PostfixOperator.IS_TRUE
-                            : PostfixOperator.IS_FALSE);
+            result = MonetPostfixOperation.create(expr, expr.getExpectedValue().cast(MonetDataType.BOOLEAN).asBoolean()
+                    ? PostfixOperator.IS_TRUE : PostfixOperator.IS_FALSE);
         }
         rectifiedPredicates.add(result);
         return result;

@@ -77,14 +77,12 @@ public class MonetNoRECOracle extends NoRECBase<MonetGlobalState> {
             List<MonetTable> tables) {
         List<MonetJoin> joinStatements = new ArrayList<>();
         MonetExpressionGenerator gen = new MonetExpressionGenerator(globalState).setColumns(columns);
-        /*for (int i = 1; i < tables.size(); i++) {
-            MonetExpression joinClause = gen.generateExpression(MonetDataType.BOOLEAN);
-            MonetTable table = Randomly.fromList(tables);
-            tables.remove(table);
-            MonetJoinType options = MonetJoinType.getRandom();
-            MonetJoin j = new MonetJoin(new MonetFromTable(table, Randomly.getBoolean(), null), joinClause, options);
-            joinStatements.add(j);
-        }*/
+        /*
+         * for (int i = 1; i < tables.size(); i++) { MonetExpression joinClause =
+         * gen.generateExpression(MonetDataType.BOOLEAN); MonetTable table = Randomly.fromList(tables);
+         * tables.remove(table); MonetJoinType options = MonetJoinType.getRandom(); MonetJoin j = new MonetJoin(new
+         * MonetFromTable(table, Randomly.getBoolean(), null), joinClause, options); joinStatements.add(j); }
+         */
         // JOIN subqueries
         for (int i = 0; i < Randomly.fromOptions(1, 2, 3, 4); i++) {
             MonetTables subqueryTables = globalState.getSchema().getRandomTableNonEmptyTables();
@@ -113,7 +111,8 @@ public class MonetNoRECOracle extends NoRECBase<MonetGlobalState> {
         select.setSelectType(SelectType.ALL);
         select.setJoinClauses(joinStatements);
         int secondCount = 0;
-        unoptimizedQueryString = "SELECT CAST(SUM(count) AS BIGINT) FROM (" + MonetVisitor.asString(select) + ") as res";
+        unoptimizedQueryString = "SELECT CAST(SUM(count) AS BIGINT) FROM (" + MonetVisitor.asString(select)
+                + ") as res";
         if (options.logEachSelect()) {
             logger.writeCurrent(unoptimizedQueryString);
         }

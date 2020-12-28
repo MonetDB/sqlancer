@@ -20,8 +20,7 @@ public final class MonetAnalyzeGenerator {
         sb.append(table.getName());
         if (Randomly.getBoolean()) {
             sb.append("(");
-            sb.append(table.getColumns().stream().map(c -> c.getName())
-                    .collect(Collectors.joining(", ")));
+            sb.append(table.getColumns().stream().map(c -> c.getName()).collect(Collectors.joining(", ")));
             sb.append(")");
         }
         if (Randomly.getBoolean()) {

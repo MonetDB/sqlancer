@@ -46,7 +46,8 @@ public class MonetSelect extends MonetQuery {
         private final MonetQuery query;
 
         public MonetCTE(String tableName, List<MonetColumn> columns, MonetQuery query) {
-            super(tableName, columns, Collections.emptyList(), TableType.TEMPORARY, Collections.emptyList(), false, false);
+            super(tableName, columns, Collections.emptyList(), TableType.TEMPORARY, Collections.emptyList(), false,
+                    false);
             this.query = query;
         }
 

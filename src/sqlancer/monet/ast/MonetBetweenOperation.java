@@ -12,8 +12,8 @@ public final class MonetBetweenOperation implements MonetExpression {
     private final boolean isSymmetric;
     private final boolean isNot;
 
-    public MonetBetweenOperation(MonetExpression expr, MonetExpression left, MonetExpression right,
-            boolean symmetric, boolean isNot) {
+    public MonetBetweenOperation(MonetExpression expr, MonetExpression left, MonetExpression right, boolean symmetric,
+            boolean isNot) {
         this.expr = expr;
         this.left = left;
         this.right = right;
@@ -47,8 +47,8 @@ public final class MonetBetweenOperation implements MonetExpression {
                 MonetBinaryComparisonOperator.LESS_EQUALS);
         MonetBinaryComparisonOperation rightComparison = new MonetBinaryComparisonOperation(expr, right,
                 MonetBinaryComparisonOperator.LESS_EQUALS);
-        MonetBinaryLogicalOperation andOperation = new MonetBinaryLogicalOperation(leftComparison,
-                rightComparison, MonetBinaryLogicalOperation.BinaryLogicalOperator.AND);
+        MonetBinaryLogicalOperation andOperation = new MonetBinaryLogicalOperation(leftComparison, rightComparison,
+                MonetBinaryLogicalOperation.BinaryLogicalOperator.AND);
         if (isSymmetric) {
             MonetBinaryComparisonOperation leftComparison2 = new MonetBinaryComparisonOperation(right, expr,
                     MonetBinaryComparisonOperator.LESS_EQUALS);

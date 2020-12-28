@@ -23,9 +23,9 @@ public final class MonetUpdateGenerator {
         sb.append("UPDATE ");
         sb.append(randomTable.getName());
         sb.append(" SET ");
-        ExpectedErrors errors = ExpectedErrors.from(
-                "reached maximum value of sequence", "violates foreign key constraint", "violates not-null constraint",
-                "violates unique constraint", "out of range", "cannot cast", "must be type boolean", "division by zero",
+        ExpectedErrors errors = ExpectedErrors.from("reached maximum value of sequence",
+                "violates foreign key constraint", "violates not-null constraint", "violates unique constraint",
+                "out of range", "cannot cast", "must be type boolean", "division by zero",
                 "You might need to add explicit type casts.", "invalid regular expression");
         errors.add("multiple assignments to same column"); // view whose columns refer to a column in the referenced
                                                            // table multiple times
@@ -62,8 +62,8 @@ public final class MonetUpdateGenerator {
         MonetCommon.addCommonExpressionErrors(errors);
         if (!Randomly.getBooleanWithSmallProbability()) {
             sb.append(" WHERE ");
-            MonetExpression where = MonetExpressionGenerator.generateExpression(globalState,
-                    randomTable.getColumns(), MonetDataType.BOOLEAN);
+            MonetExpression where = MonetExpressionGenerator.generateExpression(globalState, randomTable.getColumns(),
+                    MonetDataType.BOOLEAN);
             sb.append(MonetVisitor.asString(where));
         }
 

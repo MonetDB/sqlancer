@@ -39,7 +39,7 @@ public class MonetLikeOperation extends BinaryNode<MonetExpression> implements M
     public String getOperatorRepresentation() {
         if (caseIsensitive && isNot) {
             return "NOT ILIKE";
-        } else if(!caseIsensitive && isNot) {
+        } else if (!caseIsensitive && isNot) {
             return "NOT LIKE";
         } else if (caseIsensitive && !isNot) {
             return "ILIKE";

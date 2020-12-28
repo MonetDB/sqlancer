@@ -80,8 +80,8 @@ public class MonetBinaryArithmeticOperation extends BinaryOperatorNode<MonetExpr
 
     }
 
-    public MonetBinaryArithmeticOperation(MonetExpression left, MonetExpression right,
-            MonetBinaryOperator op, MonetDataType type) {
+    public MonetBinaryArithmeticOperation(MonetExpression left, MonetExpression right, MonetBinaryOperator op,
+            MonetDataType type) {
         super(left, right, op);
         this.type = type;
     }

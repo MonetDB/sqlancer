@@ -12,8 +12,8 @@ public final class MonetCaseOperation implements MonetExpression {
     private final MonetExpression switchCondition;
     private final MonetDataType type;
 
-    public MonetCaseOperation(MonetExpression switchCondition, List<MonetExpression> conditions, List<MonetExpression> expressions,
-            MonetExpression elseExpr, MonetDataType type) {
+    public MonetCaseOperation(MonetExpression switchCondition, List<MonetExpression> conditions,
+            List<MonetExpression> expressions, MonetExpression elseExpr, MonetDataType type) {
         this.switchCondition = switchCondition;
         this.conditions = conditions;
         this.expressions = expressions;

@@ -10,7 +10,8 @@ public class MonetAnyAllOperation implements MonetExpression {
     private final boolean isAny;
     private final MonetQuery select;
 
-    public MonetAnyAllOperation(MonetExpression expr, MonetBinaryComparisonOperator comparison, boolean isAny, MonetQuery select) {
+    public MonetAnyAllOperation(MonetExpression expr, MonetBinaryComparisonOperator comparison, boolean isAny,
+            MonetQuery select) {
         this.expr = expr;
         this.select = select;
         this.isAny = isAny; /* ANY vs ALL */

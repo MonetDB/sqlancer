@@ -46,8 +46,7 @@ public class MonetTLPAggregateOracle extends MonetTLPBase {
 
     protected void aggregateCheck() throws SQLException {
         MonetAggregateFunction aggregateFunction = Randomly.fromOptions(MonetAggregateFunction.MAX,
-                MonetAggregateFunction.MIN, MonetAggregateFunction.SUM,
-                MonetAggregateFunction.COUNT);
+                MonetAggregateFunction.MIN, MonetAggregateFunction.SUM, MonetAggregateFunction.COUNT);
         MonetAggregate aggregate = gen.generateArgsForAggregate(aggregateFunction.getRandomReturnType(),
                 aggregateFunction);
         List<MonetExpression> fetchColumns = new ArrayList<>();
@@ -84,15 +83,16 @@ public class MonetTLPAggregateOracle extends MonetTLPBase {
             List<MonetExpression> from) {
         String metamorphicQuery;
         MonetExpression whereClause = gen.generateExpression(MonetDataType.BOOLEAN);
-        MonetExpression negatedClause = new MonetPrefixOperation(whereClause, PrefixOperator.NOT, MonetDataType.BOOLEAN);
+        MonetExpression negatedClause = new MonetPrefixOperation(whereClause, PrefixOperator.NOT,
+                MonetDataType.BOOLEAN);
         MonetExpression notNullClause = new MonetPostfixOperation(whereClause, PostfixOperator.IS_NULL);
         List<MonetExpression> mappedAggregate = mapped(aggregate);
         MonetSelect leftSelect = getSelect(mappedAggregate, from, whereClause, select.getJoinClauses());
         MonetSelect middleSelect = getSelect(mappedAggregate, from, negatedClause, select.getJoinClauses());
         MonetSelect rightSelect = getSelect(mappedAggregate, from, notNullClause, select.getJoinClauses());
         metamorphicQuery = "SELECT " + getOuterAggregateFunction(aggregate) + " FROM (";
-        metamorphicQuery += MonetVisitor.asString(leftSelect) + " UNION ALL "
-                + MonetVisitor.asString(middleSelect) + " UNION ALL " + MonetVisitor.asString(rightSelect);
+        metamorphicQuery += MonetVisitor.asString(leftSelect) + " UNION ALL " + MonetVisitor.asString(middleSelect)
+                + " UNION ALL " + MonetVisitor.asString(rightSelect);
         metamorphicQuery += ") as asdf";
         return metamorphicQuery;
     }

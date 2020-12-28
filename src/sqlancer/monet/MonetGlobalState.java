@@ -42,7 +42,8 @@ public class MonetGlobalState extends SQLGlobalState<MonetOptions, MonetSchema> 
     }
 
     private List<String> getOperators(SQLConnection con) throws SQLException {
-        List<String> opClasses = Arrays.asList(new String[] {"<", ">", "<=", ">=", "=", "<>", "!", "^", "|", "||", "&", "~", "+", "-", "/", "%", "*", "<<", ">>", "@"});
+        List<String> opClasses = Arrays.asList(new String[] { "<", ">", "<=", ">=", "=", "<>", "!", "^", "|", "||", "&",
+                "~", "+", "-", "/", "%", "*", "<<", ">>", "@" });
         return opClasses;
     }
 

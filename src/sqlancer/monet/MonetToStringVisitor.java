@@ -367,7 +367,9 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
             throw new AssertionError(cast.getType());
         }
         Optional<Integer> size = compoundType.getSize();
-        MonetDataType[] exclude = new MonetDataType[]{MonetDataType.INT,MonetDataType.TIME,MonetDataType.TIMESTAMP,MonetDataType.DATE,MonetDataType.SECOND_INTERVAL,MonetDataType.DAY_INTERVAL,MonetDataType.MONTH_INTERVAL};
+        MonetDataType[] exclude = new MonetDataType[] { MonetDataType.INT, MonetDataType.TIME, MonetDataType.TIMESTAMP,
+                MonetDataType.DATE, MonetDataType.SECOND_INTERVAL, MonetDataType.DAY_INTERVAL,
+                MonetDataType.MONTH_INTERVAL };
         if (size.isPresent() && !Arrays.stream(exclude).allMatch(t -> t.equals(compoundType.getDataType()))) {
             sb.append("(");
             sb.append(size.get());

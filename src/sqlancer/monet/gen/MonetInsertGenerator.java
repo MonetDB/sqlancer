@@ -45,10 +45,10 @@ public final class MonetInsertGenerator {
                 }
                 if (Randomly.getBoolean()) {
                     sbRowValue.append(MonetVisitor.asString(MonetExpressionGenerator
-                        .generateConstant(globalState.getRandomly(), columns.get(i).getType())));
+                            .generateConstant(globalState.getRandomly(), columns.get(i).getType())));
                 } else {
-                    sbRowValue.append(MonetVisitor.asString(new MonetExpressionGenerator(globalState)
-                        .generateExpression(columns.get(i).getType())));
+                    sbRowValue.append(MonetVisitor.asString(
+                            new MonetExpressionGenerator(globalState).generateExpression(columns.get(i).getType())));
                 }
             }
             sbRowValue.append(")");

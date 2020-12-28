@@ -39,6 +39,7 @@ public class MonetTLPWhereOracle extends MonetTLPBase {
         List<String> combinedString = new ArrayList<>();
         List<String> secondResultSet = ComparatorHelper.getCombinedResultSet(firstQueryString, secondQueryString,
                 thirdQueryString, combinedString, Randomly.getBoolean(), state, errors);
-        ComparatorHelper.assumeResultSetsAreEqual(resultSet, secondResultSet, originalQueryString, combinedString, state);
+        ComparatorHelper.assumeResultSetsAreEqual(resultSet, secondResultSet, originalQueryString, combinedString,
+                state);
     }
 }
