@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import sqlancer.Randomly;
+import sqlancer.common.DBMSCommon;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.postgres.PostgresGlobalState;
 import sqlancer.postgres.PostgresSchema;
 import sqlancer.postgres.PostgresSchema.PostgresColumn;
@@ -15,7 +15,6 @@ import sqlancer.postgres.PostgresSchema.PostgresDataType;
 import sqlancer.postgres.PostgresSchema.PostgresTable;
 import sqlancer.postgres.PostgresVisitor;
 import sqlancer.postgres.ast.PostgresExpression;
-import sqlancer.sqlite3.gen.SQLite3Common;
 
 public class PostgresTableGenerator {
 
@@ -59,12 +58,12 @@ public class PostgresTableGenerator {
         PostgresCommon.addCommonTableErrors(errors);
     }
 
-    public static Query generate(String tableName, PostgresSchema newSchema, boolean generateOnlyKnown,
+    public static SQLQueryAdapter generate(String tableName, PostgresSchema newSchema, boolean generateOnlyKnown,
             PostgresGlobalState globalState) {
         return new PostgresTableGenerator(tableName, newSchema, generateOnlyKnown, globalState).generate();
     }
 
-    private Query generate() {
+    private SQLQueryAdapter generate() {
         columnCanHavePrimaryKey = true;
         sb.append("CREATE");
         if (Randomly.getBoolean()) {
@@ -85,7 +84,7 @@ public class PostgresTableGenerator {
         } else {
             createStandard();
         }
-        return new QueryAdapter(sb.toString(), errors, true);
+        return new SQLQueryAdapter(sb.toString(), errors, true);
     }
 
     private void createStandard() throws AssertionError {
@@ -94,7 +93,7 @@ public class PostgresTableGenerator {
             if (i != 0) {
                 sb.append(", ");
             }
-            String name = SQLite3Common.createColumnName(i);
+            String name = DBMSCommon.createColumnName(i);
             createColumn(name);
         }
         if (Randomly.getBoolean()) {

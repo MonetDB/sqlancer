@@ -1,6 +1,5 @@
 package sqlancer.common.oracle;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import sqlancer.GlobalState;
@@ -8,16 +7,16 @@ import sqlancer.GlobalState;
 public class CompositeTestOracle implements TestOracle {
 
     private final TestOracle[] oracles;
-    private final GlobalState<?, ?> globalState;
+    private final GlobalState<?, ?, ?> globalState;
     private int i;
 
-    public CompositeTestOracle(List<TestOracle> oracles, GlobalState<?, ?> globalState) {
+    public CompositeTestOracle(List<TestOracle> oracles, GlobalState<?, ?, ?> globalState) {
         this.globalState = globalState;
         this.oracles = oracles.toArray(new TestOracle[oracles.size()]);
     }
 
     @Override
-    public void check() throws SQLException {
+    public void check() throws Exception {
         try {
             oracles[i].check();
             boolean lastOracleIndex = i == oracles.length - 1;

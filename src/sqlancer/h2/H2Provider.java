@@ -5,17 +5,17 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import sqlancer.AbstractAction;
-import sqlancer.GlobalState;
 import sqlancer.IgnoreMeException;
-import sqlancer.ProviderAdapter;
 import sqlancer.Randomly;
+import sqlancer.SQLConnection;
+import sqlancer.SQLGlobalState;
+import sqlancer.SQLProviderAdapter;
 import sqlancer.StatementExecutor;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
-import sqlancer.common.query.QueryProvider;
+import sqlancer.common.query.SQLQueryAdapter;
+import sqlancer.common.query.SQLQueryProvider;
 import sqlancer.h2.H2Provider.H2GlobalState;
 
-public class H2Provider extends ProviderAdapter<H2GlobalState, H2Options> {
+public class H2Provider extends SQLProviderAdapter<H2GlobalState, H2Options> {
 
     public H2Provider() {
         super(H2GlobalState.class, H2Options.class);
@@ -25,21 +25,21 @@ public class H2Provider extends ProviderAdapter<H2GlobalState, H2Options> {
 
         INSERT(H2InsertGenerator::getQuery), //
         INDEX(H2IndexGenerator::getQuery), //
-        ANALYZE((g) -> new QueryAdapter("ANALYZE")), //
+        ANALYZE((g) -> new SQLQueryAdapter("ANALYZE")), //
         CREATE_VIEW(H2ViewGenerator::getQuery), //
         UPDATE(H2UpdateGenerator::getQuery), //
         DELETE(H2DeleteGenerator::getQuery), //
         SET(H2SetGenerator::getQuery);
 
-        private final QueryProvider<H2GlobalState> queryProvider;
+        private final SQLQueryProvider<H2GlobalState> sqlQueryProvider;
 
-        Action(QueryProvider<H2GlobalState> queryProvider) {
-            this.queryProvider = queryProvider;
+        Action(SQLQueryProvider<H2GlobalState> sqlQueryProvider) {
+            this.sqlQueryProvider = sqlQueryProvider;
         }
 
         @Override
-        public Query getQuery(H2GlobalState state) throws SQLException {
-            return queryProvider.getQuery(state);
+        public SQLQueryAdapter getQuery(H2GlobalState state) throws Exception {
+            return sqlQueryProvider.getQuery(state);
         }
     }
 
@@ -63,7 +63,7 @@ public class H2Provider extends ProviderAdapter<H2GlobalState, H2Options> {
         }
     }
 
-    public static class H2GlobalState extends GlobalState<H2Options, H2Schema> {
+    public static class H2GlobalState extends SQLGlobalState<H2Options, H2Schema> {
 
         @Override
         protected H2Schema readSchema() throws SQLException {
@@ -73,14 +73,14 @@ public class H2Provider extends ProviderAdapter<H2GlobalState, H2Options> {
     }
 
     @Override
-    public void generateDatabase(H2GlobalState globalState) throws SQLException {
+    public void generateDatabase(H2GlobalState globalState) throws Exception {
         if (Randomly.getBoolean()) {
             H2SetGenerator.getQuery(globalState).execute(globalState);
         }
-        boolean success = false;
+        boolean success;
         for (int i = 0; i < Randomly.fromOptions(1, 2, 3); i++) {
             do {
-                Query qt = new H2TableGenerator().getQuery(globalState);
+                SQLQueryAdapter qt = new H2TableGenerator().getQuery(globalState);
                 success = globalState.executeStatement(qt);
             } while (!success);
         }
@@ -94,13 +94,13 @@ public class H2Provider extends ProviderAdapter<H2GlobalState, H2Options> {
     }
 
     @Override
-    public Connection createDatabase(H2GlobalState globalState) throws SQLException {
+    public SQLConnection createDatabase(H2GlobalState globalState) throws SQLException {
         String connectionString = "jdbc:h2:~/" + globalState.getDatabaseName() + ";DB_CLOSE_ON_EXIT=FALSE";
         Connection connection = DriverManager.getConnection(connectionString, "sa", "");
         connection.createStatement().execute("DROP ALL OBJECTS DELETE FILES");
         connection.close();
         connection = DriverManager.getConnection(connectionString, "sa", "");
-        return connection;
+        return new SQLConnection(connection);
     }
 
     @Override

@@ -3,13 +3,8 @@ package sqlancer;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.file.Files;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,6 +24,7 @@ import com.beust.jcommander.JCommander.Builder;
 import sqlancer.citus.CitusProvider;
 import sqlancer.clickhouse.ClickHouseProvider;
 import sqlancer.cockroachdb.CockroachDBProvider;
+import sqlancer.common.log.Loggable;
 import sqlancer.common.query.Query;
 import sqlancer.common.query.SQLancerResultSet;
 import sqlancer.duckdb.DuckDBProvider;
@@ -68,6 +64,7 @@ public final class Main {
         public FileWriter currentFileWriter;
         private static final List<String> INITIALIZED_PROVIDER_NAMES = new ArrayList<>();
         private final boolean logEachSelect;
+        private final DatabaseProvider<?, ?, ?> databaseProvider;
 
         private static final class AlsoWriteToConsoleFileWriter extends FileWriter {
 
@@ -88,7 +85,7 @@ public final class Main {
             }
         }
 
-        public StateLogger(String databaseName, DatabaseProvider<?, ?> provider, MainOptions options) {
+        public StateLogger(String databaseName, DatabaseProvider<?, ?, ?> provider, MainOptions options) {
             File dir = new File(LOG_DIRECTORY, provider.getDBMSName());
             if (dir.exists() && !dir.isDirectory()) {
                 throw new AssertionError(dir);
@@ -99,9 +96,10 @@ public final class Main {
             if (logEachSelect) {
                 curFile = new File(dir, databaseName + "-cur.log");
             }
+            this.databaseProvider = provider;
         }
 
-        private void ensureExistsAndIsEmpty(File dir, DatabaseProvider<?, ?> provider) {
+        private void ensureExistsAndIsEmpty(File dir, DatabaseProvider<?, ?, ?> provider) {
             if (INITIALIZED_PROVIDER_NAMES.contains(provider.getDBMSName())) {
                 return;
             }
@@ -162,37 +160,32 @@ public final class Main {
             }
         }
 
-        public void writeCurrent(String queryString) {
-            write(queryString, "\n");
+        public void writeCurrent(String input) {
+            write(databaseProvider.getLoggableFactory().createLoggable(input));
         }
 
-        private void write(String queryString, String suffix) {
+        public void writeCurrentNoLineBreak(String input) {
+            write(databaseProvider.getLoggableFactory().createLoggableWithNoLinebreak(input));
+        }
+
+        private void write(Loggable loggable) {
             if (!logEachSelect) {
                 throw new UnsupportedOperationException();
             }
             try {
-                getCurrentFileWriter().write(queryString);
-                if (!queryString.endsWith(";")) {
-                    getCurrentFileWriter().write(';');
-                }
-                if (suffix != null && suffix.length() != 0) {
-                    getCurrentFileWriter().write(suffix);
-                }
+                getCurrentFileWriter().write(loggable.getLogString());
+
                 currentFileWriter.flush();
             } catch (IOException e) {
                 throw new AssertionError();
             }
         }
 
-        public void writeCurrentNoLineBreak(String queryString) {
-            write(queryString, "");
-        }
-
         public void logException(Throwable reduce, StateToReproduce state) {
-            String stackTrace = getStackTrace(reduce);
+            Loggable stackTrace = getStackTrace(reduce);
             FileWriter logFileWriter2 = getLogFileWriter();
             try {
-                logFileWriter2.write(stackTrace);
+                logFileWriter2.write(stackTrace.getLogString());
                 printState(logFileWriter2, state);
             } catch (IOException e) {
                 throw new AssertionError(e);
@@ -206,22 +199,17 @@ public final class Main {
             }
         }
 
-        private String getStackTrace(Throwable e1) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e1.printStackTrace(pw);
-            return "--" + sw.toString().replace("\n", "\n--");
+        private Loggable getStackTrace(Throwable e1) {
+            return databaseProvider.getLoggableFactory().convertStacktraceToLoggable(e1);
         }
 
         private void printState(FileWriter writer, StateToReproduce state) {
             StringBuilder sb = new StringBuilder();
-            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-            Date date = new Date();
-            sb.append("-- Time: " + dateFormat.format(date) + "\n");
-            sb.append("-- Database: " + state.getDatabaseName() + "\n");
-            sb.append("-- Database version: " + state.getDatabaseVersion() + "\n");
-            sb.append("-- seed value: " + state.getSeedValue() + "\n");
-            for (Query s : state.getStatements()) {
+
+            sb.append(databaseProvider.getLoggableFactory()
+                    .getInfo(state.getDatabaseName(), state.getDatabaseVersion(), state.getSeedValue()).getLogString());
+
+            for (Query<?> s : state.getStatements()) {
                 sb.append(s.getQueryString());
                 sb.append('\n');
             }
@@ -234,15 +222,15 @@ public final class Main {
 
     }
 
-    public static class QueryManager {
+    public static class QueryManager<C extends SQLancerDBConnection> {
 
-        private final GlobalState<?, ?> globalState;
+        private final GlobalState<?, ?, C> globalState;
 
-        QueryManager(GlobalState<?, ?> globalState) {
+        QueryManager(GlobalState<?, ?, C> globalState) {
             this.globalState = globalState;
         }
 
-        public boolean execute(Query q, String... fills) throws SQLException {
+        public boolean execute(Query<C> q, String... fills) throws Exception {
             globalState.getState().logStatement(q);
             boolean success;
             success = q.execute(globalState, fills);
@@ -250,7 +238,7 @@ public final class Main {
             return success;
         }
 
-        public SQLancerResultSet executeAndGet(Query q, String... fills) throws SQLException {
+        public SQLancerResultSet executeAndGet(Query<C> q, String... fills) throws Exception {
             globalState.getState().logStatement(q);
             SQLancerResultSet result;
             result = q.executeAndGet(globalState, fills);
@@ -272,9 +260,9 @@ public final class Main {
         System.exit(executeMain(args));
     }
 
-    public static class DBMSExecutor<G extends GlobalState<O, ?>, O extends DBMSSpecificOptions<?>> {
+    public static class DBMSExecutor<G extends GlobalState<O, ?, C>, O extends DBMSSpecificOptions<?>, C extends SQLancerDBConnection> {
 
-        private final DatabaseProvider<G, O> provider;
+        private final DatabaseProvider<G, O, C> provider;
         private final MainOptions options;
         private final O command;
         private final String databaseName;
@@ -282,7 +270,7 @@ public final class Main {
         private StateToReproduce stateToRepro;
         private final Randomly r;
 
-        public DBMSExecutor(DatabaseProvider<G, O> provider, MainOptions options, O dbmsSpecificOptions,
+        public DBMSExecutor(DatabaseProvider<G, O, C> provider, MainOptions options, O dbmsSpecificOptions,
                 String databaseName, Randomly r) {
             this.provider = provider;
             this.options = options;
@@ -303,14 +291,14 @@ public final class Main {
             return command;
         }
 
-        public void testConnection() throws SQLException {
+        public void testConnection() throws Exception {
             G state = getInitializedGlobalState(options.getRandomSeed());
-            try (Connection con = provider.createDatabase(state)) {
+            try (SQLancerDBConnection con = provider.createDatabase(state)) {
                 return;
             }
         }
 
-        public void run() throws SQLException {
+        public void run() throws Exception {
             G state = createGlobalState();
             stateToRepro = provider.getStateToReproduce(databaseName);
             stateToRepro.seedValue = r.getSeed();
@@ -320,12 +308,11 @@ public final class Main {
             state.setDatabaseName(databaseName);
             state.setMainOptions(options);
             state.setDmbsSpecificOptions(command);
-            try (Connection con = provider.createDatabase(state)) {
-                QueryManager manager = new QueryManager(state);
+            try (C con = provider.createDatabase(state)) {
+                QueryManager<C> manager = new QueryManager<>(state);
                 try {
-                    java.sql.DatabaseMetaData meta = con.getMetaData();
-                    stateToRepro.databaseVersion = meta.getDatabaseProductVersion();
-                } catch (SQLFeatureNotSupportedException e) {
+                    stateToRepro.databaseVersion = con.getDatabaseVersion();
+                } catch (Exception e) {
                     // ignore
                 }
                 state.setConnection(con);
@@ -367,13 +354,13 @@ public final class Main {
         }
     }
 
-    public static class DBMSExecutorFactory<G extends GlobalState<O, ?>, O extends DBMSSpecificOptions<?>> {
+    public static class DBMSExecutorFactory<G extends GlobalState<O, ?, C>, O extends DBMSSpecificOptions<?>, C extends SQLancerDBConnection> {
 
-        private final DatabaseProvider<G, O> provider;
+        private final DatabaseProvider<G, O, C> provider;
         private final MainOptions options;
         private final O command;
 
-        public DBMSExecutorFactory(DatabaseProvider<G, O> provider, MainOptions options) {
+        public DBMSExecutorFactory(DatabaseProvider<G, O, C> provider, MainOptions options) {
             this.provider = provider;
             this.options = options;
             this.command = createCommand();
@@ -392,32 +379,32 @@ public final class Main {
         }
 
         @SuppressWarnings("unchecked")
-        public DBMSExecutor<G, O> getDBMSExecutor(String databaseName, Randomly r) {
+        public DBMSExecutor<G, O, C> getDBMSExecutor(String databaseName, Randomly r) {
             try {
-                return new DBMSExecutor<G, O>(provider.getClass().getDeclaredConstructor().newInstance(), options,
+                return new DBMSExecutor<G, O, C>(provider.getClass().getDeclaredConstructor().newInstance(), options,
                         command, databaseName, r);
             } catch (Exception e) {
                 throw new AssertionError(e);
             }
         }
 
-        public DatabaseProvider<G, O> getProvider() {
+        public DatabaseProvider<G, O, C> getProvider() {
             return provider;
         }
 
     }
 
     public static int executeMain(String... args) throws AssertionError {
-        List<DatabaseProvider<?, ?>> providers = getDBMSProviders();
-        Map<String, DBMSExecutorFactory<?, ?>> nameToProvider = new HashMap<>();
+        List<DatabaseProvider<?, ?, ?>> providers = getDBMSProviders();
+        Map<String, DBMSExecutorFactory<?, ?, ?>> nameToProvider = new HashMap<>();
         MainOptions options = new MainOptions();
         Builder commandBuilder = JCommander.newBuilder().addObject(options);
-        for (DatabaseProvider<?, ?> provider : providers) {
+        for (DatabaseProvider<?, ?, ?> provider : providers) {
             String name = provider.getDBMSName();
             if (!name.toLowerCase().equals(name)) {
                 throw new AssertionError(name + " should be in lowercase!");
             }
-            DBMSExecutorFactory<?, ?> executorFactory = new DBMSExecutorFactory<>(provider, options);
+            DBMSExecutorFactory<?, ?, ?> executorFactory = new DBMSExecutorFactory<>(provider, options);
             commandBuilder = commandBuilder.addCommand(name, executorFactory.getCommand());
             nameToProvider.put(name, executorFactory);
         }
@@ -459,13 +446,13 @@ public final class Main {
         }
 
         ExecutorService execService = Executors.newFixedThreadPool(options.getNumberConcurrentThreads());
-        DBMSExecutorFactory<?, ?> executorFactory = nameToProvider.get(jc.getParsedCommand());
+        DBMSExecutorFactory<?, ?, ?> executorFactory = nameToProvider.get(jc.getParsedCommand());
 
         if (options.performConnectionTest()) {
             try {
                 executorFactory.getDBMSExecutor(options.getDatabasePrefix() + "connectiontest", new Randomly())
                         .testConnection();
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 System.err.println(
                         "SQLancer failed creating a test database, indicating that SQLancer might have failed connecting to the DBMS. In order to change the username and password, you can use the --username and --password options. Currently, SQLancer does not yet support passing a host and port (see https://github.com/sqlancer/sqlancer/issues/95).\n\n");
                 e.printStackTrace();
@@ -515,8 +502,8 @@ public final class Main {
                 }
 
                 private boolean run(MainOptions options, ExecutorService execService,
-                        DBMSExecutorFactory<?, ?> executorFactory, Randomly r, final String databaseName) {
-                    DBMSExecutor<?, ?> executor = executorFactory.getDBMSExecutor(databaseName, r);
+                        DBMSExecutorFactory<?, ?, ?> executorFactory, Randomly r, final String databaseName) {
+                    DBMSExecutor<?, ?, ?> executor = executorFactory.getDBMSExecutor(databaseName, r);
                     try {
                         executor.run();
                         return true;
@@ -556,8 +543,8 @@ public final class Main {
         return threadsShutdown == 0 ? 0 : options.getErrorExitCode();
     }
 
-    static List<DatabaseProvider<?, ?>> getDBMSProviders() {
-        List<DatabaseProvider<?, ?>> providers = new ArrayList<>();
+    static List<DatabaseProvider<?, ?, ?>> getDBMSProviders() {
+        List<DatabaseProvider<?, ?, ?>> providers = new ArrayList<>();
         providers.add(new SQLite3Provider());
         providers.add(new CockroachDBProvider());
         providers.add(new MySQLProvider());

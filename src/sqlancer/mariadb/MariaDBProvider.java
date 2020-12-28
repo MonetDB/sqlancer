@@ -7,12 +7,14 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import sqlancer.GlobalState;
 import sqlancer.IgnoreMeException;
 import sqlancer.MainOptions;
-import sqlancer.ProviderAdapter;
 import sqlancer.Randomly;
-import sqlancer.common.query.Query;
+import sqlancer.SQLConnection;
+import sqlancer.SQLGlobalState;
+import sqlancer.SQLProviderAdapter;
+import sqlancer.common.DBMSCommon;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.mariadb.MariaDBProvider.MariaDBGlobalState;
 import sqlancer.mariadb.gen.MariaDBIndexGenerator;
 import sqlancer.mariadb.gen.MariaDBInsertGenerator;
@@ -21,9 +23,8 @@ import sqlancer.mariadb.gen.MariaDBTableAdminCommandGenerator;
 import sqlancer.mariadb.gen.MariaDBTableGenerator;
 import sqlancer.mariadb.gen.MariaDBTruncateGenerator;
 import sqlancer.mariadb.gen.MariaDBUpdateGenerator;
-import sqlancer.sqlite3.gen.SQLite3Common;
 
-public class MariaDBProvider extends ProviderAdapter<MariaDBGlobalState, MariaDBOptions> {
+public class MariaDBProvider extends SQLProviderAdapter<MariaDBGlobalState, MariaDBOptions> {
 
     public static final int MAX_EXPRESSION_DEPTH = 3;
 
@@ -45,12 +46,12 @@ public class MariaDBProvider extends ProviderAdapter<MariaDBGlobalState, MariaDB
     }
 
     @Override
-    public void generateDatabase(MariaDBGlobalState globalState) throws SQLException {
+    public void generateDatabase(MariaDBGlobalState globalState) throws Exception {
         MainOptions options = globalState.getOptions();
 
         while (globalState.getSchema().getDatabaseTables().size() < Randomly.smallNumber() + 1) {
-            String tableName = SQLite3Common.createTableName(globalState.getSchema().getDatabaseTables().size());
-            Query createTable = MariaDBTableGenerator.generate(tableName, globalState.getRandomly(),
+            String tableName = DBMSCommon.createTableName(globalState.getSchema().getDatabaseTables().size());
+            SQLQueryAdapter createTable = MariaDBTableGenerator.generate(tableName, globalState.getRandomly(),
                     globalState.getSchema());
             globalState.executeStatement(createTable);
         }
@@ -102,7 +103,7 @@ public class MariaDBProvider extends ProviderAdapter<MariaDBGlobalState, MariaDB
             assert nextAction != null;
             assert nrRemaining[nextAction.ordinal()] > 0;
             nrRemaining[nextAction.ordinal()]--;
-            Query query;
+            SQLQueryAdapter query;
             try {
                 switch (nextAction) {
                 case CHECKSUM:
@@ -152,7 +153,7 @@ public class MariaDBProvider extends ProviderAdapter<MariaDBGlobalState, MariaDB
         }
     }
 
-    public static class MariaDBGlobalState extends GlobalState<MariaDBOptions, MariaDBSchema> {
+    public static class MariaDBGlobalState extends SQLGlobalState<MariaDBOptions, MariaDBSchema> {
 
         @Override
         protected MariaDBSchema readSchema() throws SQLException {
@@ -162,7 +163,7 @@ public class MariaDBProvider extends ProviderAdapter<MariaDBGlobalState, MariaDB
     }
 
     @Override
-    public Connection createDatabase(MariaDBGlobalState globalState) throws SQLException {
+    public SQLConnection createDatabase(MariaDBGlobalState globalState) throws SQLException {
         globalState.getState().logStatement("DROP DATABASE IF EXISTS " + globalState.getDatabaseName());
         globalState.getState().logStatement("CREATE DATABASE " + globalState.getDatabaseName());
         globalState.getState().logStatement("USE " + globalState.getDatabaseName());
@@ -179,7 +180,7 @@ public class MariaDBProvider extends ProviderAdapter<MariaDBGlobalState, MariaDB
         try (Statement s = con.createStatement()) {
             s.execute("USE " + globalState.getDatabaseName());
         }
-        return con;
+        return new SQLConnection(con);
     }
 
     @Override

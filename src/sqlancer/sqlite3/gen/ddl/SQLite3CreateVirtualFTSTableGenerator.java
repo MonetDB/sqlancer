@@ -5,10 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import sqlancer.Randomly;
+import sqlancer.common.DBMSCommon;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
-import sqlancer.sqlite3.gen.SQLite3Common;
+import sqlancer.common.query.SQLQueryAdapter;
 
 public class SQLite3CreateVirtualFTSTableGenerator {
 
@@ -21,7 +20,7 @@ public class SQLite3CreateVirtualFTSTableGenerator {
         this.r = r;
     }
 
-    public static Query createTableStatement(String tableName, Randomly r) {
+    public static SQLQueryAdapter createTableStatement(String tableName, Randomly r) {
         return new SQLite3CreateVirtualFTSTableGenerator(tableName, r).create();
     }
 
@@ -37,7 +36,7 @@ public class SQLite3CreateVirtualFTSTableGenerator {
         MATCHINFO, TOKENIZE, PREFIX, ORDER, LANGUAGEID, COMPRESS, NOT_INDEXED
     }
 
-    public Query create() {
+    public SQLQueryAdapter create() {
         sb.append("CREATE VIRTUAL TABLE ");
         sb.append(tableName);
         sb.append(" USING ");
@@ -46,7 +45,7 @@ public class SQLite3CreateVirtualFTSTableGenerator {
         } else {
             createFts5Table();
         }
-        return new QueryAdapter(sb.toString(),
+        return new SQLQueryAdapter(sb.toString(),
                 ExpectedErrors.from("unrecognized parameter", "unknown tokenizer: ascii"), true);
     }
 
@@ -175,7 +174,7 @@ public class SQLite3CreateVirtualFTSTableGenerator {
             if (i != 0) {
                 sb.append(", ");
             }
-            sb.append(SQLite3Common.createColumnName(i));
+            sb.append(DBMSCommon.createColumnName(i));
             columnAction.action();
         }
         tableAction.action();

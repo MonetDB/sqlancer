@@ -1,17 +1,15 @@
 package sqlancer;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import sqlancer.StateToReproduce.OracleRunReproductionState;
 import sqlancer.common.oracle.CompositeTestOracle;
 import sqlancer.common.oracle.TestOracle;
-import sqlancer.common.query.QueryAdapter;
-import sqlancer.common.schema.AbstractTable;
+import sqlancer.common.schema.AbstractSchema;
 
-public abstract class ProviderAdapter<G extends GlobalState<O, ?>, O extends DBMSSpecificOptions<? extends OracleFactory<G>>>
-        implements DatabaseProvider<G, O> {
+public abstract class ProviderAdapter<G extends GlobalState<O, ? extends AbstractSchema<G, ?>, C>, O extends DBMSSpecificOptions<? extends OracleFactory<G>>, C extends SQLancerDBConnection>
+        implements DatabaseProvider<G, O, C> {
 
     private final Class<G> globalClass;
     private final Class<O> optionClass;
@@ -23,7 +21,7 @@ public abstract class ProviderAdapter<G extends GlobalState<O, ?>, O extends DBM
 
     @Override
     public StateToReproduce getStateToReproduce(String databaseName) {
-        return new StateToReproduce(databaseName);
+        return new StateToReproduce(databaseName, this);
     }
 
     @Override
@@ -37,7 +35,7 @@ public abstract class ProviderAdapter<G extends GlobalState<O, ?>, O extends DBM
     }
 
     @Override
-    public void generateAndTestDatabase(G globalState) throws SQLException {
+    public void generateAndTestDatabase(G globalState) throws Exception {
         try {
             generateDatabase(globalState);
             checkViewsAreValid(globalState);
@@ -62,19 +60,9 @@ public abstract class ProviderAdapter<G extends GlobalState<O, ?>, O extends DBM
         }
     }
 
-    private void checkViewsAreValid(G globalState) {
-        List<? extends AbstractTable<?, ?>> views = globalState.getSchema().getViews();
-        for (AbstractTable<?, ?> view : views) {
-            QueryAdapter q = new QueryAdapter("SELECT 1 FROM " + view.getName() + " LIMIT 1");
-            try {
-                q.execute(globalState);
-            } catch (Throwable t) {
-                throw new IgnoreMeException();
-            }
-        }
-    }
+    protected abstract void checkViewsAreValid(G globalState);
 
-    protected TestOracle getTestOracle(G globalState) throws SQLException {
+    protected TestOracle getTestOracle(G globalState) throws Exception {
         List<? extends OracleFactory<G>> testOracleFactory = globalState.getDmbsSpecificOptions()
                 .getTestOracleFactory();
         boolean testOracleRequiresMoreThanZeroRows = testOracleFactory.stream()
@@ -90,13 +78,13 @@ public abstract class ProviderAdapter<G extends GlobalState<O, ?>, O extends DBM
             return new CompositeTestOracle(testOracleFactory.stream().map(o -> {
                 try {
                     return o.create(globalState);
-                } catch (SQLException e1) {
+                } catch (Exception e1) {
                     throw new AssertionError(e1);
                 }
             }).collect(Collectors.toList()), globalState);
         }
     }
 
-    public abstract void generateDatabase(G globalState) throws SQLException;
+    public abstract void generateDatabase(G globalState) throws Exception;
 
 }

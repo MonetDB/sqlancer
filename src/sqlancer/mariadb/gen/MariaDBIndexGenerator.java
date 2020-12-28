@@ -3,20 +3,19 @@ package sqlancer.mariadb.gen;
 import java.util.List;
 
 import sqlancer.Randomly;
+import sqlancer.common.DBMSCommon;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.mariadb.MariaDBSchema;
 import sqlancer.mariadb.MariaDBSchema.MariaDBColumn;
 import sqlancer.mariadb.MariaDBSchema.MariaDBTable;
-import sqlancer.sqlite3.gen.SQLite3Common;
 
 public final class MariaDBIndexGenerator {
 
     private MariaDBIndexGenerator() {
     }
 
-    public static Query generate(MariaDBSchema s) {
+    public static SQLQueryAdapter generate(MariaDBSchema s) {
         ExpectedErrors errors = new ExpectedErrors();
         StringBuilder sb = new StringBuilder("CREATE ");
         errors.add("Key/Index cannot be defined on a virtual generated column");
@@ -27,7 +26,7 @@ public final class MariaDBIndexGenerator {
         }
         sb.append("INDEX ");
         sb.append("i");
-        sb.append(SQLite3Common.createColumnName(Randomly.smallNumber()));
+        sb.append(DBMSCommon.createColumnName(Randomly.smallNumber()));
         if (Randomly.getBoolean()) {
             sb.append(" USING ");
             sb.append(Randomly.fromOptions("BTREE", "HASH")); // , "RTREE")
@@ -55,7 +54,7 @@ public final class MariaDBIndexGenerator {
         // errors.add("is not supported for this operation");
         // }
 
-        return new QueryAdapter(sb.toString(), errors, true);
+        return new SQLQueryAdapter(sb.toString(), errors, true);
     }
 
 }

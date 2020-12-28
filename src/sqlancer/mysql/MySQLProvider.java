@@ -7,12 +7,13 @@ import java.sql.Statement;
 
 import sqlancer.AbstractAction;
 import sqlancer.IgnoreMeException;
-import sqlancer.ProviderAdapter;
 import sqlancer.Randomly;
+import sqlancer.SQLConnection;
+import sqlancer.SQLProviderAdapter;
 import sqlancer.StatementExecutor;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
-import sqlancer.common.query.QueryProvider;
+import sqlancer.common.DBMSCommon;
+import sqlancer.common.query.SQLQueryAdapter;
+import sqlancer.common.query.SQLQueryProvider;
 import sqlancer.mysql.gen.MySQLAlterTable;
 import sqlancer.mysql.gen.MySQLDeleteGenerator;
 import sqlancer.mysql.gen.MySQLDropIndex;
@@ -28,16 +29,15 @@ import sqlancer.mysql.gen.tblmaintenance.MySQLCheckTable;
 import sqlancer.mysql.gen.tblmaintenance.MySQLChecksum;
 import sqlancer.mysql.gen.tblmaintenance.MySQLOptimize;
 import sqlancer.mysql.gen.tblmaintenance.MySQLRepair;
-import sqlancer.sqlite3.gen.SQLite3Common;
 
-public class MySQLProvider extends ProviderAdapter<MySQLGlobalState, MySQLOptions> {
+public class MySQLProvider extends SQLProviderAdapter<MySQLGlobalState, MySQLOptions> {
 
     public MySQLProvider() {
         super(MySQLGlobalState.class, MySQLOptions.class);
     }
 
     enum Action implements AbstractAction<MySQLGlobalState> {
-        SHOW_TABLES((g) -> new QueryAdapter("SHOW TABLES")), //
+        SHOW_TABLES((g) -> new SQLQueryAdapter("SHOW TABLES")), //
         INSERT(MySQLInsertGenerator::insertRow), //
         SET_VARIABLE(MySQLSetGenerator::set), //
         REPAIR(MySQLRepair::repair), //
@@ -48,26 +48,26 @@ public class MySQLProvider extends ProviderAdapter<MySQLGlobalState, MySQLOption
         FLUSH(MySQLFlush::create), RESET(MySQLReset::create), CREATE_INDEX(MySQLIndexGenerator::create), //
         ALTER_TABLE(MySQLAlterTable::create), //
         TRUNCATE_TABLE(MySQLTruncateTableGenerator::generate), //
-        SELECT_INFO((g) -> new QueryAdapter(
+        SELECT_INFO((g) -> new SQLQueryAdapter(
                 "select TABLE_NAME, ENGINE from information_schema.TABLES where table_schema = '" + g.getDatabaseName()
                         + "'")), //
         CREATE_TABLE((g) -> {
             // TODO refactor
-            String tableName = SQLite3Common.createTableName(g.getSchema().getDatabaseTables().size());
+            String tableName = DBMSCommon.createTableName(g.getSchema().getDatabaseTables().size());
             return MySQLTableGenerator.generate(g, tableName);
         }), //
         DELETE(MySQLDeleteGenerator::delete), //
         DROP_INDEX(MySQLDropIndex::generate);
 
-        private final QueryProvider<MySQLGlobalState> queryProvider;
+        private final SQLQueryProvider<MySQLGlobalState> sqlQueryProvider;
 
-        Action(QueryProvider<MySQLGlobalState> queryProvider) {
-            this.queryProvider = queryProvider;
+        Action(SQLQueryProvider<MySQLGlobalState> sqlQueryProvider) {
+            this.sqlQueryProvider = sqlQueryProvider;
         }
 
         @Override
-        public Query getQuery(MySQLGlobalState globalState) throws SQLException {
-            return queryProvider.getQuery(globalState);
+        public SQLQueryAdapter getQuery(MySQLGlobalState globalState) throws Exception {
+            return sqlQueryProvider.getQuery(globalState);
         }
     }
 
@@ -131,10 +131,10 @@ public class MySQLProvider extends ProviderAdapter<MySQLGlobalState, MySQLOption
     }
 
     @Override
-    public void generateDatabase(MySQLGlobalState globalState) throws SQLException {
+    public void generateDatabase(MySQLGlobalState globalState) throws Exception {
         while (globalState.getSchema().getDatabaseTables().size() < Randomly.smallNumber() + 1) {
-            String tableName = SQLite3Common.createTableName(globalState.getSchema().getDatabaseTables().size());
-            Query createTable = MySQLTableGenerator.generate(globalState, tableName);
+            String tableName = DBMSCommon.createTableName(globalState.getSchema().getDatabaseTables().size());
+            SQLQueryAdapter createTable = MySQLTableGenerator.generate(globalState, tableName);
             globalState.executeStatement(createTable);
         }
 
@@ -148,7 +148,7 @@ public class MySQLProvider extends ProviderAdapter<MySQLGlobalState, MySQLOption
     }
 
     @Override
-    public Connection createDatabase(MySQLGlobalState globalState) throws SQLException {
+    public SQLConnection createDatabase(MySQLGlobalState globalState) throws SQLException {
         String databaseName = globalState.getDatabaseName();
         globalState.getState().logStatement("DROP DATABASE IF EXISTS " + databaseName);
         globalState.getState().logStatement("CREATE DATABASE " + databaseName);
@@ -165,7 +165,7 @@ public class MySQLProvider extends ProviderAdapter<MySQLGlobalState, MySQLOption
         try (Statement s = con.createStatement()) {
             s.execute("USE " + databaseName);
         }
-        return con;
+        return new SQLConnection(con);
     }
 
     @Override

@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import sqlancer.Randomly;
+import sqlancer.common.DBMSCommon;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.postgres.PostgresGlobalState;
 import sqlancer.postgres.PostgresSchema.PostgresColumn;
 import sqlancer.postgres.PostgresSchema.PostgresDataType;
@@ -14,7 +14,6 @@ import sqlancer.postgres.PostgresSchema.PostgresIndex;
 import sqlancer.postgres.PostgresSchema.PostgresTable;
 import sqlancer.postgres.PostgresVisitor;
 import sqlancer.postgres.ast.PostgresExpression;
-import sqlancer.sqlite3.gen.SQLite3Common;
 
 public final class PostgresIndexGenerator {
 
@@ -25,7 +24,7 @@ public final class PostgresIndexGenerator {
         BTREE, HASH, GIST, GIN
     }
 
-    public static Query generate(PostgresGlobalState globalState) {
+    public static SQLQueryAdapter generate(PostgresGlobalState globalState) {
         ExpectedErrors errors = new ExpectedErrors();
         StringBuilder sb = new StringBuilder();
         sb.append("CREATE");
@@ -135,15 +134,16 @@ public final class PostgresIndexGenerator {
         errors.add("functions in index predicate must be marked IMMUTABLE");
         errors.add("functions in index expression must be marked IMMUTABLE");
         errors.add("result of range difference would not be contiguous");
+        errors.add("which is part of the partition key");
         PostgresCommon.addCommonExpressionErrors(errors);
-        return new QueryAdapter(sb.toString(), errors);
+        return new SQLQueryAdapter(sb.toString(), errors);
     }
 
     private static String getNewIndexName(PostgresTable randomTable) {
         List<PostgresIndex> indexes = randomTable.getIndexes();
         int indexI = 0;
         while (true) {
-            String indexName = SQLite3Common.createIndexName(indexI++);
+            String indexName = DBMSCommon.createIndexName(indexI++);
             if (indexes.stream().noneMatch(i -> i.getIndexName().equals(indexName))) {
                 return indexName;
             }

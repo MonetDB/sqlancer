@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import sqlancer.Randomly;
+import sqlancer.common.DBMSCommon;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.sqlite3.SQLite3Errors;
 import sqlancer.sqlite3.SQLite3Options.SQLite3OracleFactory;
 import sqlancer.sqlite3.SQLite3Provider.SQLite3GlobalState;
@@ -46,7 +46,7 @@ public class SQLite3TableGenerator {
         this.existingSchema = globalState.getSchema();
     }
 
-    public static Query createTableStatement(String tableName, SQLite3GlobalState globalState) {
+    public static SQLQueryAdapter createTableStatement(String tableName, SQLite3GlobalState globalState) {
         SQLite3TableGenerator sqLite3TableGenerator = new SQLite3TableGenerator(tableName, globalState);
         sqLite3TableGenerator.start();
         ExpectedErrors errors = new ExpectedErrors();
@@ -57,7 +57,7 @@ public class SQLite3TableGenerator {
         errors.add("parser stack overflow");
         errors.add("malformed JSON");
         errors.add("JSON cannot hold BLOB values");
-        return new QueryAdapter(sqLite3TableGenerator.sb.toString(), errors, true);
+        return new SQLQueryAdapter(sqLite3TableGenerator.sb.toString(), errors, true);
     }
 
     public void start() {
@@ -79,13 +79,13 @@ public class SQLite3TableGenerator {
         boolean allowPrimaryKeyInColumn = Randomly.getBoolean();
         int nrColumns = 1 + Randomly.smallNumber();
         for (int i = 0; i < nrColumns; i++) {
-            columns.add(SQLite3Column.createDummy(SQLite3Common.createColumnName(i)));
+            columns.add(SQLite3Column.createDummy(DBMSCommon.createColumnName(i)));
         }
         for (int i = 0; i < nrColumns; i++) {
             if (i != 0) {
                 sb.append(", ");
             }
-            String columnName = SQLite3Common.createColumnName(columnId);
+            String columnName = DBMSCommon.createColumnName(columnId);
             SQLite3ColumnBuilder columnBuilder = new SQLite3ColumnBuilder()
                     .allowPrimaryKey(allowPrimaryKeyInColumn && !containsPrimaryKey);
             sb.append(columnBuilder.createColumn(columnName, globalState, columns));
@@ -152,7 +152,7 @@ public class SQLite3TableGenerator {
      */
     private void addForeignKey() {
         assert globalState.getDmbsSpecificOptions().testForeignKeys;
-        List<String> foreignKeyColumns = new ArrayList<>();
+        List<String> foreignKeyColumns;
         if (Randomly.getBoolean()) {
             foreignKeyColumns = Arrays.asList(Randomly.fromList(columnNames));
         } else {

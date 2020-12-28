@@ -1,12 +1,11 @@
 package sqlancer;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import sqlancer.common.query.Query;
 
-public class StatementExecutor<G extends GlobalState<?, ?>, A extends AbstractAction<G>> {
+public class StatementExecutor<G extends GlobalState<?, ?, ?>, A extends AbstractAction<G>> {
 
     private final G globalState;
     private final A[] actions;
@@ -15,7 +14,7 @@ public class StatementExecutor<G extends GlobalState<?, ?>, A extends AbstractAc
 
     @FunctionalInterface
     public interface AfterQueryAction {
-        void notify(Query q) throws SQLException;
+        void notify(Query<?> q) throws Exception;
     }
 
     @FunctionalInterface
@@ -30,7 +29,8 @@ public class StatementExecutor<G extends GlobalState<?, ?>, A extends AbstractAc
         this.queryConsumer = queryConsumer;
     }
 
-    public void executeStatements() throws SQLException {
+    @SuppressWarnings("unchecked")
+    public void executeStatements() throws Exception {
         Randomly r = globalState.getRandomly();
         int[] nrRemaining = new int[actions.length];
         List<A> availableActions = new ArrayList<>();
@@ -60,6 +60,7 @@ public class StatementExecutor<G extends GlobalState<?, ?>, A extends AbstractAc
             assert nextAction != null;
             assert nrRemaining[i] > 0;
             nrRemaining[i]--;
+            @SuppressWarnings("rawtypes")
             Query query = null;
             try {
                 boolean success;

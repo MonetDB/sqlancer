@@ -1,6 +1,5 @@
 package sqlancer.duckdb;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -8,15 +7,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import sqlancer.IgnoreMeException;
 import sqlancer.Randomly;
+import sqlancer.SQLConnection;
+import sqlancer.common.DBMSCommon;
+import sqlancer.common.schema.AbstractRelationalTable;
 import sqlancer.common.schema.AbstractSchema;
-import sqlancer.common.schema.AbstractTable;
 import sqlancer.common.schema.AbstractTableColumn;
 import sqlancer.common.schema.AbstractTables;
 import sqlancer.common.schema.TableIndex;
+import sqlancer.duckdb.DuckDBProvider.DuckDBGlobalState;
 import sqlancer.duckdb.DuckDBSchema.DuckDBTable;
 
-public class DuckDBSchema extends AbstractSchema<DuckDBTable> {
+public class DuckDBSchema extends AbstractSchema<DuckDBGlobalState, DuckDBTable> {
 
     public enum DuckDBDataType {
 
@@ -94,7 +97,7 @@ public class DuckDBSchema extends AbstractSchema<DuckDBTable> {
             case FLOAT:
                 switch (size) {
                 case 8:
-                    return Randomly.fromOptions("DOUBLE", "NUMERIC");
+                    return Randomly.fromOptions("DOUBLE");
                 case 4:
                     return Randomly.fromOptions("REAL", "FLOAT4");
                 default:
@@ -166,6 +169,7 @@ public class DuckDBSchema extends AbstractSchema<DuckDBTable> {
             size = 2;
             break;
         case "BIGINT":
+        case "HUGEINT": // TODO: 16-bit int
             primitiveType = DuckDBDataType.INT;
             size = 8;
             break;
@@ -193,13 +197,17 @@ public class DuckDBSchema extends AbstractSchema<DuckDBTable> {
         case "TIMESTAMP":
             primitiveType = DuckDBDataType.TIMESTAMP;
             break;
+        case "INTERVAL":
+            throw new IgnoreMeException();
+        // TODO: caused when a view contains a computation like ((TIMESTAMP '1970-01-05 11:26:57')-(TIMESTAMP
+        // '1969-12-29 06:50:27'))
         default:
             throw new AssertionError(typeString);
         }
         return new DuckDBCompositeDataType(primitiveType, size);
     }
 
-    public static class DuckDBTable extends AbstractTable<DuckDBColumn, TableIndex> {
+    public static class DuckDBTable extends AbstractRelationalTable<DuckDBColumn, TableIndex, DuckDBGlobalState> {
 
         public DuckDBTable(String tableName, List<DuckDBColumn> columns, boolean isView) {
             super(tableName, columns, Collections.emptyList(), isView);
@@ -207,10 +215,13 @@ public class DuckDBSchema extends AbstractSchema<DuckDBTable> {
 
     }
 
-    public static DuckDBSchema fromConnection(Connection con, String databaseName) throws SQLException {
+    public static DuckDBSchema fromConnection(SQLConnection con, String databaseName) throws SQLException {
         List<DuckDBTable> databaseTables = new ArrayList<>();
         List<String> tableNames = getTableNames(con);
         for (String tableName : tableNames) {
+            if (DBMSCommon.matchesIndexName(tableName)) {
+                continue; // TODO: unexpected?
+            }
             List<DuckDBColumn> databaseColumns = getTableColumns(con, tableName);
             boolean isView = tableName.startsWith("v");
             DuckDBTable t = new DuckDBTable(tableName, databaseColumns, isView);
@@ -223,7 +234,7 @@ public class DuckDBSchema extends AbstractSchema<DuckDBTable> {
         return new DuckDBSchema(databaseTables);
     }
 
-    private static List<String> getTableNames(Connection con) throws SQLException {
+    private static List<String> getTableNames(SQLConnection con) throws SQLException {
         List<String> tableNames = new ArrayList<>();
         try (Statement s = con.createStatement()) {
             try (ResultSet rs = s.executeQuery("SELECT * FROM sqlite_master()")) {
@@ -235,7 +246,7 @@ public class DuckDBSchema extends AbstractSchema<DuckDBTable> {
         return tableNames;
     }
 
-    private static List<DuckDBColumn> getTableColumns(Connection con, String tableName) throws SQLException {
+    private static List<DuckDBColumn> getTableColumns(SQLConnection con, String tableName) throws SQLException {
         List<DuckDBColumn> columns = new ArrayList<>();
         try (Statement s = con.createStatement()) {
             try (ResultSet rs = s.executeQuery(String.format("SELECT * FROM pragma_table_info('%s');", tableName))) {

@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import sqlancer.Randomly;
+import sqlancer.common.DBMSCommon;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.sqlite3.SQLite3Provider.SQLite3GlobalState;
 import sqlancer.sqlite3.schema.SQLite3Schema.SQLite3Column;
 
@@ -15,7 +15,7 @@ public final class SQLite3CreateVirtualRtreeTabelGenerator {
     private SQLite3CreateVirtualRtreeTabelGenerator() {
     }
 
-    public static Query createTableStatement(String rTreeTableName, SQLite3GlobalState globalState) {
+    public static SQLQueryAdapter createTableStatement(String rTreeTableName, SQLite3GlobalState globalState) {
         ExpectedErrors errors = new ExpectedErrors();
         List<SQLite3Column> columns = new ArrayList<>();
         StringBuilder sb = new StringBuilder("CREATE VIRTUAL TABLE ");
@@ -35,7 +35,7 @@ public final class SQLite3CreateVirtualRtreeTabelGenerator {
         for (int i = 0; i < Randomly.smallNumber(); i++) {
             sb.append(", ");
             sb.append("+");
-            String columnName = SQLite3Common.createColumnName(size + i);
+            String columnName = DBMSCommon.createColumnName(size + i);
             SQLite3ColumnBuilder columnBuilder = new SQLite3ColumnBuilder().allowPrimaryKey(false).allowNotNull(false)
                     .allowUnique(false).allowCheck(false);
             String c = columnBuilder.createColumn(columnName, globalState, columns);
@@ -47,7 +47,7 @@ public final class SQLite3CreateVirtualRtreeTabelGenerator {
 
         errors.add("Wrong number of columns for an rtree table");
         errors.add("Too many columns for an rtree table");
-        return new QueryAdapter(sb.toString(), errors, true);
+        return new SQLQueryAdapter(sb.toString(), errors, true);
     }
 
 }

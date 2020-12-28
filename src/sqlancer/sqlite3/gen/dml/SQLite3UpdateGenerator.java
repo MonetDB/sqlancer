@@ -5,8 +5,7 @@ import java.util.stream.Collectors;
 
 import sqlancer.Randomly;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.sqlite3.SQLite3Errors;
 import sqlancer.sqlite3.SQLite3Provider.SQLite3GlobalState;
 import sqlancer.sqlite3.SQLite3Visitor;
@@ -27,18 +26,18 @@ public class SQLite3UpdateGenerator {
         this.r = r;
     }
 
-    public static Query updateRow(SQLite3GlobalState globalState) {
+    public static SQLQueryAdapter updateRow(SQLite3GlobalState globalState) {
         SQLite3Table randomTableNoViewOrBailout = globalState.getSchema()
                 .getRandomTableOrBailout(t -> !t.isView() && !t.isReadOnly());
         return updateRow(globalState, randomTableNoViewOrBailout);
     }
 
-    public static Query updateRow(SQLite3GlobalState globalState, SQLite3Table table) {
+    public static SQLQueryAdapter updateRow(SQLite3GlobalState globalState, SQLite3Table table) {
         SQLite3UpdateGenerator generator = new SQLite3UpdateGenerator(globalState, globalState.getRandomly());
         return generator.update(table);
     }
 
-    private Query update(SQLite3Table table) {
+    private SQLQueryAdapter update(SQLite3Table table) {
         sb.append("UPDATE ");
         if (Randomly.getBoolean()) {
             sb.append("OR IGNORE ");
@@ -96,28 +95,19 @@ public class SQLite3UpdateGenerator {
         // sb.append(expressions.stream().map(e -> SQLite3Visitor.asString(e)).collect(Collectors.joining(", ")));
         // }
 
-        errors.add("[SQLITE_ERROR] SQL error or missing database (foreign key mismatch");
-        errors.add("[SQLITE_CONSTRAINT]  Abort due to constraint violation");
+        SQLite3Errors.addInsertUpdateErrors(errors);
+
         errors.add("[SQLITE_ERROR] SQL error or missing database (parser stack overflow)");
         errors.add(
                 "[SQLITE_ERROR] SQL error or missing database (second argument to likelihood() must be a constant between 0.0 and 1.0)");
-        errors.add("[SQLITE_ERROR] SQL error or missing database (no such table:");
         // for views
         errors.add("ORDER BY term out of range");
-        errors.add("no such column");
-        errors.add("(too many levels of trigger recursion");
-        errors.add("String or BLOB exceeds size limit");
-        errors.add("cannot UPDATE generated column");
         errors.add("unknown function: json_type");
 
-        // TODO not update generated columns?
-        errors.add("cannot INSERT into generated column");
-        errors.add("A table in the database is locked"); // https://www.sqlite.org/src/tktview?name=56a74875be
-        errors.add("The database file is locked");
         SQLite3Errors.addInsertNowErrors(errors);
         SQLite3Errors.addExpectedExpressionErrors(errors);
         SQLite3Errors.addDeleteErrors(errors);
-        return new QueryAdapter(sb.toString(), errors, true /* column could have an ON UPDATE clause */);
+        return new SQLQueryAdapter(sb.toString(), errors, true /* column could have an ON UPDATE clause */);
 
     }
 

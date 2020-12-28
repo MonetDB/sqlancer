@@ -32,7 +32,7 @@ import sqlancer.cockroachdb.gen.CockroachDBExpressionGenerator;
 import sqlancer.cockroachdb.oracle.CockroachDBNoRECOracle;
 import sqlancer.common.oracle.TestOracle;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.common.query.SQLancerResultSet;
 
 public class CockroachDBTLPAggregateOracle implements TestOracle {
@@ -107,7 +107,7 @@ public class CockroachDBTLPAggregateOracle implements TestOracle {
         CockroachDBSelect leftSelect = getSelect(mappedAggregate, from, whereClause, select.getJoinList());
         CockroachDBSelect middleSelect = getSelect(mappedAggregate, from, negatedClause, select.getJoinList());
         CockroachDBSelect rightSelect = getSelect(mappedAggregate, from, notNullClause, select.getJoinList());
-        metamorphicQuery = "SELECT " + getOuterAggregateFunction(aggregate).toString() + " FROM (";
+        metamorphicQuery = "SELECT " + getOuterAggregateFunction(aggregate) + " FROM (";
         metamorphicQuery += CockroachDBVisitor.asString(leftSelect) + " UNION ALL "
                 + CockroachDBVisitor.asString(middleSelect) + " UNION ALL " + CockroachDBVisitor.asString(rightSelect);
         metamorphicQuery += ")";
@@ -116,7 +116,7 @@ public class CockroachDBTLPAggregateOracle implements TestOracle {
 
     private String getAggregateResult(String queryString) throws SQLException {
         String resultString;
-        QueryAdapter q = new QueryAdapter(queryString, errors);
+        SQLQueryAdapter q = new SQLQueryAdapter(queryString, errors);
         try (SQLancerResultSet result = q.executeAndGet(state)) {
             if (result == null) {
                 throw new IgnoreMeException();

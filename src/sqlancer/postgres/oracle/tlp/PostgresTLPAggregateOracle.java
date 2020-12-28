@@ -12,7 +12,7 @@ import sqlancer.ComparatorHelper;
 import sqlancer.IgnoreMeException;
 import sqlancer.Randomly;
 import sqlancer.common.oracle.TestOracle;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.common.query.SQLancerResultSet;
 import sqlancer.postgres.PostgresGlobalState;
 import sqlancer.postgres.PostgresSchema.PostgresDataType;
@@ -94,7 +94,7 @@ public class PostgresTLPAggregateOracle extends PostgresTLPBase implements TestO
         PostgresSelect leftSelect = getSelect(mappedAggregate, from, whereClause, select.getJoinClauses());
         PostgresSelect middleSelect = getSelect(mappedAggregate, from, negatedClause, select.getJoinClauses());
         PostgresSelect rightSelect = getSelect(mappedAggregate, from, notNullClause, select.getJoinClauses());
-        metamorphicQuery = "SELECT " + getOuterAggregateFunction(aggregate).toString() + " FROM (";
+        metamorphicQuery = "SELECT " + getOuterAggregateFunction(aggregate) + " FROM (";
         metamorphicQuery += PostgresVisitor.asString(leftSelect) + " UNION ALL "
                 + PostgresVisitor.asString(middleSelect) + " UNION ALL " + PostgresVisitor.asString(rightSelect);
         metamorphicQuery += ") as asdf";
@@ -114,7 +114,7 @@ public class PostgresTLPAggregateOracle extends PostgresTLPBase implements TestO
             }
         }
         String resultString;
-        QueryAdapter q = new QueryAdapter(queryString, errors);
+        SQLQueryAdapter q = new SQLQueryAdapter(queryString, errors);
         try (SQLancerResultSet result = q.executeAndGet(state)) {
             if (result == null) {
                 throw new IgnoreMeException();

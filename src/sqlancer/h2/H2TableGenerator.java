@@ -7,8 +7,7 @@ import java.util.stream.Collectors;
 import sqlancer.IgnoreMeException;
 import sqlancer.Randomly;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.h2.H2Provider.H2GlobalState;
 import sqlancer.h2.H2Schema.H2Column;
 import sqlancer.h2.H2Schema.H2CompositeDataType;
@@ -16,10 +15,12 @@ import sqlancer.h2.H2Schema.H2Table;
 
 public class H2TableGenerator {
 
-    public Query getQuery(H2GlobalState globalState) {
+    public SQLQueryAdapter getQuery(H2GlobalState globalState) {
         ExpectedErrors errors = new ExpectedErrors();
         errors.add("already exists");
-        StringBuilder sb = new StringBuilder("CREATE TABLE " + globalState.getSchema().getFreeTableName() + "(");
+        StringBuilder sb = new StringBuilder("CREATE TABLE ");
+        sb.append(globalState.getSchema().getFreeTableName());
+        sb.append("(");
         List<String> columnNames = new ArrayList<>();
         for (int i = 0; i < Randomly.fromOptions(1, 2, 3); i++) {
             columnNames.add("c" + i);
@@ -103,7 +104,7 @@ public class H2TableGenerator {
             errors.add(" cannot be updatable by a referential constraint with"); // generated columns
         }
         sb.append(")");
-        return new QueryAdapter(sb.toString(), errors, true);
+        return new SQLQueryAdapter(sb.toString(), errors, true);
     }
 
     private void addReferentialAction(StringBuilder sb) {

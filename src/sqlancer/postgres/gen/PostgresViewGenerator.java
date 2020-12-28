@@ -1,20 +1,19 @@
 package sqlancer.postgres.gen;
 
 import sqlancer.Randomly;
+import sqlancer.common.DBMSCommon;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.postgres.PostgresGlobalState;
 import sqlancer.postgres.PostgresVisitor;
 import sqlancer.postgres.ast.PostgresSelect;
-import sqlancer.sqlite3.gen.SQLite3Common;
 
 public final class PostgresViewGenerator {
 
     private PostgresViewGenerator() {
     }
 
-    public static Query create(PostgresGlobalState globalState) {
+    public static SQLQueryAdapter create(PostgresGlobalState globalState) {
         ExpectedErrors errors = new ExpectedErrors();
         StringBuilder sb = new StringBuilder("CREATE");
         boolean materialized;
@@ -52,7 +51,7 @@ public final class PostgresViewGenerator {
             if (i != 0) {
                 sb.append(", ");
             }
-            sb.append(SQLite3Common.createColumnName(i));
+            sb.append(DBMSCommon.createColumnName(i));
         }
         sb.append(")");
         // if (Randomly.getBoolean() && false) {
@@ -87,7 +86,7 @@ public final class PostgresViewGenerator {
         errors.add("non-integer constant in DISTINCT ON");
         errors.add("SELECT DISTINCT ON expressions must match initial ORDER BY expressions");
         PostgresCommon.addCommonExpressionErrors(errors);
-        return new QueryAdapter(sb.toString(), errors, true);
+        return new SQLQueryAdapter(sb.toString(), errors, true);
     }
 
 }

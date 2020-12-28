@@ -1,7 +1,6 @@
 package sqlancer.sqlite3;
 
 import java.io.File;
-import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -9,19 +8,19 @@ import java.util.Arrays;
 import java.util.List;
 
 import sqlancer.AbstractAction;
-import sqlancer.GlobalState;
 import sqlancer.IgnoreMeException;
-import sqlancer.ProviderAdapter;
 import sqlancer.Randomly;
+import sqlancer.SQLConnection;
+import sqlancer.SQLGlobalState;
+import sqlancer.SQLProviderAdapter;
 import sqlancer.StatementExecutor;
+import sqlancer.common.DBMSCommon;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
-import sqlancer.common.query.QueryProvider;
+import sqlancer.common.query.SQLQueryAdapter;
+import sqlancer.common.query.SQLQueryProvider;
 import sqlancer.sqlite3.SQLite3Options.SQLite3OracleFactory;
 import sqlancer.sqlite3.SQLite3Provider.SQLite3GlobalState;
 import sqlancer.sqlite3.gen.SQLite3AnalyzeGenerator;
-import sqlancer.sqlite3.gen.SQLite3Common;
 import sqlancer.sqlite3.gen.SQLite3CreateVirtualRtreeTabelGenerator;
 import sqlancer.sqlite3.gen.SQLite3ExplainGenerator;
 import sqlancer.sqlite3.gen.SQLite3PragmaGenerator;
@@ -44,7 +43,7 @@ import sqlancer.sqlite3.gen.dml.SQLite3UpdateGenerator;
 import sqlancer.sqlite3.schema.SQLite3Schema;
 import sqlancer.sqlite3.schema.SQLite3Schema.SQLite3Table;
 
-public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3Options> {
+public class SQLite3Provider extends SQLProviderAdapter<SQLite3GlobalState, SQLite3Options> {
 
     public static boolean allowFloatingPointFp = true;
     public static boolean mustKnowResult;
@@ -93,26 +92,26 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
         CHECK_RTREE_TABLE((g) -> {
             SQLite3Table table = g.getSchema().getRandomTableOrBailout(t -> t.getName().startsWith("r"));
             String format = String.format("SELECT rtreecheck('%s');", table.getName());
-            return new QueryAdapter(format, ExpectedErrors.from("The database file is locked"));
+            return new SQLQueryAdapter(format, ExpectedErrors.from("The database file is locked"));
         }), //
         VIRTUAL_TABLE_ACTION(SQLite3VirtualFTSTableCommandGenerator::create), //
         CREATE_VIEW(SQLite3ViewGenerator::generate), //
         CREATE_TRIGGER(SQLite3CreateTriggerGenerator::create), //
         MANIPULATE_STAT_TABLE(SQLite3StatTableGenerator::getQuery);
 
-        private final QueryProvider<SQLite3GlobalState> queryProvider;
+        private final SQLQueryProvider<SQLite3GlobalState> sqlQueryProvider;
 
-        Action(QueryProvider<SQLite3GlobalState> queryProvider) {
-            this.queryProvider = queryProvider;
+        Action(SQLQueryProvider<SQLite3GlobalState> sqlQueryProvider) {
+            this.sqlQueryProvider = sqlQueryProvider;
         }
 
         @Override
-        public Query getQuery(SQLite3GlobalState state) throws SQLException {
-            return queryProvider.getQuery(state);
+        public SQLQueryAdapter getQuery(SQLite3GlobalState state) throws Exception {
+            return sqlQueryProvider.getQuery(state);
         }
     }
 
-    public static class SQLite3GlobalState extends GlobalState<SQLite3Options, SQLite3Schema> {
+    public static class SQLite3GlobalState extends SQLGlobalState<SQLite3Options, SQLite3Schema> {
 
         @Override
         protected SQLite3Schema readSchema() throws SQLException {
@@ -178,7 +177,7 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
     }
 
     @Override
-    public void generateDatabase(SQLite3GlobalState globalState) throws SQLException {
+    public void generateDatabase(SQLite3GlobalState globalState) throws Exception {
         Randomly r = new Randomly(SQLite3SpecialStringGenerator::generate);
         globalState.setRandomly(r);
         if (globalState.getDmbsSpecificOptions().generateDatabase) {
@@ -194,13 +193,13 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
             int i = 0;
 
             do {
-                Query tableQuery = getTableQuery(globalState, i++);
+                SQLQueryAdapter tableQuery = getTableQuery(globalState, i++);
                 globalState.executeStatement(tableQuery);
             } while (globalState.getSchema().getDatabaseTables().size() < nrTablesToCreate);
             assert globalState.getSchema().getTables().getTables().size() == nrTablesToCreate;
             checkTablesForGeneratedColumnLoops(globalState);
             if (globalState.getDmbsSpecificOptions().testDBStats && Randomly.getBooleanWithSmallProbability()) {
-                QueryAdapter tableQuery = new QueryAdapter(
+                SQLQueryAdapter tableQuery = new SQLQueryAdapter(
                         "CREATE VIRTUAL TABLE IF NOT EXISTS stat USING dbstat(main)");
                 globalState.executeStatement(tableQuery);
             }
@@ -212,7 +211,7 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
                     });
             se.executeStatements();
 
-            Query query = SQLite3TransactionGenerator.generateCommit(globalState);
+            SQLQueryAdapter query = SQLite3TransactionGenerator.generateCommit(globalState);
             globalState.executeStatement(query);
 
             // also do an abort for DEFERRABLE INITIALLY DEFERRED
@@ -221,9 +220,9 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
         }
     }
 
-    private void checkTablesForGeneratedColumnLoops(SQLite3GlobalState globalState) throws SQLException {
+    private void checkTablesForGeneratedColumnLoops(SQLite3GlobalState globalState) throws Exception {
         for (SQLite3Table table : globalState.getSchema().getDatabaseTables()) {
-            Query q = new QueryAdapter("SELECT * FROM " + table.getName(),
+            SQLQueryAdapter q = new SQLQueryAdapter("SELECT * FROM " + table.getName(),
                     ExpectedErrors.from("needs an odd number of arguments", " requires an even number of arguments",
                             "generated column loop", "integer overflow", "malformed JSON",
                             "JSON cannot hold BLOB values", "JSON path error", "labels must be TEXT",
@@ -234,8 +233,8 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
         }
     }
 
-    private Query getTableQuery(SQLite3GlobalState globalState, int i) throws AssertionError {
-        Query tableQuery;
+    private SQLQueryAdapter getTableQuery(SQLite3GlobalState globalState, int i) throws AssertionError {
+        SQLQueryAdapter tableQuery;
         List<TableType> options = new ArrayList<>(Arrays.asList(TableType.values()));
         if (!globalState.getDmbsSpecificOptions().testFts) {
             options.remove(TableType.FTS);
@@ -245,11 +244,11 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
         }
         switch (Randomly.fromList(options)) {
         case NORMAL:
-            String tableName = SQLite3Common.createTableName(i);
+            String tableName = DBMSCommon.createTableName(i);
             tableQuery = SQLite3TableGenerator.createTableStatement(tableName, globalState);
             break;
         case FTS:
-            String ftsTableName = "v" + SQLite3Common.createTableName(i);
+            String ftsTableName = "v" + DBMSCommon.createTableName(i);
             tableQuery = SQLite3CreateVirtualFTSTableGenerator.createTableStatement(ftsTableName,
                     globalState.getRandomly());
             break;
@@ -263,7 +262,7 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
         return tableQuery;
     }
 
-    private void addSensiblePragmaDefaults(SQLite3GlobalState globalState) throws SQLException {
+    private void addSensiblePragmaDefaults(SQLite3GlobalState globalState) throws Exception {
         List<String> pragmasToExecute = new ArrayList<>();
         if (!Randomly.getBooleanWithSmallProbability()) {
             pragmasToExecute.addAll(DEFAULT_PRAGMAS);
@@ -278,12 +277,12 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
                     Randomly.fromOptions("UTF-8", "UTF-16", "UTF-16le", "UTF-16be")));
         }
         for (String s : pragmasToExecute) {
-            globalState.executeStatement(new QueryAdapter(s));
+            globalState.executeStatement(new SQLQueryAdapter(s));
         }
     }
 
     @Override
-    public Connection createDatabase(SQLite3GlobalState globalState) throws SQLException {
+    public SQLConnection createDatabase(SQLite3GlobalState globalState) throws SQLException {
         File dir = new File("." + File.separator + "databases");
         if (!dir.exists()) {
             dir.mkdir();
@@ -293,12 +292,11 @@ public class SQLite3Provider extends ProviderAdapter<SQLite3GlobalState, SQLite3
             dataBase.delete();
         }
         String url = "jdbc:sqlite:" + dataBase.getAbsolutePath();
-        return DriverManager.getConnection(url);
+        return new SQLConnection(DriverManager.getConnection(url));
     }
 
     @Override
     public String getDBMSName() {
         return "sqlite3";
     }
-
 }

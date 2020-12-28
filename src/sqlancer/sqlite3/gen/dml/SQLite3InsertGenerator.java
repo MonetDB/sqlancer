@@ -6,8 +6,7 @@ import java.util.stream.Collectors;
 
 import sqlancer.Randomly;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.sqlite3.SQLite3Errors;
 import sqlancer.sqlite3.SQLite3Provider.SQLite3GlobalState;
 import sqlancer.sqlite3.SQLite3ToStringVisitor;
@@ -30,35 +29,25 @@ public class SQLite3InsertGenerator {
         errors = new ExpectedErrors();
     }
 
-    public static Query insertRow(SQLite3GlobalState globalState) throws SQLException {
+    public static SQLQueryAdapter insertRow(SQLite3GlobalState globalState) throws SQLException {
         SQLite3Table randomTable = globalState.getSchema().getRandomTableOrBailout(t -> !t.isView() && !t.isReadOnly());
         return insertRow(globalState, randomTable);
     }
 
-    public static Query insertRow(SQLite3GlobalState globalState, SQLite3Table randomTable) {
+    public static SQLQueryAdapter insertRow(SQLite3GlobalState globalState, SQLite3Table randomTable) {
         SQLite3InsertGenerator generator = new SQLite3InsertGenerator(globalState, globalState.getRandomly());
         String query = generator.insertRow(randomTable);
-        return new QueryAdapter(query, generator.errors, true);
+        return new SQLQueryAdapter(query, generator.errors, true);
     }
 
     private String insertRow(SQLite3Table table) {
-        errors.add("cannot UPDATE generated column");
-        errors.add("[SQLITE_CONSTRAINT]");
+        SQLite3Errors.addInsertUpdateErrors(errors);
         errors.add("[SQLITE_FULL]");
-        errors.add("[SQLITE_ERROR] SQL error or missing database (foreign key mismatch");
-        errors.add("[SQLITE_CONSTRAINT]  Abort due to constraint violation (FOREIGN KEY constraint failed)");
         // // TODO: also check if the table is really missing (caused by a DROP TABLE)
-        errors.add("[SQLITE_ERROR] SQL error or missing database (no such table:");
         errors.add("ON CONFLICT clause does not match any PRIMARY KEY or UNIQUE constraint"); // trigger
-        errors.add("no such column"); // trigger
         errors.add("values were supplied"); // trigger
         errors.add("Data type mismatch (datatype mismatch)"); // trigger
-        errors.add("too many levels of trigger recursion");
-        errors.add("String or BLOB exceeds size limit");
 
-        errors.add("A table in the database is locked");
-        errors.add("cannot INSERT into generated column"); // TODO: filter out generated columns
-        errors.add("The database file is locked");
         errors.add("load_extension() prohibited in triggers and views");
         SQLite3Errors.addInsertNowErrors(errors);
         SQLite3Errors.addExpectedExpressionErrors(errors);
