@@ -9,8 +9,8 @@ import java.util.List;
 import sqlancer.ComparatorHelper;
 import sqlancer.IgnoreMeException;
 import sqlancer.Randomly;
-import sqlancer.common.query.QueryAdapter;
 import sqlancer.common.query.SQLancerResultSet;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.MonetVisitor;
@@ -90,7 +90,7 @@ public class MonetTLPAggregateOracle extends MonetTLPBase {
         MonetSelect leftSelect = getSelect(mappedAggregate, from, whereClause, select.getJoinClauses());
         MonetSelect middleSelect = getSelect(mappedAggregate, from, negatedClause, select.getJoinClauses());
         MonetSelect rightSelect = getSelect(mappedAggregate, from, notNullClause, select.getJoinClauses());
-        metamorphicQuery = "SELECT " + getOuterAggregateFunction(aggregate).toString() + " FROM (";
+        metamorphicQuery = "SELECT " + getOuterAggregateFunction(aggregate) + " FROM (";
         metamorphicQuery += MonetVisitor.asString(leftSelect) + " UNION ALL "
                 + MonetVisitor.asString(middleSelect) + " UNION ALL " + MonetVisitor.asString(rightSelect);
         metamorphicQuery += ") as asdf";
@@ -110,7 +110,7 @@ public class MonetTLPAggregateOracle extends MonetTLPBase {
             }
         }
         String resultString;
-        QueryAdapter q = new QueryAdapter(queryString, errors);
+        SQLQueryAdapter q = new SQLQueryAdapter(queryString, errors);
         try (SQLancerResultSet result = q.executeAndGet(state)) {
             if (result == null) {
                 throw new IgnoreMeException();

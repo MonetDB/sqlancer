@@ -6,8 +6,7 @@ import java.util.List;
 import sqlancer.IgnoreMeException;
 import sqlancer.Randomly;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetColumn;
 import sqlancer.monet.MonetSchema.MonetTable;
@@ -44,7 +43,7 @@ public class MonetAlterTableGenerator {
         //this.opClasses = globalState.getOpClasses();
     }
 
-    public static Query create(MonetTable randomTable, MonetGlobalState globalState, boolean generateOnlyKnown) {
+    public static SQLQueryAdapter create(MonetTable randomTable, MonetGlobalState globalState, boolean generateOnlyKnown) {
         return new MonetAlterTableGenerator(randomTable, globalState, generateOnlyKnown).generate();
     }
 
@@ -67,7 +66,7 @@ public class MonetAlterTableGenerator {
         return action;
     }
 
-    public Query generate() {
+    public SQLQueryAdapter generate() {
         ExpectedErrors errors = new ExpectedErrors();
         int i = 0;
         List<Action> action = getActions(errors);
@@ -142,7 +141,7 @@ public class MonetAlterTableGenerator {
             }
         }
 
-        return new QueryAdapter(sb.toString(), errors, true);
+        return new SQLQueryAdapter(sb.toString(), errors, true);
     }
 
     private static void alterColumn(MonetTable randomTable, StringBuilder sb) {

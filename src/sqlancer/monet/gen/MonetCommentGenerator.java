@@ -3,8 +3,7 @@ package sqlancer.monet.gen;
 import sqlancer.IgnoreMeException;
 import sqlancer.Randomly;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetTable;
 import sqlancer.monet.ast.MonetConstant;
@@ -21,7 +20,7 @@ public final class MonetCommentGenerator {
         INDEX, COLUMN, TABLE
     }
 
-    public static Query generate(MonetGlobalState globalState) {
+    public static SQLQueryAdapter generate(MonetGlobalState globalState) {
         StringBuilder sb = new StringBuilder();
         sb.append("COMMENT ON ");
         Action type = Randomly.fromOptions(Action.values());
@@ -55,7 +54,7 @@ public final class MonetCommentGenerator {
         } else {
             sb.append(MonetConstant.createTextConstant(globalState.getRandomly().getString()).getTextRepresentation());
         }
-        return new QueryAdapter(sb.toString(), ExpectedErrors.from("no such table", "no such column", "no such index", "COMMENT ON tmp object not allowed"), true);
+        return new SQLQueryAdapter(sb.toString(), ExpectedErrors.from("no such table", "no such column", "no such index", "COMMENT ON tmp object not allowed"), true);
     }
 
 }

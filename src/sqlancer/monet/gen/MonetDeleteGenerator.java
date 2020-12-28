@@ -2,8 +2,7 @@ package sqlancer.monet.gen;
 
 import sqlancer.Randomly;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.MonetSchema.MonetTable;
@@ -14,7 +13,7 @@ public final class MonetDeleteGenerator {
     private MonetDeleteGenerator() {
     }
 
-    public static Query create(MonetGlobalState globalState) {
+    public static SQLQueryAdapter create(MonetGlobalState globalState) {
         MonetTable table = globalState.getSchema().getRandomTable(t -> t.isInsertable());
         ExpectedErrors errors = new ExpectedErrors();
         MonetCommon.addCommonInsertUpdateErrors(errors);
@@ -30,7 +29,7 @@ public final class MonetDeleteGenerator {
         errors.add("division by zero");
         errors.add("conversion of");
         errors.add("cannot delete view");
-        return new QueryAdapter(sb.toString(), errors);
+        return new SQLQueryAdapter(sb.toString(), errors);
     }
 
 }

@@ -5,8 +5,7 @@ import java.util.List;
 
 import sqlancer.Randomly;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema;
 import sqlancer.monet.MonetSchema.MonetColumn;
@@ -48,12 +47,12 @@ public class MonetTableGenerator {
         MonetCommon.addCommonTableErrors(errors);
     }
 
-    public static Query generate(String tableName, MonetSchema newSchema, boolean generateOnlyKnown,
+    public static SQLQueryAdapter generate(String tableName, MonetSchema newSchema, boolean generateOnlyKnown,
             MonetGlobalState globalState) {
         return new MonetTableGenerator(tableName, newSchema, generateOnlyKnown, globalState).generate();
     }
 
-    private Query generate() {
+    private SQLQueryAdapter generate() {
         columnCanHavePrimaryKey = true;
         sb.append("CREATE");
         /*if (Randomly.getBoolean()) {
@@ -72,7 +71,7 @@ public class MonetTableGenerator {
         } else {
             createStandard();
         }
-        return new QueryAdapter(sb.toString(), errors, true);
+        return new SQLQueryAdapter(sb.toString(), errors, true);
     }
 
     private void createStandard() throws AssertionError {

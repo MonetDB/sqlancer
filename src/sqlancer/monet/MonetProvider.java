@@ -6,13 +6,14 @@ import java.sql.SQLException;
 
 import sqlancer.AbstractAction;
 import sqlancer.IgnoreMeException;
-import sqlancer.ProviderAdapter;
 import sqlancer.Randomly;
+import sqlancer.SQLConnection;
+import sqlancer.SQLProviderAdapter;
 import sqlancer.StatementExecutor;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
-import sqlancer.common.query.QueryProvider;
+import sqlancer.common.DBMSCommon;
+import sqlancer.common.query.SQLQueryAdapter;
+import sqlancer.common.query.SQLQueryProvider;
 import sqlancer.monet.MonetOptions.MonetOracleFactory;
 import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.gen.MonetAlterTableGenerator;
@@ -32,9 +33,8 @@ import sqlancer.monet.gen.MonetTruncateGenerator;
 import sqlancer.monet.gen.MonetUpdateGenerator;
 import sqlancer.monet.gen.MonetVacuumGenerator;
 import sqlancer.monet.gen.MonetViewGenerator;
-import sqlancer.sqlite3.gen.SQLite3Common;
 
-public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOptions> {
+public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOptions> {
 
     /**
      * Generate only data types and expressions that are understood by PQS.
@@ -53,13 +53,13 @@ public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOption
         ANALYZE(MonetAnalyzeGenerator::create), //
         ALTER_TABLE(g -> MonetAlterTableGenerator.create(g.getSchema().getRandomTable(t -> !t.isView()), g, generateOnlyKnown)), //
         COMMIT(g -> {
-            Query query;
+            SQLQueryAdapter query;
             if (Randomly.getBoolean()) {
-                query = new QueryAdapter("COMMIT", ExpectedErrors.from("not allowed in auto commit mode"), true);
+                query = new SQLQueryAdapter("COMMIT", ExpectedErrors.from("not allowed in auto commit mode"), true);
             } else if (Randomly.getBoolean()) {
                 query = MonetTransactionGenerator.executeBegin();
             } else {
-                query = new QueryAdapter("ROLLBACK", true);
+                query = new SQLQueryAdapter("ROLLBACK", true);
             }
             return query;
         }), //
@@ -78,14 +78,14 @@ public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOption
         PREPARE(MonetPreparedStatementGenerator::create), //
         QUERY_CATALOG((g) -> MonetQueryCatalogGenerator.query());
 
-        private final QueryProvider<MonetGlobalState> queryProvider;
+        private final SQLQueryProvider<MonetGlobalState> queryProvider;
 
-        Action(QueryProvider<MonetGlobalState> queryProvider) {
+        Action(SQLQueryProvider<MonetGlobalState> queryProvider) {
             this.queryProvider = queryProvider;
         }
 
         @Override
-        public Query getQuery(MonetGlobalState state) throws SQLException {
+        public SQLQueryAdapter getQuery(MonetGlobalState state) throws Exception {
             return queryProvider.getQuery(state);
         }
     }
@@ -133,14 +133,14 @@ public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOption
     }
 
     @Override
-    public void generateDatabase(MonetGlobalState globalState) throws SQLException {
+    public void generateDatabase(MonetGlobalState globalState) throws Exception {
         //readFunctions(globalState);
         createTables(globalState, 3); //Randomly.fromOptions(4, 5, 6));
         prepareTables(globalState);
     }
 
     @Override
-    public Connection createDatabase(MonetGlobalState globalState) throws SQLException {
+    public SQLConnection createDatabase(MonetGlobalState globalState) throws SQLException {
         if (globalState.getDmbsSpecificOptions().getTestOracleFactory().stream()
                 .anyMatch((o) -> o == MonetOracleFactory.PQS)) {
             generateOnlyKnown = true;
@@ -151,14 +151,14 @@ public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOption
         Connection con = DriverManager.getConnection(url, "monetdb", "monetdb");
 
         //TODO clean database
-        return con;
+        return new SQLConnection(con);
     }
 
-    protected void createTables(MonetGlobalState globalState, int numTables) throws SQLException {
+    protected void createTables(MonetGlobalState globalState, int numTables) throws Exception {
         while (globalState.getSchema().getDatabaseTables().size() < numTables) {
             try {
-                String tableName = SQLite3Common.createTableName(globalState.getSchema().getDatabaseTables().size());
-                Query createTable = MonetTableGenerator.generate(tableName, globalState.getSchema(),
+                String tableName = DBMSCommon.createTableName(globalState.getSchema().getDatabaseTables().size());
+                SQLQueryAdapter createTable = MonetTableGenerator.generate(tableName, globalState.getSchema(),
                         generateOnlyKnown, globalState);
                 globalState.executeStatement(createTable);
             } catch (IgnoreMeException e) {
@@ -167,7 +167,7 @@ public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOption
         }
     }
 
-    protected void prepareTables(MonetGlobalState globalState) throws SQLException {
+    protected void prepareTables(MonetGlobalState globalState) throws Exception {
         StatementExecutor<MonetGlobalState, Action> se = new StatementExecutor<>(globalState, Action.values(),
                 MonetProvider::mapActions, (q) -> {
                     if (globalState.getSchema().getDatabaseTables().isEmpty()) {
@@ -175,7 +175,7 @@ public class MonetProvider extends ProviderAdapter<MonetGlobalState, MonetOption
                     }
                 });
         se.executeStatements();
-        globalState.executeStatement(new QueryAdapter("CALL sys.setquerytimeout(5000);\n"));
+        globalState.executeStatement(new SQLQueryAdapter("CALL sys.setquerytimeout(5000);\n"));
     }
 
     @Override

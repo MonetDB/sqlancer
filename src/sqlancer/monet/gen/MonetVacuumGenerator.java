@@ -2,8 +2,7 @@ package sqlancer.monet.gen;
 
 import sqlancer.Randomly;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 
 public final class MonetVacuumGenerator {
@@ -11,14 +10,14 @@ public final class MonetVacuumGenerator {
     private MonetVacuumGenerator() {
     }
 
-    public static Query create(MonetGlobalState globalState) {
+    public static SQLQueryAdapter create(MonetGlobalState globalState) {
         StringBuilder sb = new StringBuilder("CALL sys.");
         sb.append(Randomly.fromOptions("shrink", "reuse", "vacuum"));
         sb.append("('sys', '");
         sb.append(globalState.getSchema().getRandomTable(t -> t.isInsertable()).getName());
         sb.append("')");
 
-        return new QueryAdapter(sb.toString(), ExpectedErrors.from("not allowed on tables with indices", "is not persistent"));
+        return new SQLQueryAdapter(sb.toString(), ExpectedErrors.from("not allowed on tables with indices", "is not persistent"));
     }
 
 }

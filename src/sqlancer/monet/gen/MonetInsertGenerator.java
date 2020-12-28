@@ -5,8 +5,7 @@ import java.util.stream.Collectors;
 
 import sqlancer.Randomly;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetColumn;
 import sqlancer.monet.MonetSchema.MonetTable;
@@ -18,7 +17,7 @@ public final class MonetInsertGenerator {
     private MonetInsertGenerator() {
     }
 
-    public static Query insert(MonetGlobalState globalState) {
+    public static SQLQueryAdapter insert(MonetGlobalState globalState) {
         MonetTable table = globalState.getSchema().getRandomTable(t -> t.isInsertable());
         ExpectedErrors errors = new ExpectedErrors();
         errors.add("cannot insert into column");
@@ -75,7 +74,7 @@ public final class MonetInsertGenerator {
         errors.add("out of range");
         errors.add("invalid input syntax");
 
-        return new QueryAdapter(sb.toString(), errors);
+        return new SQLQueryAdapter(sb.toString(), errors);
     }
 
     private static void insertRow(MonetGlobalState globalState, StringBuilder sb, List<MonetColumn> columns,

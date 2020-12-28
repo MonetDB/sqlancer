@@ -2,8 +2,7 @@ package sqlancer.monet.gen;
 
 import sqlancer.Randomly;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetVisitor;
 import sqlancer.monet.ast.MonetQuery;
@@ -13,7 +12,7 @@ public class MonetPreparedStatementGenerator {
     private MonetPreparedStatementGenerator() {
     }
 
-    public static Query create(MonetGlobalState globalState) {
+    public static SQLQueryAdapter create(MonetGlobalState globalState) {
         ExpectedErrors errors = new ExpectedErrors();
 
         StringBuilder sb = new StringBuilder("PREPARE ");
@@ -27,6 +26,6 @@ public class MonetPreparedStatementGenerator {
         errors.add("parameter not allowed on");
         errors.add("Cannot have a parameter");
         errors.add("parameters not allowed");
-        return new QueryAdapter(sb.toString(), errors);
+        return new SQLQueryAdapter(sb.toString(), errors);
     }
 }

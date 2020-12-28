@@ -6,9 +6,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import sqlancer.Randomly;
+import sqlancer.SQLConnection;
 import sqlancer.common.oracle.PivotedQuerySynthesisBase;
 import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetColumn;
 import sqlancer.monet.MonetSchema.MonetDataType;
@@ -26,7 +27,7 @@ import sqlancer.monet.gen.MonetCommon;
 import sqlancer.monet.gen.MonetExpressionGenerator;
 
 public class MonetPivotedQuerySynthesisOracle
-        extends PivotedQuerySynthesisBase<MonetGlobalState, MonetRowValue, MonetExpression> {
+        extends PivotedQuerySynthesisBase<MonetGlobalState, MonetRowValue, MonetExpression, SQLConnection> {
 
     private List<MonetColumn> fetchColumns;
 
@@ -37,7 +38,7 @@ public class MonetPivotedQuerySynthesisOracle
     }
 
     @Override
-    public Query getRectifiedQuery() throws SQLException {
+    public SQLQueryAdapter getRectifiedQuery() throws SQLException {
         MonetTables randomFromTables = globalState.getSchema().getRandomTableNonEmptyTables();
 
         MonetSelect selectStatement = new MonetSelect();
@@ -65,7 +66,7 @@ public class MonetPivotedQuerySynthesisOracle
                 .generateOrderBy();
         selectStatement.setOrderByExpressions(orderBy);
 
-        return new QueryAdapter(MonetVisitor.asString(selectStatement));
+        return new SQLQueryAdapter(MonetVisitor.asString(selectStatement));
     }
 
     /*
@@ -119,7 +120,7 @@ public class MonetPivotedQuerySynthesisOracle
     }
 
     @Override
-    protected Query getContainmentCheckQuery(Query query) throws SQLException {
+    protected Query<SQLConnection> getContainmentCheckQuery(Query<?> query) throws SQLException {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT * FROM ("); // ANOTHER SELECT TO USE ORDER BY without restrictions
         sb.append(query.getUnterminatedQueryString());
@@ -140,7 +141,7 @@ public class MonetPivotedQuerySynthesisOracle
             }
         }
         String resultingQueryString = sb.toString();
-        return new QueryAdapter(resultingQueryString, errors);
+        return new SQLQueryAdapter(resultingQueryString, errors);
     }
 
     @Override

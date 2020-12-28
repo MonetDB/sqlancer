@@ -2,8 +2,7 @@ package sqlancer.monet.gen;
 
 import sqlancer.Randomly;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 
 public final class MonetSequenceGenerator {
@@ -11,7 +10,7 @@ public final class MonetSequenceGenerator {
     private MonetSequenceGenerator() {
     }
 
-    public static Query createSequence(MonetGlobalState globalState) {
+    public static SQLQueryAdapter createSequence(MonetGlobalState globalState) {
         ExpectedErrors errors = new ExpectedErrors();
         StringBuilder sb = new StringBuilder("CREATE SEQUENCE ");
         sb.append(" seq");
@@ -69,7 +68,7 @@ public final class MonetSequenceGenerator {
             }
             sb.append(" CYCLE");
         }
-        return new QueryAdapter(sb.toString(), errors, true);
+        return new SQLQueryAdapter(sb.toString(), errors, true);
     }
 
 }

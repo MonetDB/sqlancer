@@ -2,8 +2,7 @@ package sqlancer.monet.gen;
 
 import sqlancer.Randomly;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetVisitor;
 import sqlancer.monet.ast.MonetQuery;
@@ -13,7 +12,7 @@ public final class MonetViewGenerator {
     private MonetViewGenerator() {
     }
 
-    public static Query create(MonetGlobalState globalState) {
+    public static SQLQueryAdapter create(MonetGlobalState globalState) {
         ExpectedErrors errors = new ExpectedErrors();
         StringBuilder sb = new StringBuilder("CREATE");
         sb.append(" VIEW ");
@@ -51,7 +50,7 @@ public final class MonetViewGenerator {
         errors.add("SAMPLE not supported");
         errors.add("no such table");
         MonetCommon.addCommonExpressionErrors(errors);
-        return new QueryAdapter(sb.toString(), errors, true);
+        return new SQLQueryAdapter(sb.toString(), errors, true);
     }
 
 }

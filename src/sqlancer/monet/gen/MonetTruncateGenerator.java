@@ -2,8 +2,7 @@ package sqlancer.monet.gen;
 
 import sqlancer.Randomly;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 
 public final class MonetTruncateGenerator {
@@ -11,7 +10,7 @@ public final class MonetTruncateGenerator {
     private MonetTruncateGenerator() {
     }
 
-    public static Query create(MonetGlobalState globalState) {
+    public static SQLQueryAdapter create(MonetGlobalState globalState) {
         StringBuilder sb = new StringBuilder();
         sb.append("TRUNCATE");
         if (Randomly.getBoolean()) {
@@ -29,7 +28,7 @@ public final class MonetTruncateGenerator {
         }
         ExpectedErrors errors = ExpectedErrors.from("cannot truncate a table referenced in a foreign key constraint", "is not a table", "cannot truncate view", "FOREIGN KEY");
         MonetCommon.addCommonInsertUpdateErrors(errors);
-        return new QueryAdapter(sb.toString(), errors);
+        return new SQLQueryAdapter(sb.toString(), errors);
     }
 
 }

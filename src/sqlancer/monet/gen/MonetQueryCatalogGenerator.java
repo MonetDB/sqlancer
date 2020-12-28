@@ -6,15 +6,15 @@ import java.sql.Statement;
 
 import sqlancer.GlobalState;
 import sqlancer.Randomly;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.SQLConnection;
+import sqlancer.common.query.SQLQueryAdapter;
 
 public final class MonetQueryCatalogGenerator {
 
     private MonetQueryCatalogGenerator() {
     }
 
-    public static Query query() {
+    public static SQLQueryAdapter query() {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT * FROM ");
         sb.append(
@@ -105,9 +105,10 @@ public final class MonetQueryCatalogGenerator {
                 "tablestoragemodel",
                 "statistics",
                 "systemfunctions"));
-        return new QueryAdapter(sb.toString()) {
+        return new SQLQueryAdapter(sb.toString()) {
             @Override
-            public boolean execute(GlobalState<?, ?> globalState, String... fills) throws SQLException {
+            public <G extends GlobalState<?, ?, SQLConnection>> boolean execute(G globalState, String... fills)
+                throws SQLException {
                 try (Statement s = globalState.getConnection().createStatement()) {
                     try (ResultSet rs = s.executeQuery(getQueryString())) {
                         // CHECKSTYLE:OFF

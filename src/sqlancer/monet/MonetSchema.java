@@ -1,6 +1,5 @@
 package sqlancer.monet;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
@@ -14,9 +13,10 @@ import java.util.Map;
 
 import sqlancer.IgnoreMeException;
 import sqlancer.Randomly;
+import sqlancer.SQLConnection;
+import sqlancer.common.schema.AbstractRelationalTable;
 import sqlancer.common.schema.AbstractRowValue;
 import sqlancer.common.schema.AbstractSchema;
-import sqlancer.common.schema.AbstractTable;
 import sqlancer.common.schema.AbstractTableColumn;
 import sqlancer.common.schema.AbstractTables;
 import sqlancer.common.schema.TableIndex;
@@ -24,7 +24,7 @@ import sqlancer.monet.MonetSchema.MonetTable;
 import sqlancer.monet.MonetSchema.MonetTable.TableType;
 import sqlancer.monet.ast.MonetConstant;
 
-public class MonetSchema extends AbstractSchema<MonetTable> {
+public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
 
     private final String databaseName;
 
@@ -127,7 +127,7 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
             super(tables);
         }
 
-        public MonetRowValue getRandomRowValue(Connection con) throws SQLException {
+        public MonetRowValue getRandomRowValue(SQLConnection con) throws SQLException {
             String randomRow = String.format("SELECT %s FROM %s ORDER BY RAND() LIMIT 1", columnNamesAsString(
                     c -> c.getTable().getName() + "." + c.getName() + " AS " + c.getTable().getName() + c.getName()),
                     // columnNamesAsString(c -> "typeof(" + c.getTable().getName() + "." +
@@ -273,7 +273,7 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
 
     }
 
-    public static class MonetTable extends AbstractTable<MonetColumn, MonetIndex> {
+    public static class MonetTable extends AbstractRelationalTable<MonetColumn, MonetIndex, MonetGlobalState> {
 
         public enum TableType {
             STANDARD, TEMPORARY
@@ -334,7 +334,7 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
 
     }
 
-    public static MonetSchema fromConnection(Connection con, String databaseName) throws SQLException {
+    public static MonetSchema fromConnection(SQLConnection con, String databaseName) throws SQLException {
         try {
             List<MonetTable> databaseTables = new ArrayList<>();
             try (Statement s = con.createStatement()) {
@@ -377,7 +377,7 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
         return tableType;
     }
 
-    protected static List<MonetIndex> getIndexes(Connection con, int tableID) throws SQLException {
+    protected static List<MonetIndex> getIndexes(SQLConnection con, int tableID) throws SQLException {
         List<MonetIndex> indexes = new ArrayList<>();
         try (Statement s = con.createStatement()) {
             try (ResultSet rs = s
@@ -391,7 +391,7 @@ public class MonetSchema extends AbstractSchema<MonetTable> {
         return indexes;
     }
 
-    protected static List<MonetColumn> getTableColumns(Connection con, int tableID) throws SQLException {
+    protected static List<MonetColumn> getTableColumns(SQLConnection con, int tableID) throws SQLException {
         List<MonetColumn> columns = new ArrayList<>();
         try (Statement s = con.createStatement()) {
             try (ResultSet rs = s

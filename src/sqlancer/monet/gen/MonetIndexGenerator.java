@@ -4,15 +4,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import sqlancer.Randomly;
+import sqlancer.common.DBMSCommon;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetColumn;
 import sqlancer.monet.MonetSchema.MonetIndex;
 import sqlancer.monet.MonetSchema.MonetTable;
-
-import sqlancer.sqlite3.gen.SQLite3Common;
 
 public final class MonetIndexGenerator {
 
@@ -23,7 +21,7 @@ public final class MonetIndexGenerator {
         UNIQUE, ORDERED, IMPRINTS, HASH
     }
 
-    public static Query generate(MonetGlobalState globalState) {
+    public static SQLQueryAdapter generate(MonetGlobalState globalState) {
         ExpectedErrors errors = new ExpectedErrors();
         StringBuilder sb = new StringBuilder();
         sb.append("CREATE ");
@@ -48,14 +46,14 @@ public final class MonetIndexGenerator {
         errors.add("already in use");
         errors.add("unsupported type");
         MonetCommon.addCommonExpressionErrors(errors);
-        return new QueryAdapter(sb.toString(), errors, true);
+        return new SQLQueryAdapter(sb.toString(), errors, true);
     }
 
     private static String getNewIndexName(MonetTable randomTable) {
         List<MonetIndex> indexes = randomTable.getIndexes();
         int indexI = 0;
         while (true) {
-            String indexName = SQLite3Common.createIndexName(indexI++);
+            String indexName = DBMSCommon.createIndexName(indexI++);
             if (indexes.stream().noneMatch(i -> i.getIndexName().equals(indexName))) {
                 return indexName;
             }

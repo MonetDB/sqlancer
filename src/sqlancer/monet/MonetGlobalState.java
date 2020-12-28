@@ -1,15 +1,15 @@
 package sqlancer.monet;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import sqlancer.GlobalState;
 import sqlancer.Randomly;
+import sqlancer.SQLConnection;
+import sqlancer.SQLGlobalState;
 
-public class MonetGlobalState extends GlobalState<MonetOptions, MonetSchema> {
+public class MonetGlobalState extends SQLGlobalState<MonetOptions, MonetSchema> {
 
     public static final char IMMUTABLE = 'i';
     public static final char STABLE = 's';
@@ -20,7 +20,7 @@ public class MonetGlobalState extends GlobalState<MonetOptions, MonetSchema> {
     private List<String> opClasses = Collections.emptyList();
 
     @Override
-    public void setConnection(Connection con) {
+    public void setConnection(SQLConnection con) {
         super.setConnection(con);
         try {
             this.opClasses = getOpclasses(getConnection());
@@ -31,17 +31,17 @@ public class MonetGlobalState extends GlobalState<MonetOptions, MonetSchema> {
         }
     }
 
-    private List<String> getCollnames(Connection con) throws SQLException {
+    private List<String> getCollnames(SQLConnection con) throws SQLException {
         List<String> opClasses = Arrays.asList(new String[] {});
         return opClasses;
     }
 
-    private List<String> getOpclasses(Connection con) throws SQLException {
+    private List<String> getOpclasses(SQLConnection con) throws SQLException {
         List<String> opClasses = Arrays.asList(new String[] {});
         return opClasses;
     }
 
-    private List<String> getOperators(Connection con) throws SQLException {
+    private List<String> getOperators(SQLConnection con) throws SQLException {
         List<String> opClasses = Arrays.asList(new String[] {"<", ">", "<=", ">=", "=", "<>", "!", "^", "|", "||", "&", "~", "+", "-", "/", "%", "*", "<<", ">>", "@"});
         return opClasses;
     }

@@ -4,8 +4,7 @@ import java.util.stream.Collectors;
 
 import sqlancer.Randomly;
 import sqlancer.common.query.ExpectedErrors;
-import sqlancer.common.query.Query;
-import sqlancer.common.query.QueryAdapter;
+import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetTable;
 
@@ -14,7 +13,7 @@ public final class MonetAnalyzeGenerator {
     private MonetAnalyzeGenerator() {
     }
 
-    public static Query create(MonetGlobalState globalState) {
+    public static SQLQueryAdapter create(MonetGlobalState globalState) {
         MonetTable table = globalState.getSchema().getRandomTable(t -> t.isInsertable());
         StringBuilder sb = new StringBuilder("ANALYZE");
         sb.append(" sys.");
@@ -31,7 +30,7 @@ public final class MonetAnalyzeGenerator {
         if (Randomly.getBoolean()) {
             sb.append(" MINMAX");
         }
-        return new QueryAdapter(sb.toString(), ExpectedErrors.from("does not exist", "is not persistent"));
+        return new SQLQueryAdapter(sb.toString(), ExpectedErrors.from("does not exist", "is not persistent"));
     }
 
 }
