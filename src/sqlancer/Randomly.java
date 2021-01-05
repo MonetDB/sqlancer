@@ -128,9 +128,6 @@ public final class Randomly {
 
     public static <T> List<T> nonEmptySubsetPotentialDuplicates(List<T> columns, int nr) {
         List<T> arr = new ArrayList<>();
-        if (nr > columns.size()) {
-            throw new AssertionError(columns + " " + nr);
-        }
         for (int i = 0; i < nr; i++) {
             arr.add(Randomly.fromList(columns));
         }
