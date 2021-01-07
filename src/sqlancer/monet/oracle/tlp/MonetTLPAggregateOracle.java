@@ -180,9 +180,6 @@ public class MonetTLPAggregateOracle extends MonetTLPBase {
         leftSelect.setJoinClauses(joinList);
         if (Randomly.getBooleanWithSmallProbability()) {
             leftSelect.setGroupByExpressions(gen.generateExpressions(Randomly.smallNumber() + 1));
-            if (Randomly.getBoolean()) {
-                leftSelect.setHavingClause(gen.generateHavingClause());
-            }
         }
         return leftSelect;
     }

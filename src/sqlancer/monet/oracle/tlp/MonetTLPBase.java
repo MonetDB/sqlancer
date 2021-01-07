@@ -64,12 +64,6 @@ public class MonetTLPBase extends TernaryLogicPartitioningOracleBase<MonetExpres
         select.setFromList(tableList);
         select.setWhereClause(null);
         select.setJoinClauses(joins);
-        if (Randomly.getBooleanWithRatherLowProbability()) {
-            select.setGroupByExpressions(gen.generateExpressions(Randomly.smallNumber() + 1));
-            if (Randomly.getBoolean()) {
-                select.setHavingClause(gen.generateHavingClause());
-            }
-        }
     }
 
     List<MonetExpression> generateFetchColumns() {
