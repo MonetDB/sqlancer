@@ -51,6 +51,7 @@ public final class MonetCommon {
         errors.add("are not equal");
         errors.add("Numerical result out of range");
         errors.add("Argument 2 to round function must be positive");
+        errors.add("Argument 2 to round function cannot be null");
         errors.add("Overflow");
         errors.add("Invalid result");
         errors.add("is not a number");
