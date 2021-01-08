@@ -233,9 +233,10 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
                     globalState, false, false, this.allowParameters);
             return new MonetQuery.MonetSubquery(sel3, null, MonetDataType.BOOLEAN);
         case CASE:
-            MonetDataType tp = MonetDataType.getRandomType();
+            boolean hasSwitch = Randomly.getBoolean();
+            MonetDataType tp = hasSwitch ? MonetDataType.getRandomType() : MonetDataType.BOOLEAN;
             int noptions = Randomly.smallNumber() + 1;
-            return new MonetCaseOperation(Randomly.getBoolean() ? generateExpression(depth + 1, tp) : null,
+            return new MonetCaseOperation(hasSwitch ? generateExpression(depth + 1, tp) : null,
                     generateExpressions(depth + 1, noptions, tp),
                     generateExpressions(depth + 1, noptions, MonetDataType.BOOLEAN),
                     Randomly.getBoolean() ? generateExpression(depth + 1, MonetDataType.BOOLEAN) : null,
@@ -409,9 +410,10 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
                     false, false, this.allowParameters);
             return new MonetQuery.MonetSubquery(select, null, type);
         case CASE:
-            MonetDataType tp = MonetDataType.getRandomType();
+            boolean hasSwitch = Randomly.getBoolean();
+            MonetDataType tp = hasSwitch ? MonetDataType.getRandomType() : MonetDataType.BOOLEAN;
             int noptions = Randomly.smallNumber() + 1;
-            return new MonetCaseOperation(Randomly.getBoolean() ? generateExpression(depth + 1, tp) : null,
+            return new MonetCaseOperation(hasSwitch ? generateExpression(depth + 1, tp) : null,
                     generateExpressions(depth + 1, noptions, tp), generateExpressions(depth + 1, noptions, type),
                     Randomly.getBoolean() ? generateExpression(depth + 1, type) : null, type);
         case ANYTYPE_EXPRESSION:
@@ -460,9 +462,10 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
                     globalState, false, false, this.allowParameters);
             return new MonetQuery.MonetSubquery(select, null, integerType);
         case CASE:
-            MonetDataType tp = MonetDataType.getRandomType();
+            boolean hasSwitch = Randomly.getBoolean();
+            MonetDataType tp = hasSwitch ? MonetDataType.getRandomType() : MonetDataType.BOOLEAN;
             int noptions = Randomly.smallNumber() + 1;
-            return new MonetCaseOperation(Randomly.getBoolean() ? generateExpression(depth + 1, tp) : null,
+            return new MonetCaseOperation(hasSwitch ? generateExpression(depth + 1, tp) : null,
                     generateExpressions(depth + 1, noptions, tp), generateExpressions(depth + 1, noptions, integerType),
                     Randomly.getBoolean() ? generateExpression(depth + 1, integerType) : null, integerType);
         case ANYTYPE_EXPRESSION:
