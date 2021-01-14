@@ -8,9 +8,11 @@ import sqlancer.common.query.ExpectedErrors;
 import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetColumn;
+import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.MonetSchema.MonetTable;
 import sqlancer.monet.MonetVisitor;
 import sqlancer.monet.ast.MonetExpression;
+import sqlancer.monet.ast.MonetQuery;
 
 public final class MonetInsertGenerator {
 
@@ -34,41 +36,51 @@ public final class MonetInsertGenerator {
         sb.append("(");
         sb.append(columns.stream().map(c -> c.getName()).collect(Collectors.joining(", ")));
         sb.append(")");
-        sb.append(" VALUES");
 
         if (globalState.getDmbsSpecificOptions().allowBulkInsert && Randomly.getBooleanWithSmallProbability()) {
-            StringBuilder sbRowValue = new StringBuilder();
-            sbRowValue.append("(");
-            for (int i = 0; i < columns.size(); i++) {
-                if (i != 0) {
-                    sbRowValue.append(", ");
-                }
-                if (Randomly.getBoolean()) {
-                    sbRowValue.append(MonetVisitor.asString(MonetExpressionGenerator
-                            .generateConstant(globalState.getRandomly(), columns.get(i).getType())));
-                } else {
-                    sbRowValue.append(MonetVisitor.asString(
-                            new MonetExpressionGenerator(globalState).generateExpression(columns.get(i).getType())));
-                }
-            }
-            sbRowValue.append(")");
-
-            int n = (int) Randomly.getNotCachedInteger(1, 3);
-            for (int i = 0; i < n; i++) {
-                if (i != 0) {
-                    sb.append(", ");
-                }
-                sb.append(sbRowValue);
-            }
+            MonetExpressionGenerator gen = new MonetExpressionGenerator(globalState);
+            List<MonetDataType> types = columns.stream().map(c -> c.getType()).collect(Collectors.toList());
+            MonetQuery sel3 = MonetRandomQueryGenerator.createSimpleSelect(gen, globalState, null, 0, types, false,false,false);
+            sb.append("(");
+            sb.append(MonetVisitor.asString(sel3));
+            sb.append(")");
         } else {
-            int n = Randomly.smallNumber() + 1;
-            for (int i = 0; i < n; i++) {
-                if (i != 0) {
-                    sb.append(", ");
+            sb.append(" VALUES");
+            if (globalState.getDmbsSpecificOptions().allowBulkInsert && Randomly.getBooleanWithSmallProbability()) {
+                StringBuilder sbRowValue = new StringBuilder();
+                sbRowValue.append("(");
+                for (int i = 0; i < columns.size(); i++) {
+                    if (i != 0) {
+                        sbRowValue.append(", ");
+                    }
+                    if (Randomly.getBoolean()) {
+                        sbRowValue.append(MonetVisitor.asString(MonetExpressionGenerator
+                                .generateConstant(globalState.getRandomly(), columns.get(i).getType())));
+                    } else {
+                        sbRowValue.append(MonetVisitor.asString(
+                                new MonetExpressionGenerator(globalState).generateExpression(columns.get(i).getType())));
+                    }
                 }
-                insertRow(globalState, sb, columns, n == 1);
+                sbRowValue.append(")");
+    
+                int n = (int) Randomly.getNotCachedInteger(1, 3);
+                for (int i = 0; i < n; i++) {
+                    if (i != 0) {
+                        sb.append(", ");
+                    }
+                    sb.append(sbRowValue);
+                }
+            } else {
+                int n = Randomly.smallNumber() + 1;
+                for (int i = 0; i < n; i++) {
+                    if (i != 0) {
+                        sb.append(", ");
+                    }
+                    insertRow(globalState, sb, columns, n == 1);
+                }
             }
         }
+
         errors.add("duplicate key value violates unique constraint");
         errors.add("identity column defined as GENERATED ALWAYS");
         errors.add("out of range");
