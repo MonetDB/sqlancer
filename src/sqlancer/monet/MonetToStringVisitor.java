@@ -240,10 +240,10 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
         }
         switch (query.fetSetDistictOrAll()) {
         case DISTINCT:
-            sb.append("DISTINCT ");
+            sb.append(Randomly.fromOptions("DISTINCT ", ""));
             break;
         case ALL:
-            sb.append(Randomly.fromOptions("ALL ", ""));
+            sb.append("ALL ");
             break;
         default:
             throw new AssertionError();
