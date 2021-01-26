@@ -48,6 +48,7 @@ public class ClickHouseTLPAggregateOracle extends ClickHouseTLPBase {
             select.setOrderByExpressions(gen.generateOrderBys());
         }
         String originalQuery = ClickHouseVisitor.asString(select);
+        originalQuery += " SETTINGS aggregate_functions_null_for_empty = 1";
 
         ClickHouseExpression whereClause = gen
                 .generateExpression(new ClickHouseSchema.ClickHouseLancerDataType(ClickHouseDataType.UInt8));
@@ -63,7 +64,7 @@ public class ClickHouseTLPAggregateOracle extends ClickHouseTLPBase {
         metamorphicText += ClickHouseVisitor.asString(leftSelect) + " UNION ALL "
                 + ClickHouseVisitor.asString(middleSelect) + " UNION ALL " + ClickHouseVisitor.asString(rightSelect);
         metamorphicText += ")";
-
+        metamorphicText += " SETTINGS aggregate_functions_null_for_empty = 1";
         List<String> firstResult = ComparatorHelper.getResultSetFirstColumnAsString(originalQuery, errors, state);
 
         List<String> secondResult = ComparatorHelper.getResultSetFirstColumnAsString(metamorphicText, errors, state);

@@ -295,7 +295,7 @@ jobs:
       - name: Build
         run: mvn -B package -DskipTests=true
       - name: Shortly run DuckDB
-        run: java -jar target/SQLancer-*.jar --num-threads 4 --timeout-seconds 30 duckdb
+        run: cd target && java -jar $(ls | grep -P 'sqlancer-[0-9.]*.jar') --num-threads 4 --timeout-seconds 30 --num-queries 0 duckdb
 
   java13:
     name: Java 13 Compatibility (DuckDB)
@@ -312,7 +312,25 @@ jobs:
       - name: Build
         run: mvn -B package -DskipTests=true
       - name: Shortly run DuckDB
-        run: java -jar target/SQLancer-*.jar --num-threads 4 --timeout-seconds 30 duckdb
+        run: cd target && java -jar $(ls | grep -P 'sqlancer-[0-9.]*.jar') --num-threads 4 --timeout-seconds 30 --num-queries 0 duckdb
+
+  java14:
+    name: Java 14 Compatibility (DuckDB)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up JDK 14
+        uses: actions/setup-java@v1
+        with:
+          java-version: 14
+      - name: Build
+        run: mvn -B package -DskipTests=true
+      - name: Shortly run DuckDB
+        run: cd target && java -jar $(ls | grep -P 'sqlancer-[0-9.]*.jar') --num-threads 4 --timeout-seconds 30 --num-queries 0 duckdb
+
 
   java15:
     name: Java 15 EA Compatibility (DuckDB)
@@ -329,4 +347,4 @@ jobs:
       - name: Build
         run: mvn -B package -DskipTests=true
       - name: Shortly run DuckDB
-        run: java -jar target/SQLancer-*.jar --num-threads 4 --timeout-seconds 30 duckdb
+        run: cd target && java -jar $(ls | grep -P 'sqlancer-[0-9.]*.jar') --num-threads 4 --timeout-seconds 30 --num-queries 0 duckdb
