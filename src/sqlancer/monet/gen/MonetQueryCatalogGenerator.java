@@ -33,8 +33,8 @@ public final class MonetQueryCatalogGenerator {
                 "dependency_args_on_types", "sessions", "prepared_statements", "prepared_statements_args", "optimizers",
                 "environment", "queue", "rejects", "spatial_ref_sys", "geometry_columns", "keywords", "table_types",
                 "function_types", "function_languages", "key_types", "index_types", "privilege_codes", "roles",
-                "var_values", "storage", "tablestorage", "schemastorage", "storagemodelinput", "storagemodel",
-                "tablestoragemodel", "statistics", "systemfunctions"));
+                "var_values", "storage", "tablestorage", "schemastorage", "storagemodelinput", "statistics",
+                "systemfunctions"));
         return new SQLQueryAdapter(sb.toString()) {
             @Override
             public <G extends GlobalState<?, ?, SQLConnection>> boolean execute(G globalState, String... fills)
