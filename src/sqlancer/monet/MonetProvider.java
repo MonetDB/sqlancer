@@ -50,7 +50,7 @@ public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOpt
 
     public enum Action implements AbstractAction<MonetGlobalState> {
         ANALYZE(MonetAnalyzeGenerator::create), //
-        ALTER_TABLE(g -> MonetAlterTableGenerator.create(g.getSchema().getRandomTable(t -> !t.isView()), g)), //
+        ALTER_TABLE(g -> MonetAlterTableGenerator.create(g.getSchema().getRandomTable(t -> !t.isView()), g, false)), //
         COMMIT(g -> {
             SQLQueryAdapter query;
             if (Randomly.getBoolean()) {
