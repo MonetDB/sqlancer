@@ -9,6 +9,7 @@ import sqlancer.common.query.ExpectedErrors;
 import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetColumn;
+import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.MonetSchema.MonetTable;
 import sqlancer.monet.MonetVisitor;
 
@@ -17,12 +18,12 @@ public class MonetAlterTableGenerator {
     private final MonetTable randomTable;
     // private Randomly r;
     private static MonetColumn randomColumn;
-    // private boolean generateOnlyKnown;
+    private boolean generateOnlyKnown;
     // private List<String> opClasses;
     private final MonetGlobalState globalState;
 
     protected enum Action {
-        // ALTER_TABLE_ADD_COLUMN, // [ COLUMN ] column data_type [ COLLATE collation ] [
+        ALTER_TABLE_ADD_COLUMN, // [ COLUMN ] column data_type [ COLLATE collation ] [
         // column_constraint [ ... ] ]
         ALTER_TABLE_DROP_COLUMN, // DROP [ COLUMN ] [ IF EXISTS ] column [ RESTRICT | CASCADE ]
         // ALTER_COLUMN_TYPE, // ALTER [ COLUMN ] column [ SET DATA ] TYPE data_type [ COLLATE collation ] [
@@ -34,15 +35,16 @@ public class MonetAlterTableGenerator {
         ADD_TABLE_CONSTRAINT // ADD table_constraint [ NOT VALID ]
     }
 
-    public MonetAlterTableGenerator(MonetTable randomTable, MonetGlobalState globalState) {
+    public MonetAlterTableGenerator(MonetTable randomTable, MonetGlobalState globalState, boolean generateOnlyKnown) {
         this.randomTable = randomTable;
         this.globalState = globalState;
+        this.generateOnlyKnown = generateOnlyKnown;
         // this.r = globalState.getRandomly();
         // this.opClasses = globalState.getOpClasses();
     }
 
-    public static SQLQueryAdapter create(MonetTable randomTable, MonetGlobalState globalState) {
-        return new MonetAlterTableGenerator(randomTable, globalState).generate();
+    public static SQLQueryAdapter create(MonetTable randomTable, MonetGlobalState globalState, boolean generateOnlyKnown) {
+        return new MonetAlterTableGenerator(randomTable, globalState, generateOnlyKnown).generate();
     }
 
     public List<Action> getActions(ExpectedErrors errors) {
@@ -78,6 +80,22 @@ public class MonetAlterTableGenerator {
                 sb.append(", ");
             }
             switch (a) {
+            case ALTER_TABLE_ADD_COLUMN:
+                String cname = String.format("c%d", randomTable.getColumns().size() + 1);
+                MonetDataType type = MonetDataType.getRandomType();
+                MonetColumn c = new MonetColumn(cname, type);
+                c.setTable(randomTable);
+                randomTable.getColumns().add(c);
+                sb.append("ADD COLUMN ");
+                sb.append(cname);
+                sb.append(" ");
+                MonetCommon.appendDataType(type, sb, false, generateOnlyKnown, globalState.getCollates());
+                /*sb.append(" "); no constraints for now
+                if (Randomly.getBoolean()) {
+                    createColumnConstraint(type, serial);
+                }*/
+                errors.add("already exists");
+                break;
             case ALTER_TABLE_DROP_COLUMN:
                 sb.append("DROP ");
                 sb.append(randomTable.getRandomColumn().getName());

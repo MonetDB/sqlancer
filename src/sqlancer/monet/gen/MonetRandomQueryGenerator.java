@@ -30,7 +30,7 @@ public final class MonetRandomQueryGenerator {
 
     private static final List<MonetDataType> ALL_TYPES = MonetDataType.getAllTypes();
 
-    private static final int MAX_SUBQUERY_DEPTH = 2;
+    private static final int MAX_SUBQUERY_DEPTH = 1;
 
     private MonetRandomQueryGenerator() {
     }
@@ -101,7 +101,7 @@ public final class MonetRandomQueryGenerator {
 
             // JOIN subqueries
             if (depth < MAX_SUBQUERY_DEPTH) { /* Protect against infinite recursion */
-                for (int i = 0; i < Randomly.fromOptions(1, 2, 3, 4); i++) {
+                for (int i = 0; i < Randomly.fromOptions(0, 1); i++) {
                     MonetQuery q = createRandomQuery(depth + 1, Randomly.smallNumber() + 1, globalState, null, false,
                             false, false);
                     MonetSubquery subquery = new MonetSubquery(q, String.format("sub%d", i), null);
@@ -197,7 +197,7 @@ public final class MonetRandomQueryGenerator {
 
     private static MonetQuery createRandomQueryInternal(MonetExpressionGenerator gen, MonetGlobalState globalState,
             MonetTables tables, int depth, int nrColumns, boolean generateOrderBy, boolean generateLimit) {
-        switch (Randomly.fromOptions(1, 2/* , 3 */, 4)) {
+        switch (Randomly.fromOptions(1, 2, 3, 4)) {
         case 1:
         case 2:
             List<MonetDataType> types = Randomly.nonEmptySubsetPotentialDuplicates(ALL_TYPES, nrColumns);
@@ -268,7 +268,7 @@ public final class MonetRandomQueryGenerator {
 
     private static MonetQuery createRandomSingleColumnQueryInternal(MonetExpressionGenerator gen,
             MonetGlobalState globalState, int depth, MonetDataType tp, boolean generateOrderBy, boolean generateLimit) {
-        switch (Randomly.fromOptions(1, 2/* , 3 */, 4)) {
+        switch (Randomly.fromOptions(1, 2, 3, 4)) {
         case 1:
         case 2:
             return createSingleColumnSelect(gen, globalState, null, depth, tp, generateOrderBy, generateLimit, true);

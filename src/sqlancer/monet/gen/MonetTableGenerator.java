@@ -119,7 +119,7 @@ public class MonetTableGenerator {
         NULL_OR_NOT_NULL, UNIQUE, PRIMARY_KEY, DEFAULT, GENERATED
     };
 
-    private void createColumnConstraint(MonetDataType type, boolean serial) {
+    public void createColumnConstraint(MonetDataType type, boolean serial) {
         List<ColumnConstraint> constraintSubset = Randomly.nonEmptySubset(ColumnConstraint.values());
         /*
          * if (Randomly.getBoolean()) { // make checks constraints less likely
