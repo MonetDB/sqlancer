@@ -21,7 +21,7 @@ public abstract class AbstractTable<C extends AbstractTableColumn<?, ?>, I exten
         this.name = name;
         this.indexes = indexes;
         this.isView = isView;
-        this.columns = Collections.unmodifiableList(columns);
+        this.columns = columns;
     }
 
     public String getName() {

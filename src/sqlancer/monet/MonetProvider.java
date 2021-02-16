@@ -49,7 +49,7 @@ public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOpt
     }
 
     public enum Action implements AbstractAction<MonetGlobalState> {
-        ANALYZE(MonetAnalyzeGenerator::create), //
+        //ANALYZE(MonetAnalyzeGenerator::create), //
         ALTER_TABLE(g -> MonetAlterTableGenerator.create(g.getSchema().getRandomTable(t -> !t.isView()), g, false)), //
         COMMIT(g -> {
             SQLQueryAdapter query;
@@ -63,16 +63,16 @@ public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOpt
             return query;
         }), //
         DELETE(MonetDeleteGenerator::create), //
-        DROP_INDEX(MonetDropIndexGenerator::create), //
+        //DROP_INDEX(MonetDropIndexGenerator::create), //
         INSERT(MonetInsertGenerator::insert), //
         UPDATE(MonetUpdateGenerator::create), //
         TRUNCATE(MonetTruncateGenerator::create), //
         MERGE(MonetMergeGenerator::create), //
-        VACUUM(MonetVacuumGenerator::create), //
+        //VACUUM(MonetVacuumGenerator::create), //
         LOGGER(MonetLoggerSuspenderGenerator::create), //
-        CREATE_INDEX(MonetIndexGenerator::generate), //
+        //CREATE_INDEX(MonetIndexGenerator::generate), //
         COMMENT_ON(MonetCommentGenerator::generate), //
-        // CREATE_SEQUENCE(MonetSequenceGenerator::createSequence), //
+        //CREATE_SEQUENCE(MonetSequenceGenerator::createSequence), //
         CREATE_VIEW(MonetViewGenerator::create), //
         PREPARE(MonetPreparedStatementGenerator::create), //
         QUERY_CATALOG((g) -> MonetQueryCatalogGenerator.query());
@@ -101,25 +101,25 @@ public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOpt
         case TRUNCATE:
         case LOGGER:
         case QUERY_CATALOG:
-        case CREATE_INDEX:
-        case DROP_INDEX:
+        //case CREATE_INDEX:
+        //case DROP_INDEX:
+       // case VACUUM:
+       // case ANALYZE:
+        case ALTER_TABLE:
             nrPerformed = r.getInteger(0, 2);
             break;
-        case VACUUM:
-        case ANALYZE:
-        case ALTER_TABLE:
         case DELETE:
         case MERGE:
             nrPerformed = r.getInteger(0, 3);
             break;
         case CREATE_VIEW:
-            nrPerformed = r.getInteger(0, 5);
+            nrPerformed = r.getInteger(0, 1);
             break;
         case UPDATE:
             nrPerformed = r.getInteger(0, 10);
             break;
         case PREPARE:
-            nrPerformed = r.getInteger(0, 50);
+            nrPerformed = r.getInteger(0, 5);
             break;
         case INSERT:
             nrPerformed = r.getInteger(0, globalState.getOptions().getMaxNumberInserts());
@@ -146,7 +146,7 @@ public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOpt
          */
 
         MonetDataType.intitializeTypes();
-        String url = "jdbc:monetdb://localhost:50000/:inmemory";
+        String url = "jdbc:monetdb://localhost:50000/";
         Connection con = DriverManager.getConnection(url, "monetdb", "monetdb");
 
         // TODO clean database
