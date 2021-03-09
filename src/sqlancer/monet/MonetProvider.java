@@ -30,7 +30,6 @@ import sqlancer.monet.gen.MonetTableGenerator;
 import sqlancer.monet.gen.MonetTransactionGenerator;
 import sqlancer.monet.gen.MonetTruncateGenerator;
 import sqlancer.monet.gen.MonetUpdateGenerator;
-import sqlancer.monet.gen.MonetVacuumGenerator;
 import sqlancer.monet.gen.MonetViewGenerator;
 
 public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOptions> {
@@ -68,7 +67,6 @@ public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOpt
         UPDATE(MonetUpdateGenerator::create), //
         TRUNCATE(MonetTruncateGenerator::create), //
         MERGE(MonetMergeGenerator::create), //
-        //VACUUM(MonetVacuumGenerator::create), //
         LOGGER(MonetLoggerSuspenderGenerator::create), //
         //CREATE_INDEX(MonetIndexGenerator::generate), //
         COMMENT_ON(MonetCommentGenerator::generate), //
