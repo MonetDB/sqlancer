@@ -11,7 +11,7 @@ public final class MonetLoggerSuspenderGenerator {
 
     public static SQLQueryAdapter create(MonetGlobalState globalState) {
         StringBuilder sb = new StringBuilder("CALL sys.");
-        sb.append(Randomly.fromOptions("flush_log", "suspend_log_flushing", "resume_log_flushing"));
+        sb.append(Randomly.fromOptions("suspend_log_flushing", "resume_log_flushing"));
         sb.append("()");
 
         return new SQLQueryAdapter(sb.toString(), false);
