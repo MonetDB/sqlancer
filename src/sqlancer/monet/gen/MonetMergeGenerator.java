@@ -87,6 +87,7 @@ public final class MonetMergeGenerator {
         List<MonetColumn> array3 = new ArrayList<>(table.getColumns().size() + joined.getColumns().size());
         array3.addAll(table.getColumns());
         array3.addAll(joined.getColumns());
+        gen.setColumns(array3);
         sb.append(MonetVisitor.asString(gen.generateExpression(MonetDataType.BOOLEAN)));
         switch (Randomly.fromOptions(1, 2, 3)) {
         case 1:

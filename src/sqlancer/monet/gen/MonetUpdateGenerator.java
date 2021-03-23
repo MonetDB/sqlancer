@@ -1,5 +1,6 @@
 package sqlancer.monet.gen;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import sqlancer.Randomly;
@@ -18,7 +19,7 @@ public final class MonetUpdateGenerator {
     }
 
     public static SQLQueryAdapter create(MonetGlobalState globalState) {
-        MonetTable randomTable = globalState.getSchema().getRandomTable(t -> t.isInsertable());
+        MonetTable randomTable = globalState.getSchema().getRandomTable(t -> t.isInsertable()), randomTable2 = null;
         StringBuilder sb = new StringBuilder();
         sb.append("UPDATE ");
         sb.append(randomTable.getName());
@@ -31,6 +32,15 @@ public final class MonetUpdateGenerator {
                                                            // table multiple times
         List<MonetColumn> columns = randomTable.getRandomNonEmptyColumnSubset();
         MonetCommon.addCommonInsertUpdateErrors(errors);
+        MonetExpressionGenerator gen = new MonetExpressionGenerator(globalState);
+        List<MonetColumn> cols = new ArrayList<>(randomTable.getColumns().size());
+        cols.addAll(randomTable.getColumns());
+
+        if (!Randomly.getBooleanWithSmallProbability()) { /* TODO the same table may be picked again, so use an alias */
+            randomTable2 = globalState.getSchema().getRandomTable();
+            cols.addAll(randomTable2.getColumns());
+        }
+        gen.setColumns(cols);
 
         for (int i = 0; i < columns.size(); i++) {
             if (i != 0) {
@@ -40,15 +50,13 @@ public final class MonetUpdateGenerator {
             sb.append(column.getName());
             sb.append(" = ");
             if (!Randomly.getBoolean()) {
-                MonetExpression constant = MonetExpressionGenerator.generateConstant(globalState.getRandomly(),
-                        column.getType());
-                sb.append(MonetVisitor.asString(constant));
+                MonetExpression exp = gen.generateExpression(column.getType());
+                sb.append(MonetVisitor.asString(exp));
             } else if (Randomly.getBoolean()) {
                 sb.append("DEFAULT");
             } else {
                 sb.append("(");
-                MonetExpression expr = MonetExpressionGenerator.generateExpression(globalState,
-                        randomTable.getColumns(), column.getType());
+                MonetExpression expr = gen.generateExpression(column.getType());
                 // caused by casts
                 sb.append(MonetVisitor.asString(expr));
                 sb.append(")");
@@ -59,11 +67,15 @@ public final class MonetUpdateGenerator {
         errors.add("conversion of");
         errors.add("cannot update view");
 
+        if (randomTable2 != null) {
+            sb.append(" FROM ");
+            sb.append(randomTable2.getName());
+        }
+
         MonetCommon.addCommonExpressionErrors(errors);
         if (!Randomly.getBooleanWithSmallProbability()) {
             sb.append(" WHERE ");
-            MonetExpression where = MonetExpressionGenerator.generateExpression(globalState, randomTable.getColumns(),
-                    MonetDataType.BOOLEAN);
+            MonetExpression where = gen.generateExpression(MonetDataType.BOOLEAN);
             sb.append(MonetVisitor.asString(where));
         }
 
