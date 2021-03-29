@@ -32,6 +32,7 @@ public final class MonetCommon {
         errors.add("Wrong format (");
         errors.add(" no such binary operator");
         errors.add(" no such unary operator");
+        errors.add(" no such aggregate");
         errors.add("has incorrect format");
         errors.add("in query results without an aggregate function");
         errors.add("no such column");
