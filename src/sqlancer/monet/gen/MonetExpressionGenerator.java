@@ -607,8 +607,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
 
     public MonetExpression generateAggregate() {
         if (Randomly.getBooleanWithRatherLowProbability()) {
-            return new MonetAggregate(new ArrayList<MonetExpression>(), MonetAggregateFunction.COUNT_ALL,
-                    Randomly.getBoolean());
+            return new MonetAggregate(new ArrayList<MonetExpression>(), MonetAggregateFunction.COUNT_ALL, MonetDataType.BIGINT, Randomly.getBoolean());
         } else {
             return getAggregate(MonetDataType.getRandomType());
         }
@@ -621,7 +620,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
     }
 
     public MonetAggregate generateArgsForAggregate(MonetDataType dataType, MonetAggregateFunction agg) {
-        return new MonetAggregate(generateExpressions(0, agg.getNrArgs(), dataType), agg, Randomly.getBoolean());
+        return new MonetAggregate(generateExpressions(0, agg.getNrArgs(), dataType), agg, dataType, Randomly.getBoolean());
     }
 
     public MonetExpressionGenerator allowAggregates(boolean value) {

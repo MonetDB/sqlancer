@@ -16,6 +16,8 @@ public class MonetAggregate extends FunctionNode<MonetAggregateFunction, MonetEx
 
     private final boolean isDistinct;
 
+    private final MonetDataType returnType;
+
     public enum MonetAggregateFunction {
         AVG("avg", 1, MonetDataType.DOUBLE, MonetDataType.REAL, MonetDataType.DECIMAL, MonetDataType.SECOND_INTERVAL,
                 MonetDataType.DAY_INTERVAL, MonetDataType.MONTH_INTERVAL),
@@ -85,12 +87,19 @@ public class MonetAggregate extends FunctionNode<MonetAggregateFunction, MonetEx
         }
     }
 
-    public MonetAggregate(List<MonetExpression> args, MonetAggregateFunction func, boolean isDistinct) {
+    public MonetAggregate(List<MonetExpression> args, MonetAggregateFunction func, MonetDataType returnType, boolean isDistinct) {
         super(func, args);
         this.isDistinct = isDistinct;
+        this.returnType = returnType;
     }
 
     public boolean isDistinct() {
         return this.isDistinct;
     }
+
+    @Override
+    public MonetDataType getExpressionType() {
+        return returnType;
+    }
+
 }
