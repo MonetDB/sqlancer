@@ -75,7 +75,8 @@ public final class MonetCommon {
         errors.add("Result too large");
         errors.add("Domain error");
         errors.add("Digits out of bounds");
-        errors.add("subqueries not supported inside MERGE conditions");
+        errors.add("subqueries not supported inside");
+        errors.add("set operations not supported inside");
         /* TODO the following errors should be removed */
         errors.add("Decimal ");
         errors.add("Timestamp ");
