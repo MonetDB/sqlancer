@@ -78,6 +78,7 @@ public final class MonetCommon {
         errors.add("subqueries not supported inside");
         errors.add("set operations not supported inside");
         errors.add("aggregate function calls cannot be nested");
+        errors.add("For the IN operator, both sides must have a type defined");
         /* TODO the following errors should be removed */
         errors.add("Decimal ");
         errors.add("Timestamp ");
