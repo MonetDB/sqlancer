@@ -77,6 +77,7 @@ public final class MonetCommon {
         errors.add("Digits out of bounds");
         errors.add("subqueries not supported inside");
         errors.add("set operations not supported inside");
+        errors.add("aggregate function calls cannot be nested");
         /* TODO the following errors should be removed */
         errors.add("Decimal ");
         errors.add("Timestamp ");
