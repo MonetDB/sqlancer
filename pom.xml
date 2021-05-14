@@ -269,7 +269,7 @@
     <dependency>
       <groupId>monetdb</groupId>
       <artifactId>monetdb-jdbc</artifactId>
-      <version>2.29</version>
+      <version>11.19.15</version>
     </dependency>
     <dependency>
       <groupId>org.mongodb</groupId>
