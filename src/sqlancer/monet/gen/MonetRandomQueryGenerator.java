@@ -78,6 +78,7 @@ public final class MonetRandomQueryGenerator {
             boolean setalias) {
         MonetSelect select = new MonetSelect();
         select.setSelectType(SelectType.getRandom());
+        boolean groupBy = Randomly.getBooleanWithRatherLowProbability(), areAggregatesAllowed = gen.areAggregatesAllowed();
 
         if (tables != null && !tables.getTables().isEmpty()) {
             List<MonetExpression> ctes = new ArrayList<>(tables.getTables().size());
@@ -113,22 +114,26 @@ public final class MonetRandomQueryGenerator {
         }
 
         List<MonetExpression> columns = new ArrayList<>(types.size());
+        gen.allowAggregates(groupBy);
         for (MonetDataType tp : types) {
             columns.add(gen.generateExpression(depth, tp));
         }
+        gen.allowAggregates(areAggregatesAllowed);
         select.setFetchColumns(columns);
 
-        if (!Randomly.getBooleanWithRatherLowProbability()) {
+        if (Randomly.getBoolean()) {
             select.setWhereClause(gen.generateExpression(depth + 1, MonetDataType.BOOLEAN));
         }
-        if (Randomly.getBooleanWithRatherLowProbability()) {
+        if (groupBy) {
             select.setGroupByExpressions(gen.generateExpressions(Randomly.smallNumber() + 1, depth + 1));
             if (Randomly.getBooleanWithRatherLowProbability()) {
                 select.setHavingClause(gen.generateHavingClause(depth + 1));
             }
         }
         if (generateOrderBy && Randomly.getBooleanWithRatherLowProbability()) {
+            gen.allowAggregates(groupBy);
             select.setOrderByExpressions(gen.generateOrderBy(depth + 1));
+            gen.allowAggregates(areAggregatesAllowed);
         }
         if (generateLimit && Randomly.getBoolean()) {
             select.setLimitClause(
