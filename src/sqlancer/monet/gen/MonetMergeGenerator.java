@@ -13,6 +13,8 @@ import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.MonetSchema.MonetTable;
 import sqlancer.monet.MonetVisitor;
 import sqlancer.monet.ast.MonetExpression;
+import sqlancer.monet.ast.MonetQuery;
+import sqlancer.monet.ast.MonetSelect.MonetCTE;
 
 public final class MonetMergeGenerator {
 
@@ -72,17 +74,41 @@ public final class MonetMergeGenerator {
 
     public static SQLQueryAdapter create(MonetGlobalState globalState) {
         MonetTable table = globalState.getSchema().getRandomTable(t -> t.isInsertable());
-        MonetTable joined = globalState.getSchema().getRandomTable();
+
+        MonetQuery query = MonetRandomQueryGenerator.createRandomQuery(0, Randomly.fromOptions(1, 2, 3), globalState, null, false, false, false);
+        String queryName = "mergejoined";
+        List<MonetColumn> cols = new ArrayList<>();
+        if (query.getFetchColumns() != null && !query.getFetchColumns().isEmpty()) {
+            int j = 0;
+            for (MonetExpression ex : query.getFetchColumns()) {
+                String nextColumnName = String.format("c%d", j);
+                MonetDataType dt = ex.getExpressionType();
+                if (dt == null) {
+                    throw new AssertionError("Ups " + ex.getClass().getName()); /* this is for debugging */
+                }
+                cols.add(new MonetColumn(nextColumnName, dt, queryName));
+                j++;
+            }
+        }
+        MonetCTE joined = new MonetCTE(queryName, cols, query);
+
         ExpectedErrors errors = new ExpectedErrors();
         MonetCommon.addCommonInsertUpdateErrors(errors);
         StringBuilder sb = new StringBuilder("MERGE INTO ");
         sb.append(table.getName());
         sb.append(" USING (");
-        sb.append("SELECT * FROM ");
-        sb.append(joined.getName());
+        sb.append(MonetVisitor.asString(joined.getQuery()));
         sb.append(") AS ");
         sb.append(joined.getName());
-        sb.append(" ON ");
+        int i = 0;
+        sb.append("(");
+        for (MonetColumn column : joined.getColumns()) {
+            if (i++ != 0) {
+                sb.append(",");
+            }
+            sb.append(column.getName());
+        }
+        sb.append(") ON ");
         MonetExpressionGenerator gen = new MonetExpressionGenerator(globalState);
         List<MonetColumn> array3 = new ArrayList<>(table.getColumns().size() + joined.getColumns().size());
         array3.addAll(table.getColumns());
