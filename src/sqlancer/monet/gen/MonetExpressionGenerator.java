@@ -628,6 +628,10 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         return this;
     }
 
+    public boolean areAggregatesAllowed() {
+        return allowAggregateFunctions;
+    }
+
     @Override
     public MonetExpression generatePredicate() {
         return generateExpression(0);
