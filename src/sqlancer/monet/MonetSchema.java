@@ -288,18 +288,30 @@ public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
 
         private final TableType tableType;
         private final List<MonetStatisticsObject> statistics;
+        private final List<MonetConstraint> constraints;
         private final boolean isInsertable;
+        private int columnCounter = 0;
+        private int constraintCounter = 0;
 
         public MonetTable(String tableName, List<MonetColumn> columns, List<MonetIndex> indexes, TableType tableType,
-                List<MonetStatisticsObject> statistics, boolean isView, boolean isInsertable) {
+                List<MonetStatisticsObject> statistics, List<MonetConstraint> constraints, boolean isView, boolean isInsertable) {
             super(tableName, columns, indexes, isView);
             this.statistics = statistics;
+            this.constraints = constraints;
             this.isInsertable = isInsertable;
             this.tableType = tableType;
         }
 
         public List<MonetStatisticsObject> getStatistics() {
             return statistics;
+        }
+
+        public List<MonetConstraint> getConstraints() {
+            return constraints;
+        }
+
+        public MonetConstraint getRandomConstraint() {
+            return Randomly.fromList(constraints);
         }
 
         public TableType getTableType() {
@@ -310,6 +322,33 @@ public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
             return isInsertable;
         }
 
+        public int getColumnCounter() {
+            return columnCounter;
+        }
+
+        public int getConstraintCounter() {
+            return constraintCounter;
+        }
+
+        public void setColumnCounter(int columnCounter) {
+            this.columnCounter = columnCounter;
+        }
+
+        public void setConstraintCounter(int constraintCounter) {
+            this.constraintCounter = constraintCounter;
+        }
+    }
+
+    public static final class MonetConstraint { /* for now only keep name */
+        private final String name;
+
+        public MonetConstraint(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
     }
 
     public static final class MonetStatisticsObject {
@@ -351,13 +390,15 @@ public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
                         boolean isView = tableType == 1;
                         MonetTable.TableType monetTableType = getTableType(tableCommitAction);
                         List<MonetColumn> databaseColumns = getTableColumns(con, tableID);
+                        List<MonetConstraint> databaseConstraints = getTableConstraints(con, tableID);
                         List<MonetIndex> indexes = getIndexes(con, tableID);
                         List<MonetStatisticsObject> statistics = new ArrayList<>(); // TODO? getStatistics(con);
-                        MonetTable t = new MonetTable(tableName, databaseColumns, indexes, monetTableType, statistics,
-                                isView, !isView);
+                        MonetTable t = new MonetTable(tableName, databaseColumns, indexes, monetTableType, statistics, databaseConstraints, isView, !isView);
                         for (MonetColumn c : databaseColumns) {
                             c.setTable(t);
                         }
+                        t.setColumnCounter(databaseColumns.size());
+                        t.setConstraintCounter(databaseConstraints.size());
                         databaseTables.add(t);
                     }
                 }
@@ -410,6 +451,22 @@ public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
             }
         }
         return columns;
+    }
+
+    protected static List<MonetConstraint> getTableConstraints(SQLConnection con, int tableID) throws SQLException {
+        List<MonetConstraint> constraints = new ArrayList<>();
+        try (Statement s = con.createStatement()) {
+            try (ResultSet rs = s.executeQuery(
+                    "select keys.\"name\" as key_name from sys.keys where table_id = '"
+                            + tableID + "' order by key_name")) {
+                while (rs.next()) {
+                    String constraintName = rs.getString("key_name");
+                    MonetConstraint c = new MonetConstraint(constraintName);
+                    constraints.add(c);
+                }
+            }
+        }
+        return constraints;
     }
 
     public MonetSchema(List<MonetTable> databaseTables, String databaseName) {

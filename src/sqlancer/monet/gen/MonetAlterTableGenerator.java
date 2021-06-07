@@ -9,6 +9,7 @@ import sqlancer.common.query.ExpectedErrors;
 import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema.MonetColumn;
+import sqlancer.monet.MonetSchema.MonetConstraint;
 import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.MonetSchema.MonetTable;
 import sqlancer.monet.MonetVisitor;
@@ -32,7 +33,8 @@ public class MonetAlterTableGenerator {
                                        // DROP DEFAULT
         ALTER_COLUMN_SET_DROP_NULL, // ALTER [ COLUMN ] column { SET | DROP } NOT NULL
         // ALTER_COLUMN_SET_STORAGE, // ALTER [ COLUMN ] column SET STORAGE { PLAIN | EXTERNAL | EXTENDED | MAIN }
-        ADD_TABLE_CONSTRAINT // ADD table_constraint [ NOT VALID ]
+        ADD_TABLE_CONSTRAINT, // ADD table_constraint [ NOT VALID ]
+        ALTER_TABLE_DROP_CONSTRAINT
     }
 
     public MonetAlterTableGenerator(MonetTable randomTable, MonetGlobalState globalState, boolean generateOnlyKnown) {
@@ -60,6 +62,10 @@ public class MonetAlterTableGenerator {
         if (randomTable.getColumns().size() == 1) {
             action.remove(Action.ALTER_TABLE_DROP_COLUMN);
         }
+        if (randomTable.getConstraints().size() == 0) {
+            action.remove(Action.ALTER_TABLE_DROP_CONSTRAINT);
+        }
+
         if (action.isEmpty()) {
             throw new IgnoreMeException();
         }
@@ -81,11 +87,15 @@ public class MonetAlterTableGenerator {
             }
             switch (a) {
             case ALTER_TABLE_ADD_COLUMN:
-                String cname = String.format("c%d", randomTable.getColumns().size() + 1);
+                int nextNumber = randomTable.getColumnCounter() + 1;
+                String cname = String.format("c%d", nextNumber);
+
                 MonetDataType type = MonetDataType.getRandomType();
                 MonetColumn c = new MonetColumn(cname, type);
+                randomTable.setColumnCounter(nextNumber);
                 c.setTable(randomTable);
                 randomTable.getColumns().add(c);
+
                 sb.append("ADD COLUMN ");
                 sb.append(cname);
                 sb.append(" ");
@@ -135,7 +145,15 @@ public class MonetAlterTableGenerator {
              * sb.append(Randomly.fromOptions("PLAIN", "EXTERNAL", "EXTENDED", "MAIN")); break;
              */
             case ADD_TABLE_CONSTRAINT:
-                sb.append("ADD ");
+                int nextCNumber = randomTable.getColumnCounter() + 1;
+                String conname = String.format("con%d", nextCNumber);
+
+                MonetConstraint con = new MonetConstraint(conname);
+                randomTable.setConstraintCounter(nextCNumber);
+                randomTable.getConstraints().add(con);
+    
+                sb.append("ADD CONSTRAINT ");
+                sb.append(String.format("con%d ", nextCNumber));
                 MonetCommon.addTableConstraint(sb, randomTable, globalState, errors);
 
                 // errors.add("types ");
@@ -145,6 +163,16 @@ public class MonetAlterTableGenerator {
                 errors.add("NOT NULL constraint violated for column");
                 errors.add("a table can have only one PRIMARY KEY");
                 errors.add("already exists");
+                break;
+            case ALTER_TABLE_DROP_CONSTRAINT:
+                sb.append("DROP CONSTRAINT ");
+                sb.append(randomTable.getRandomConstraint().getName());
+                errors.add("because other objects depend on it");
+                if (Randomly.getBoolean()) {
+                    sb.append(" ");
+                    sb.append(Randomly.fromOptions("RESTRICT", "CASCADE"));
+                }
+                errors.add("does not exist");
                 break;
             default:
                 throw new AssertionError(a);

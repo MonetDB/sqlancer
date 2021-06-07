@@ -33,7 +33,7 @@ public class MonetTableGenerator {
         this.newSchema = newSchema;
         this.generateOnlyKnown = generateOnlyKnown;
         this.globalState = globalState;
-        table = new MonetTable(tableName, columnsToBeAdded, null, null, null, false, false);
+        table = new MonetTable(tableName, columnsToBeAdded, null, null, null, null, false, false);
         errors.add("invalid input syntax for");
         errors.add("is not unique");
         errors.add("integer out of range");

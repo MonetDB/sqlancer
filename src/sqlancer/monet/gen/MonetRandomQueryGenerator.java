@@ -44,7 +44,7 @@ public final class MonetRandomQueryGenerator {
             for (MonetColumn c : t.getColumns()) {
                 cols.add(new MonetColumn(c.getName(), c.getType(), String.format("l%d%s", depth, t.getName())));
             }
-            tables.add(new MonetTable(t.getName(), cols, t.getIndexes(), t.getTableType(), t.getStatistics(),
+            tables.add(new MonetTable(t.getName(), cols, t.getIndexes(), t.getTableType(), t.getStatistics(), t.getConstraints(),
                     t.isView(), t.isInsertable()));
         }
 
