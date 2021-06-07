@@ -136,7 +136,11 @@ public class MonetAlterTableGenerator {
                 break;
             case ALTER_COLUMN_SET_DROP_NULL:
                 alterColumn(randomTable, sb);
-                sb.append("SET NOT NULL");
+                if (Randomly.getBoolean()) {
+                    sb.append("SET NULL");
+                } else {
+                    sb.append("SET NOT NULL");
+                }
                 errors.add("contains null values");
                 errors.add("NOT NULL constraint violated for column");
                 break;
@@ -156,11 +160,6 @@ public class MonetAlterTableGenerator {
                 sb.append(String.format("con%d ", nextCNumber));
                 MonetCommon.addTableConstraint(sb, randomTable, globalState, errors);
 
-                // errors.add("types ");
-                errors.add("shift operand too large in ");
-                errors.add("has no valid default value");
-                errors.add("value too long for type (var)char");
-                errors.add("NOT NULL constraint violated for column");
                 errors.add("a table can have only one PRIMARY KEY");
                 errors.add("already exists");
                 break;
