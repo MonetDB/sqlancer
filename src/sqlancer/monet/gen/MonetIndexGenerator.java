@@ -32,8 +32,10 @@ public final class MonetIndexGenerator {
         sb.append("INDEX ");
         MonetTable randomTable = globalState.getSchema().getRandomTable(t -> !t.isView());
         int nextINumber = randomTable.getIndexCounter() + 1;
-        sb.append(String.format("i%d", nextINumber));
+        MonetIndex index = MonetIndex.create(String.format("i%d", nextINumber));
+        sb.append(index.getIndexName());
         randomTable.setIndexCounter(nextINumber);
+        randomTable.getIndexes().add(index);
         sb.append(" ON ");
         sb.append(randomTable.getName());
         sb.append(" (");
