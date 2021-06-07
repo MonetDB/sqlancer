@@ -142,6 +142,7 @@ public class MonetAlterTableGenerator {
                     sb.append("SET NOT NULL");
                 }
                 errors.add("contains null values");
+                errors.add("cannot change NOT NULL CONSTRAINT for column");
                 errors.add("NOT NULL constraint violated for column");
                 break;
             /*
