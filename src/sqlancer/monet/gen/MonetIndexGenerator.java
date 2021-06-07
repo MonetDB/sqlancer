@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import sqlancer.Randomly;
-import sqlancer.common.DBMSCommon;
 import sqlancer.common.query.ExpectedErrors;
 import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.monet.MonetGlobalState;
@@ -32,8 +31,9 @@ public final class MonetIndexGenerator {
         }
         sb.append("INDEX ");
         MonetTable randomTable = globalState.getSchema().getRandomTable(t -> !t.isView());
-        String indexName = getNewIndexName(randomTable);
-        sb.append(indexName);
+        int nextINumber = randomTable.getIndexCounter() + 1;
+        sb.append(String.format("i%d", nextINumber));
+        randomTable.setIndexCounter(nextINumber);
         sb.append(" ON ");
         sb.append(randomTable.getName());
         sb.append(" (");
@@ -49,16 +49,4 @@ public final class MonetIndexGenerator {
         MonetCommon.addCommonExpressionErrors(errors);
         return new SQLQueryAdapter(sb.toString(), errors, true);
     }
-
-    private static String getNewIndexName(MonetTable randomTable) {
-        List<MonetIndex> indexes = randomTable.getIndexes();
-        int indexI = 0;
-        while (true) {
-            String indexName = DBMSCommon.createIndexName(indexI++);
-            if (indexes.stream().noneMatch(i -> i.getIndexName().equals(indexName))) {
-                return indexName;
-            }
-        }
-    }
-
 }

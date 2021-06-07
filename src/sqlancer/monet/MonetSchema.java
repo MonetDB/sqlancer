@@ -292,6 +292,7 @@ public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
         private final boolean isInsertable;
         private int columnCounter = 0;
         private int constraintCounter = 0;
+        private int indexCounter = 0;
 
         public MonetTable(String tableName, List<MonetColumn> columns, List<MonetIndex> indexes, TableType tableType,
                 List<MonetStatisticsObject> statistics, List<MonetConstraint> constraints, boolean isView, boolean isInsertable) {
@@ -330,12 +331,20 @@ public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
             return constraintCounter;
         }
 
+        public int getIndexCounter() {
+            return indexCounter;
+        }
+
         public void setColumnCounter(int columnCounter) {
             this.columnCounter = columnCounter;
         }
 
         public void setConstraintCounter(int constraintCounter) {
             this.constraintCounter = constraintCounter;
+        }
+
+        public void setIndexCounter(int indexCounter) {
+            this.indexCounter = indexCounter;
         }
     }
 
@@ -399,6 +408,7 @@ public class MonetSchema extends AbstractSchema<MonetGlobalState, MonetTable> {
                         }
                         t.setColumnCounter(databaseColumns.size());
                         t.setConstraintCounter(databaseConstraints.size());
+                        t.setIndexCounter(indexes.size());
                         databaseTables.add(t);
                     }
                 }
