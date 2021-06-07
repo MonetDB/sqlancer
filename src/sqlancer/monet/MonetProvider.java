@@ -48,7 +48,7 @@ public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOpt
     }
 
     public enum Action implements AbstractAction<MonetGlobalState> {
-        //ANALYZE(MonetAnalyzeGenerator::create), //
+        ANALYZE(MonetAnalyzeGenerator::create), //
         ALTER_TABLE(g -> MonetAlterTableGenerator.create(g.getSchema().getRandomTable(t -> !t.isView()), g, false)), //
         COMMIT(g -> {
             SQLQueryAdapter query;
@@ -62,13 +62,13 @@ public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOpt
             return query;
         }), //
         DELETE(MonetDeleteGenerator::create), //
-        //DROP_INDEX(MonetDropIndexGenerator::create), //
+        DROP_INDEX(MonetDropIndexGenerator::create), //
         INSERT(MonetInsertGenerator::insert), //
         UPDATE(MonetUpdateGenerator::create), //
         TRUNCATE(MonetTruncateGenerator::create), //
         MERGE(MonetMergeGenerator::create), //
         LOGGER(MonetLoggerSuspenderGenerator::create), //
-        //CREATE_INDEX(MonetIndexGenerator::generate), //
+        CREATE_INDEX(MonetIndexGenerator::generate), //
         COMMENT_ON(MonetCommentGenerator::generate), //
         //CREATE_SEQUENCE(MonetSequenceGenerator::createSequence), //
         CREATE_VIEW(MonetViewGenerator::create), //
@@ -95,14 +95,15 @@ public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOpt
             nrPerformed = r.getInteger(0, 0);
             break;
         case COMMENT_ON:
-            // case CREATE_SEQUENCE:
-        case TRUNCATE:
+        //case CREATE_SEQUENCE:
+        case DROP_INDEX:
+            nrPerformed = r.getInteger(0, 1);
+            break;
+        case ANALYZE:
         case LOGGER:
         case QUERY_CATALOG:
-        //case CREATE_INDEX:
-        //case DROP_INDEX:
-       // case VACUUM:
-       // case ANALYZE:
+        case CREATE_INDEX:
+        case TRUNCATE:
         case ALTER_TABLE:
             nrPerformed = r.getInteger(0, 2);
             break;
@@ -114,10 +115,10 @@ public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOpt
             nrPerformed = r.getInteger(0, 1);
             break;
         case UPDATE:
-            nrPerformed = r.getInteger(0, 10);
+            nrPerformed = r.getInteger(0, 5);
             break;
         case PREPARE:
-            nrPerformed = r.getInteger(0, 5);
+            nrPerformed = r.getInteger(0, 10);
             break;
         case INSERT:
             nrPerformed = r.getInteger(0, globalState.getOptions().getMaxNumberInserts());
