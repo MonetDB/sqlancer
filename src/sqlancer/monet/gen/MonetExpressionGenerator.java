@@ -235,7 +235,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         case SUBQUERY:
             MonetQuery sel3 = MonetRandomQueryGenerator.createRandomSingleColumnQuery(depth + 1, MonetDataType.BOOLEAN,
                     globalState, false, false, this.allowParameters);
-            return new MonetQuery.MonetSubquery(sel3, null, MonetDataType.BOOLEAN);
+            return new MonetQuery.MonetSubquery(sel3, null, MonetDataType.BOOLEAN, null);
         case CASE:
             boolean hasSwitch = Randomly.getBoolean();
             MonetDataType tp = hasSwitch ? MonetDataType.getRandomType() : MonetDataType.BOOLEAN;
@@ -412,7 +412,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         case SUBQUERY:
             MonetQuery select = MonetRandomQueryGenerator.createRandomSingleColumnQuery(depth + 1, type, globalState,
                     false, false, this.allowParameters);
-            return new MonetQuery.MonetSubquery(select, null, type);
+            return new MonetQuery.MonetSubquery(select, null, type, null);
         case CASE:
             boolean hasSwitch = Randomly.getBoolean();
             MonetDataType tp = hasSwitch ? MonetDataType.getRandomType() : MonetDataType.BOOLEAN;
@@ -464,7 +464,7 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         case SUBQUERY:
             MonetQuery select = MonetRandomQueryGenerator.createRandomSingleColumnQuery(depth + 1, integerType,
                     globalState, false, false, this.allowParameters);
-            return new MonetQuery.MonetSubquery(select, null, integerType);
+            return new MonetQuery.MonetSubquery(select, null, integerType, null);
         case CASE:
             boolean hasSwitch = Randomly.getBoolean();
             MonetDataType tp = hasSwitch ? MonetDataType.getRandomType() : MonetDataType.BOOLEAN;

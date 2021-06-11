@@ -19,8 +19,8 @@ import sqlancer.monet.gen.MonetAlterTableGenerator;
 import sqlancer.monet.gen.MonetAnalyzeGenerator;
 import sqlancer.monet.gen.MonetCommentGenerator;
 import sqlancer.monet.gen.MonetDeleteGenerator;
-import sqlancer.monet.gen.MonetDropIndexGenerator;
-import sqlancer.monet.gen.MonetIndexGenerator;
+//import sqlancer.monet.gen.MonetDropIndexGenerator;
+//import sqlancer.monet.gen.MonetIndexGenerator;
 import sqlancer.monet.gen.MonetInsertGenerator;
 import sqlancer.monet.gen.MonetLoggerSuspenderGenerator;
 import sqlancer.monet.gen.MonetMergeGenerator;
@@ -62,13 +62,13 @@ public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOpt
             return query;
         }), //
         DELETE(MonetDeleteGenerator::create), //
-        DROP_INDEX(MonetDropIndexGenerator::create), //
+        //DROP_INDEX(MonetDropIndexGenerator::create), //
         INSERT(MonetInsertGenerator::insert), //
         UPDATE(MonetUpdateGenerator::create), //
         TRUNCATE(MonetTruncateGenerator::create), //
         MERGE(MonetMergeGenerator::create), //
         LOGGER(MonetLoggerSuspenderGenerator::create), //
-        CREATE_INDEX(MonetIndexGenerator::generate), //
+        //CREATE_INDEX(MonetIndexGenerator::generate), //
         COMMENT_ON(MonetCommentGenerator::generate), //
         //CREATE_SEQUENCE(MonetSequenceGenerator::createSequence), //
         CREATE_VIEW(MonetViewGenerator::create), //
@@ -96,13 +96,13 @@ public class MonetProvider extends SQLProviderAdapter<MonetGlobalState, MonetOpt
             break;
         case COMMENT_ON:
         //case CREATE_SEQUENCE:
-        case DROP_INDEX:
+        //case DROP_INDEX:
             nrPerformed = r.getInteger(0, 1);
             break;
         case ANALYZE:
         case LOGGER:
         case QUERY_CATALOG:
-        case CREATE_INDEX:
+        //case CREATE_INDEX:
         case TRUNCATE:
         case ALTER_TABLE:
             nrPerformed = r.getInteger(0, 2);
