@@ -79,6 +79,10 @@ public class MonetExpressionGenerator implements ExpressionGenerator<MonetExpres
         return this;
     }
 
+    public List<MonetColumn> getColumns() {
+        return this.columns;
+    }
+
     public MonetExpressionGenerator setRowValue(MonetRowValue rw) {
         this.rw = rw;
         return this;

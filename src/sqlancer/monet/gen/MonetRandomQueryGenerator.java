@@ -105,9 +105,27 @@ public final class MonetRandomQueryGenerator {
                 for (int i = 0; i < Randomly.fromOptions(0, 1); i++) {
                     MonetQuery q = createRandomQuery(depth + 1, Randomly.smallNumber() + 1, globalState, null, false,
                             false, false);
-                    MonetSubquery subquery = new MonetSubquery(q, String.format("sub%d", i), null);
-                    joinStatements.add(new MonetJoin(subquery, gen.generateExpression(depth + 1, MonetDataType.BOOLEAN),
-                            MonetJoinType.getRandom()));
+
+                    String name = String.format("sub%d", i);
+                    List<MonetColumn> cols = new ArrayList<>();
+                    int j = 0;
+                    for (MonetExpression ex : q.getFetchColumns()) {
+                        String nextColumnName = String.format("c%d", j);
+                        MonetDataType dt = ex.getExpressionType();
+                        if (dt == null) {
+                            throw new AssertionError("Ups " + ex.getClass().getName()); /* this is for debugging */
+                        }
+                        cols.add(new MonetColumn(nextColumnName, dt, String.format("%s", name)));
+                        j++;
+                    }
+                    MonetSubquery subquery = new MonetSubquery(q, name, null, cols);
+
+                    List<MonetExpression> joinclauses = new ArrayList<>();
+                    for (int k = 0; k < Randomly.fromOptions(1, 2); k++) {
+                        joinclauses.add(gen.generateExpression(depth + 1, MonetDataType.BOOLEAN));
+                    }
+
+                    joinStatements.add(new MonetJoin(subquery, joinclauses, MonetJoinType.getRandom()));
                 }
             }
             select.setJoinClauses(joinStatements);

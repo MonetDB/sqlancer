@@ -12,6 +12,7 @@ import sqlancer.common.oracle.TernaryLogicPartitioningOracleBase;
 import sqlancer.monet.MonetGlobalState;
 import sqlancer.monet.MonetSchema;
 import sqlancer.monet.MonetSchema.MonetColumn;
+import sqlancer.monet.MonetSchema.MonetDataType;
 import sqlancer.monet.MonetSchema.MonetTable;
 import sqlancer.monet.MonetSchema.MonetTables;
 import sqlancer.monet.ast.MonetColumnValue;
@@ -86,7 +87,18 @@ public class MonetTLPBase extends TernaryLogicPartitioningOracleBase<MonetExpres
     public static MonetSubquery createSubquery(MonetGlobalState globalState, String name, MonetTables tables) {
         MonetQuery select = MonetRandomQueryGenerator.createRandomQuery(0, Randomly.smallNumber() + 1, globalState,
                 tables, false, false, false);
-        return new MonetSubquery(select, name, null);
+        List<MonetColumn> cols = new ArrayList<>();
+        int j = 0;
+        for (MonetExpression ex : select.getFetchColumns()) {
+            String nextColumnName = String.format("c%d", j);
+            MonetDataType dt = ex.getExpressionType();
+            if (dt == null) {
+                throw new AssertionError("Ups " + ex.getClass().getName()); /* this is for debugging */
+            }
+            cols.add(new MonetColumn(nextColumnName, dt, String.format("%s", name)));
+            j++;
+        }
+        return new MonetSubquery(select, name, null, cols);
     }
 
 }

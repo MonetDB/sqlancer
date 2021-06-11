@@ -113,6 +113,18 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
         if (subquery.getName() != null) {
             sb.append(" AS ");
             sb.append(subquery.getName());
+
+            if (subquery.getColumns() != null) {
+                int i = 0;
+                sb.append("(");
+                for (MonetColumn column : subquery.getColumns()) {
+                    if (i++ != 0) {
+                        sb.append(",");
+                    }
+                    sb.append(column.getName());
+                }
+                sb.append(") ");
+            }
         }
     }
 
@@ -190,7 +202,14 @@ public final class MonetToStringVisitor extends ToStringVisitor<MonetExpression>
             visit(j.getTableReference());
             if (j.getType() != MonetJoinType.CROSS && j.getType() != MonetJoinType.NATURAL) {
                 sb.append(" ON ");
-                visit(j.getOnClause());
+
+                int i = 0;
+                for (MonetExpression joinex : j.getOnClause()) {
+                    if (i++ != 0) {
+                        sb.append(" AND ");
+                    }
+                    visit(joinex);
+                }
             }
         }
 
