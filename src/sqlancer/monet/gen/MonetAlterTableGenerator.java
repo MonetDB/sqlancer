@@ -167,7 +167,7 @@ public class MonetAlterTableGenerator {
             case ALTER_TABLE_DROP_CONSTRAINT:
                 sb.append("DROP CONSTRAINT ");
                 sb.append(randomTable.getRandomConstraint().getName());
-                errors.add("because other objects depend on it");
+                errors.add("there are database objects which depend on it");
                 if (Randomly.getBoolean()) {
                     sb.append(" ");
                     sb.append(Randomly.fromOptions("RESTRICT", "CASCADE"));
