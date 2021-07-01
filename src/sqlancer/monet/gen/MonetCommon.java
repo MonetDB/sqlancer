@@ -88,6 +88,7 @@ public final class MonetCommon {
     }
 
     public static void addCommonInsertUpdateErrors(ExpectedErrors errors) {
+        errors.add("duplicate column names in subquery column list");
         errors.add("NOT NULL constraint violated for column");
         errors.add("SQL feature not yet available for expressions and default values");
         errors.add("not implemented as");
